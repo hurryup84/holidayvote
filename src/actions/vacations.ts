@@ -19,12 +19,12 @@ export async function createVacation(formData: FormData) {
   } = await supabase.auth.getUser();
 
   // Debug: check what auth context is being used
-  const { data: { session } } = await supabase.auth.getSession();
-  console.log("[createVacation] Session exists:", !!session);
-  if (session) {
-    console.log("[createVacation] Session access_token (first 50):", session.access_token.substring(0, 50));
+  const { data: { session: debugSession } } = await supabase.auth.getSession();
+  console.log("[createVacation] Session exists:", !!debugSession);
+  if (debugSession) {
+    console.log("[createVacation] Session access_token (first 50):", debugSession.access_token.substring(0, 50));
     // Decode JWT to check claims
-    const parts = session.access_token.split('.');
+    const parts = debugSession.access_token.split('.');
     if (parts.length === 3) {
       try {
         const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString());
@@ -73,12 +73,12 @@ export async function createVacation(formData: FormData) {
 
   // TEST: Try direct fetch to PostgREST with explicit headers
   const sessionData = await supabase.auth.getSession();
-  const session = sessionData.data.session;
-  if (session?.access_token) {
+  const testSession = sessionData.data.session;
+  if (testSession?.access_token) {
     const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/vacations`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${session.access_token}`,
+        'Authorization': `Bearer ${testSession.access_token}`,
         'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         'Content-Type': 'application/json',
         'Prefer': 'return=representation',
@@ -101,7 +101,7 @@ export async function createVacation(formData: FormData) {
       await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/participants`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
+          'Authorization': `Bearer ${testSession.access_token}`,
           'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
           'Content-Type': 'application/json',
         },
