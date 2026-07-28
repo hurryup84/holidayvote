@@ -84,7 +84,12 @@ export function ParticipantsList({
                   <span className="font-medium truncate">
                     {p.profile?.name ?? "Unbekannt"}
                     {p.isCurrentUser && <span className="text-xs text-teal-600">(Du)</span>}
-                    {p.isOwner && <Crown className="h-4 w-4 text-amber-500" title="Ersteller" />}
+                    {/* p.isOwner && <Crown className="h-4 w-4 text-amber-500" title="Ersteller" /> */}
+                    {p.isOwner && (
+                      <span title="Ersteller">
+                        <Crown className="h-4 w-4 text-amber-500" />
+                      </span>
+                    )}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-xs text-slate-500">
