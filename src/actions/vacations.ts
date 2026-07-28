@@ -2,14 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { customAlphabet } from "nanoid";
 import { createClient } from "@/lib/supabase/server";
 import type { Participant, Property, Vacation } from "@/lib/types";
-
-const generateInviteCode = customAlphabet(
-  "23456789ABCDEFGHJKLMNPQRSTUVWXYZ",
-  8
-);
 
 export async function createVacation(formData: FormData) {
   const supabase = await createClient();
@@ -18,46 +12,11 @@ export async function createVacation(formData: FormData) {
     error: authError,
   } = await supabase.auth.getUser();
 
-  // Debug: check what auth context is being used
-  const { data: { session: debugSession } } = await supabase.auth.getSession();
-  console.log("[createVacation] Session exists:", !!debugSession);
-  if (debugSession) {
-    console.log("[createVacation] Session access_token (first 50):", debugSession.access_token.substring(0, 50));
-    // Decode JWT to check claims
-    const parts = debugSession.access_token.split('.');
-    if (parts.length === 3) {
-      try {
-        const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString());
-        console.log("[createVacation] JWT claims:", { sub: payload.sub, email: payload.email, role: payload.role });
-      } catch (e) {
-        console.log("[createVacation] Failed to decode JWT");
-      }
-    }
-  }
-
   if (authError) {
     console.error("Auth error:", authError.message);
     return { error: `Auth-Fehler: ${authError.message}` };
   }
   if (!user) return { error: "Nicht angemeldet" };
-
-  // Ensure profile exists (in case trigger didn't fire)
-  const { error: ensureProfileError } = await supabase.rpc("ensure_profile", {
-    p_user_id: user.id,
-    p_email: user.email,
-    p_name: user.user_metadata?.name ?? null,
-  });
-  if (ensureProfileError) {
-    console.error("Ensure profile error:", ensureProfileError.message);
-    // Continue anyway - profile might already exist
-  }
-
-  // Verify profile exists
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("id", user.id)
-    .maybeSingle();
 
   const name = formData.get("name") as string;
   const description = (formData.get("description") as string) || null;
@@ -69,83 +28,21 @@ export async function createVacation(formData: FormData) {
     return { error: "Name ist erforderlich" };
   }
 
-  const inviteCode = generateInviteCode();
-
-  // TEST: Try direct fetch to PostgREST with explicit headers
-  const sessionData = await supabase.auth.getSession();
-  const testSession = sessionData.data.session;
-  if (testSession?.access_token) {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/vacations`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${testSession.access_token}`,
-        'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation',
-      },
-      body: JSON.stringify({
-        name: name.trim(),
-        description: description?.trim() || null,
-        destination: destination?.trim() || null,
-        start_date: startDate || null,
-        end_date: endDate || null,
-        invite_code: inviteCode,
-        owner_id: user.id,
-      }),
-    });
-    const data = await res.json();
-    console.log("[createVacation] Direct fetch result:", res.status, data);
-    if (res.ok && data?.[0]) {
-      const vacation = data[0];
-      // Insert participant
-      await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/participants`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${testSession.access_token}`,
-          'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          vacation_id: vacation.id,
-          user_id: user.id,
-          role: 'owner',
-        }),
-      });
-      redirect(`/v/${vacation.invite_code}`);
-    }
-    console.error("[createVacation] Direct fetch failed:", res.status, data);
-  }
-
-  const { data: vacation, error } = await supabase
-    .from("vacations")
-    .insert({
-      name: name.trim(),
-      description: description?.trim() || null,
-      destination: destination?.trim() || null,
-      start_date: startDate || null,
-      end_date: endDate || null,
-      invite_code: inviteCode,
-      owner_id: user.id,
-    })
-    .select()
-    .single();
+  // Use database function to create vacation (bypasses RLS issues in Server Actions)
+  const { data: vacation, error } = await supabase.rpc("create_vacation", {
+    p_name: name.trim(),
+    p_description: description?.trim() || null,
+    p_destination: destination?.trim() || null,
+    p_start_date: startDate || null,
+    p_end_date: endDate || null,
+  });
 
   if (error) {
     console.error("Vacation insert error:", error.message, "Code:", error.code);
     return { error: error.message };
   }
 
-  const { error: participantError } = await supabase
-    .from("participants")
-    .insert({
-      vacation_id: vacation.id,
-      user_id: user.id,
-      role: "owner",
-    });
-
-  if (participantError) return { error: participantError.message };
-
-  redirect(`/v/${vacation.invite_code}`);
+  redirect(`/v/${vacation[0].invite_code}`);
 }
 
 export async function joinVacation(inviteCode: string) {
@@ -180,17 +77,14 @@ export async function updateVacation(vacationId: string, formData: FormData) {
   const startDate = (formData.get("start_date") as string) || null;
   const endDate = (formData.get("end_date") as string) || null;
 
-  const { error } = await supabase
-    .from("vacations")
-    .update({
-      name: name.trim(),
-      description: description?.trim() || null,
-      destination: destination?.trim() || null,
-      start_date: startDate || null,
-      end_date: endDate || null,
-    })
-    .eq("id", vacationId)
-    .eq("owner_id", user.id);
+  const { error } = await supabase.rpc("update_vacation", {
+    p_vacation_id: vacationId,
+    p_name: name.trim(),
+    p_description: description?.trim() || null,
+    p_destination: destination?.trim() || null,
+    p_start_date: startDate || null,
+    p_end_date: endDate || null,
+  });
 
   if (error) return { error: error.message };
 
@@ -206,11 +100,10 @@ export async function deleteVacation(vacationId: string, inviteCode: string) {
 
   if (!user) return { error: "Nicht angemeldet" };
 
-  const { error } = await supabase
-    .from("vacations")
-    .delete()
-    .eq("id", vacationId)
-    .eq("owner_id", user.id);
+  const { error } = await supabase.rpc("delete_vacation", {
+    p_vacation_id: vacationId,
+    p_invite_code: inviteCode,
+  });
 
   if (error) return { error: error.message };
 

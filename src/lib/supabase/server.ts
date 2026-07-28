@@ -1,12 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
+// Server-side Supabase client for Server Actions with cookie support
 export async function createClient() {
   const cookieStore = await cookies();
-
-  // Try SSR client first to get session
-  const ssrClient = createServerClient(
+  return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -20,52 +18,14 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             );
           } catch {
-            // Called from Server Component – ignore
+            // The `setAll` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
           }
         },
       },
     }
   );
-
-  const { data: { session } } = await ssrClient.auth.getSession();
-
-  if (session?.access_token) {
-    console.log("[createClient] Session found, creating standard client with setSession");
-    // Create standard client and set session
-    const standardClient = createSupabaseClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        global: {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-          },
-        },
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-        },
-      }
-    );
-
-    // CRITICAL: Set session on the standard client so getSession() works
-    const { error } = await standardClient.auth.setSession({
-      access_token: session.access_token,
-      refresh_token: session.refresh_token || '',
-    });
-    if (error) {
-      console.error("[createClient] setSession error:", error.message);
-    } else {
-      console.log("[createClient] setSession successful");
-    }
-
-    return standardClient;
-  }
-
-  // Fallback to SSR client (no session)
-  console.log("[createClient] No session, using SSR client");
-  return ssrClient;
 }
 
 export async function getUser() {
