@@ -59,7 +59,6 @@ export async function joinVacation(inviteCode: string) {
 
   if (error) return { error: error.message };
 
-  revalidatePath(`/v/${inviteCode}`);
   return { success: true, vacationId: data };
 }
 

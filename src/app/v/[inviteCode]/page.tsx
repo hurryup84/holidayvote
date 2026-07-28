@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import {
   getVacationPublic,
   getVacationWithDetails,
+  joinVacation,
 } from "@/actions/vacations";
 import { getUser, getProfile } from "@/lib/supabase/server";
 import { sortProperties } from "@/lib/sort-properties";
@@ -89,42 +90,16 @@ export default async function VacationPage({ params }: PageProps) {
     );
   }
 
-  // Check if user is already a participant
+  // Auto-join if not yet participant - call RPC first (SECURITY DEFINER bypasses RLS)
+  const joinResult = await joinVacation(inviteCode);
+  if (joinResult?.error) notFound();
+
+  // Now fetch details (user should now be a participant)
   const details = await getVacationWithDetails(inviteCode);
   if (!details) notFound();
 
-  // If not a participant, show join confirmation page
   if (!details.userRole) {
-    return (
-      <div className="min-h-screen">
-        <header className="border-b border-slate-200 bg-white">
-          <div className="mx-auto flex h-14 max-w-3xl items-center px-4">
-            <span className="font-semibold text-teal-700">HolidayVote</span>
-          </div>
-        </header>
-        <main className="mx-auto max-w-lg px-4 py-12 space-y-6">
-          <div className="text-center">
-            <Badge variant="info" className="mb-3">
-              Einladung
-            </Badge>
-            <h1 className="text-2xl font-bold">{publicData.name}</h1>
-            {publicData.destination && (
-              <p className="text-slate-500">{publicData.destination}</p>
-            )}
-            {publicData.start_date && (
-              <p className="text-sm text-slate-400">
-                {formatDateRange(publicData.start_date, publicData.end_date)}
-              </p>
-            )}
-            <p className="mt-3 text-sm text-slate-500">
-              {publicData.property_count} Häuser ·{" "}
-              {publicData.participant_count} Teilnehmer
-            </p>
-          </div>
-          <JoinVacationForm inviteCode={inviteCode} />
-        </main>
-      </div>
-    );
+    notFound();
   }
 
   const profile = await getProfile();
