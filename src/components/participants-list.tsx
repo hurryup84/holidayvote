@@ -2,7 +2,7 @@
 
 import { X, Star, Crown, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import type { Participant, Property } from "@/lib/types";
@@ -105,7 +105,7 @@ export function ParticipantsList({
               </div>
 
               {p.isOwner && !p.isCurrentUser && (
-                <Badge variant="secondary" className="text-xs">
+                <Badge variant="default" className="text-xs">
                   Owner
                 </Badge>
               )}
