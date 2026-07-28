@@ -136,6 +136,9 @@ export default async function VacationPage({ params }: PageProps) {
           inviteCode={inviteCode}
           participantCount={details.participants.length}
           propertyCount={details.properties.length}
+          participants={details.participants}
+          properties={details.properties}
+          currentUserId={details.userId}
         />
 
         <PropertyForm
