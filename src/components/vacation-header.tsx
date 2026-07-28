@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Users, ChevronDown } from "lucide-react";
 import { ShareButton } from "@/components/share-button";
 import { ParticipantsList } from "@/components/participants-list";
+import { Button } from "@/components/ui/button";
 import type { Participant, Property } from "@/lib/types";
 
 interface VacationHeaderProps {
