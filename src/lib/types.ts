@@ -62,6 +62,9 @@ export interface Property {
   votes?: Vote[];
   vetoes?: Veto[];
   comments?: Comment[];
+  address: string | null;
+  lat: number | null;
+  lng: number | null;
 }
 
 export interface Vote {
