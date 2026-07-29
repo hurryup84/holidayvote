@@ -304,7 +304,7 @@ export function PropertyCard({
                 size="sm"
               />
               <span className="text-sm text-slate-500">
-                {stats.totalStars}/{stats.voteCount * 3 || "–"} (
+                {stats.totalStars}/{stats.voteCount * 5 || "–"} (
                 {stats.voteCount} Stimmen)
               </span>
             </div>

@@ -15,7 +15,7 @@ export async function castVote(
   } = await supabase.auth.getUser();
 
   if (!user) return { error: "Nicht angemeldet" };
-  if (stars < 1 || stars > 3) return { error: "Ungültige Bewertung" };
+  if (stars < 1 || stars > 5) return { error: "Ungültige Bewertung" };
 
   const { data: existing } = await supabase
     .from("votes")

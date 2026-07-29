@@ -20,7 +20,7 @@ export function StarRating({
 
   return (
     <div className="flex gap-1">
-      {[1, 2, 3].map((star) => (
+      {[1, 2, 3, 4, 5].map((star) => (
         <button
           key={star}
           type="button"
@@ -43,7 +43,7 @@ export function StarRating({
   );
 }
 
-export function StarDisplay({ stars, max = 3 }: { stars: number; max?: number }) {
+export function StarDisplay({ stars, max = 5 }: { stars: number; max?: number }) {
   return (
     <span className="inline-flex gap-0.5 text-amber-400">
       {Array.from({ length: max }).map((_, i) => (
