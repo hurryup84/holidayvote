@@ -1,6 +1,6 @@
 #!/bin/bash
 # HolidayVote dev server script
-# Usage: ./dev.sh [start|stop|restart|status]
+# Usage: ./dev.sh [start|stop|restart|status|check]
 
 NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
 
@@ -13,9 +13,25 @@ fi
 PID_FILE=".claude/dev-server.pid"
 LOG_FILE=".claude/dev-server.log"
 
+check() {
+  echo "Running type check..."
+  if npm run typecheck; then
+    echo "✓ Type check passed"
+  else
+    echo "✗ Type check failed"
+    return 1
+  fi
+}
+
 start() {
   if [ -f "$PID_FILE" ] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
     echo "Server already running (PID: $(cat "$PID_FILE"))"
+    return 1
+  fi
+
+  echo "Running type check before start..."
+  if ! npm run typecheck; then
+    echo "✗ Type check failed. Fix errors before starting."
     return 1
   fi
 
@@ -60,5 +76,6 @@ case "${1:-start}" in
   stop) stop ;;
   restart) stop; sleep 1; start ;;
   status) status ;;
-  *) echo "Usage: $0 [start|stop|restart|status]" ;;
+  check) check ;;
+  *) echo "Usage: $0 [start|stop|restart|status|check]" ;;
 esac
