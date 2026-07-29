@@ -189,3 +189,66 @@ export async function getUserVacations() {
 
   return vacations ?? [];
 }
+
+// Field configuration types
+export interface VacationFieldConfig {
+  field_name: string;
+  is_enabled: boolean;
+  display_order: number;
+}
+
+// Get field config for a vacation
+export async function getVacationFieldConfig(vacationId: string): Promise<VacationFieldConfig[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("get_vacation_field_config", {
+    p_vacation_id: vacationId,
+  });
+
+  if (error) {
+    console.error("Get field config error:", error.message);
+    return [];
+  }
+  return data ?? [];
+}
+
+// Update field config for a vacation
+export async function updateVacationFieldConfig(
+  vacationId: string,
+  fieldName: string,
+  isEnabled: boolean,
+  displayOrder: number
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { success: false, error: "Nicht angemeldet" };
+
+  const { error } = await supabase.rpc("upsert_vacation_field_config", {
+    p_vacation_id: vacationId,
+    p_field_name: fieldName,
+    p_is_enabled: isEnabled,
+    p_display_order: displayOrder,
+  });
+
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
+
+// Initialize default field config for a new vacation
+export async function initVacationFieldConfig(vacationId: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { success: false, error: "Nicht angemeldet" };
+
+  const { error } = await supabase.rpc("init_vacation_field_config", {
+    p_vacation_id: vacationId,
+  });
+
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}

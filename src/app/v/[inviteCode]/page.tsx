@@ -4,6 +4,8 @@ import {
   getVacationPublic,
   getVacationWithDetails,
   joinVacation,
+  getVacationFieldConfig,
+  type VacationFieldConfig,
 } from "@/actions/vacations";
 import { getUser, getProfile } from "@/lib/supabase/server";
 import { sortProperties } from "@/lib/sort-properties";
@@ -11,8 +13,8 @@ import { formatDateRange } from "@/lib/utils";
 import { Header } from "@/components/header";
 import { AuthForm } from "@/components/auth-form";
 import { VacationHeader } from "@/components/vacation-header";
-import { PropertyForm } from "@/components/property-form";
 import { PropertyCard } from "@/components/property-card";
+import { PropertyForm } from "@/components/property-form";
 import { EmptyState } from "@/components/empty-state";
 import { ProfileSetup } from "@/components/profile-setup";
 import { JoinVacationForm } from "@/components/join-vacation-form";
@@ -98,6 +100,9 @@ export default async function VacationPage({ params }: PageProps) {
   const details = await getVacationWithDetails(inviteCode);
   if (!details) notFound();
 
+  // Fetch field config for this vacation
+  const fieldConfig = await getVacationFieldConfig(details.vacation.id);
+
   if (!details.userRole) {
     notFound();
   }
@@ -144,6 +149,7 @@ export default async function VacationPage({ params }: PageProps) {
         <PropertyForm
           vacationId={details.vacation.id}
           inviteCode={inviteCode}
+          fieldConfig={fieldConfig}
         />
 
         {sortedProperties.length === 0 ? (

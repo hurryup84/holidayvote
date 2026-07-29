@@ -10,12 +10,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Link2, AlertCircle, MapPin } from "lucide-react";
 import type { OpenGraphData } from "@/lib/types";
 
+import type { VacationFieldConfig } from "@/actions/vacations";
+
 interface PropertyFormProps {
   vacationId: string;
   inviteCode: string;
+  fieldConfig?: VacationFieldConfig[];
 }
 
-export function PropertyForm({ vacationId, inviteCode }: PropertyFormProps) {
+export function PropertyForm({ vacationId, inviteCode, fieldConfig = [] }: PropertyFormProps) {
   const [url, setUrl] = useState("");
   const [fetching, setFetching] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -23,6 +26,12 @@ export function PropertyForm({ vacationId, inviteCode }: PropertyFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [ogData, setOgData] = useState<OpenGraphData | null>(null);
   const [showForm, setShowForm] = useState(false);
+
+  // Helper to check if a field is enabled
+  const isFieldEnabled = (fieldName: string) => {
+    const config = fieldConfig.find((c) => c.field_name === fieldName);
+    return config?.is_enabled ?? true;
+  };
 
   async function handleFetchOg() {
     if (!url.trim()) return;
@@ -122,65 +131,77 @@ export function PropertyForm({ vacationId, inviteCode }: PropertyFormProps) {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="address">
-                <MapPin className="h-4 w-4 inline mr-1" />
-                Adresse (optional – für Kartenansicht)
-              </Label>
-              <Input
-                id="address"
-                name="address"
-                placeholder="z.B. Musterstraße 12, 12345 Berlin"
-              />
-            </div>
+            {isFieldEnabled("address") && (
+              <div className="space-y-2">
+                <Label htmlFor="address">
+                  <MapPin className="h-4 w-4 inline mr-1" />
+                  Adresse (optional – für Kartenansicht)
+                </Label>
+                <Input
+                  id="address"
+                  name="address"
+                  placeholder="z.B. Musterstraße 12, 12345 Berlin"
+                />
+              </div>
+            )}
 
             <input type="hidden" name="description" value={ogData?.description ?? ""} />
             <input type="hidden" name="image_url" value={ogData?.image ?? ""} />
             <input type="hidden" name="provider" value={ogData?.provider ?? ""} />
 
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label htmlFor="price">Gesamtpreis (€)</Label>
-                <Input
-                  id="price"
-                  name="price"
-                  type="number"
-                  min="0"
-                  step="1"
-                  placeholder="2500"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="bedrooms">Schlafzimmer</Label>
-                <Input
-                  id="bedrooms"
-                  name="bedrooms"
-                  type="number"
-                  min="0"
-                  placeholder="3"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="beds">Betten</Label>
-                <Input id="beds" name="beds" type="number" min="0" placeholder="6" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="bathrooms">Badezimmer</Label>
-                <Input
-                  id="bathrooms"
-                  name="bathrooms"
-                  type="number"
-                  min="0"
-                  step="0.5"
-                  placeholder="2"
-                />
-              </div>
+              {isFieldEnabled("price") && (
+                <div className="space-y-2">
+                  <Label htmlFor="price">Gesamtpreis (€)</Label>
+                  <Input
+                    id="price"
+                    name="price"
+                    type="number"
+                    min="0"
+                    step="1"
+                    placeholder="z.B. 2500"
+                  />
+                </div>
+              )}
+              {isFieldEnabled("bedrooms") && (
+                <div className="space-y-2">
+                  <Label htmlFor="bedrooms">Schlafzimmer</Label>
+                  <Input
+                    id="bedrooms"
+                    name="bedrooms"
+                    type="number"
+                    min="0"
+                    placeholder="z.B. 3"
+                  />
+                </div>
+              )}
+              {isFieldEnabled("beds") && (
+                <div className="space-y-2">
+                  <Label htmlFor="beds">Betten</Label>
+                  <Input id="beds" name="beds" type="number" min="0" placeholder="6" />
+                </div>
+              )}
+              {isFieldEnabled("bathrooms") && (
+                <div className="space-y-2">
+                  <Label htmlFor="bathrooms">Badezimmer</Label>
+                  <Input
+                    id="bathrooms"
+                    name="bathrooms"
+                    type="number"
+                    min="0"
+                    step="0.5"
+                    placeholder="z.B. 2"
+                  />
+                </div>
+              )}
             </div>
 
-            <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" name="has_pool" className="rounded" />
-              Pool vorhanden
-            </label>
+            {isFieldEnabled("has_pool") && (
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" name="has_pool" className="rounded" />
+                Pool vorhanden
+              </label>
+            )}
 
             {error && <p className="text-sm text-red-600">{error}</p>}
 

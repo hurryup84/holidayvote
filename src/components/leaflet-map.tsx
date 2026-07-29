@@ -2,7 +2,18 @@
 
 import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+
+// Inject minimal leaflet CSS to avoid lightningcss issues with @tailwindcss/postcss
+useEffect(() => {
+  if (typeof window !== "undefined" && !document.getElementById("leaflet-css")) {
+    const link = document.createElement("link");
+    link.id = "leaflet-css";
+    link.rel = "stylesheet";
+    link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+    link.crossOrigin = "";
+    document.head.appendChild(link);
+  }
+}, []);
 
 interface PropertyMarker {
   id: string;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Users, ChevronDown } from "lucide-react";
+import { Users, ChevronDown, Settings } from "lucide-react";
 import Link from "next/link";
 import { MapPin } from "lucide-react";
 import { ShareButton } from "@/components/share-button";
@@ -68,6 +68,13 @@ export function VacationHeader({
         >
           <MapPin className="h-4 w-4" />
           <span>Karte</span>
+        </Link>
+        <Link
+          href={`/v/${inviteCode}/settings`}
+          className="flex h-8 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+        >
+          <Settings className="h-4 w-4" />
+          <span>Einstellungen</span>
         </Link>
       </div>
 
