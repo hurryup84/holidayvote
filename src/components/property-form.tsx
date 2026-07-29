@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Link2, AlertCircle } from "lucide-react";
+import { Loader2, Link2, AlertCircle, MapPin } from "lucide-react";
 import type { OpenGraphData } from "@/lib/types";
 
 interface PropertyFormProps {
@@ -119,6 +119,18 @@ export function PropertyForm({ vacationId, inviteCode }: PropertyFormProps) {
                 name="title"
                 defaultValue={ogData?.title ?? ""}
                 placeholder="Villa am Meer"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="address">
+                <MapPin className="h-4 w-4 inline mr-1" />
+                Adresse (optional – für Kartenansicht)
+              </Label>
+              <Input
+                id="address"
+                name="address"
+                placeholder="z.B. Musterstraße 12, 12345 Berlin"
               />
             </div>
 

@@ -5,6 +5,26 @@ import { createClient } from "@/lib/supabase/server";
 import { detectProvider, isValidUrl } from "@/lib/utils";
 import type { PropertyStatus } from "@/lib/types";
 
+// Geocode address using Nominatim (OpenStreetMap) - free, no API key required
+async function geocodeAddress(address: string): Promise<{ lat: number; lng: number } | null> {
+  try {
+    const encoded = encodeURIComponent(address);
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encoded}&limit=1&addressdetails=1`;
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'HolidayVote/1.0 (ferienhaus-app)',
+      },
+    });
+    const data = await response.json();
+    if (data.length > 0) {
+      return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+    }
+  } catch (e) {
+    console.error("Geocoding error:", e);
+  }
+  return null;
+}
+
 export async function addProperty(vacationId: string, inviteCode: string, formData: FormData) {
   const supabase = await createClient();
   const {
@@ -40,6 +60,19 @@ export async function addProperty(vacationId: string, inviteCode: string, formDa
   const bathrooms = formData.get("bathrooms") ? parseFloat(formData.get("bathrooms") as string) : null;
   const hasPool = formData.get("has_pool") === "on";
 
+  // Get address and geocode it
+  const address = (formData.get("address") as string)?.trim() || null;
+  let lat: number | null = null;
+  let lng: number | null = null;
+
+  if (address) {
+    const coords = await geocodeAddress(address);
+    if (coords) {
+      lat = coords.lat;
+      lng = coords.lng;
+    }
+  }
+
   const { error } = await supabase.from("properties").insert({
     vacation_id: vacationId,
     url,
@@ -53,6 +86,9 @@ export async function addProperty(vacationId: string, inviteCode: string, formDa
     bathrooms,
     has_pool: hasPool,
     suggested_by: user.id,
+    address,
+    lat,
+    lng,
   });
 
   if (error) return { error: error.message };
@@ -144,11 +180,27 @@ export async function updateProperty(
   const bathrooms = formData.get("bathrooms") ? parseFloat(formData.get("bathrooms") as string) : null;
   const hasPool = formData.get("has_pool") === "on";
   const title = (formData.get("title") as string)?.trim() || null;
+  const address = (formData.get("address") as string)?.trim() || null;
+
+  // Geocode address if provided and changed
+  let lat: number | null = null;
+  let lng: number | null = null;
+
+  if (address) {
+    const coords = await geocodeAddress(address);
+    if (coords) {
+      lat = coords.lat;
+      lng = coords.lng;
+    }
+  }
 
   const { error } = await supabase
     .from("properties")
     .update({
       title,
+      address,
+      lat,
+      lng,
       price,
       beds,
       bedrooms,

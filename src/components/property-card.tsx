@@ -29,6 +29,7 @@ import {
   CheckCircle2,
   XCircle,
   Pencil,
+  MapPin,
 } from "lucide-react";
 import type { Property, ParticipantRole } from "@/lib/types";
 
@@ -187,6 +188,20 @@ export function PropertyCard({
                   placeholder="Titel des Hauses"
                 />
               </div>
+
+              <div className="space-y-1">
+                <Label htmlFor={`address-${property.id}`}>
+                  <MapPin className="h-4 w-4 inline mr-1" />
+                  Adresse (optional – für Kartenansicht)
+                </Label>
+                <Input
+                  id={`address-${property.id}`}
+                  name="address"
+                  defaultValue={property.address ?? ""}
+                  placeholder="z.B. Musterstraße 12, 12345 Berlin"
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label htmlFor={`price-${property.id}`}>Gesamtpreis (€)</Label>

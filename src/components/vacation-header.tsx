@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Users, ChevronDown } from "lucide-react";
+import Link from "next/link";
+import { MapPin } from "lucide-react";
 import { ShareButton } from "@/components/share-button";
 import { ParticipantsList } from "@/components/participants-list";
 import { Button } from "@/components/ui/button";
@@ -60,6 +62,13 @@ export function VacationHeader({
           <span>{participantCount} Teilnehmer</span>
         )}
         <ShareButton inviteCode={inviteCode} vacationName={name} />
+        <Link
+          href={`/v/${inviteCode}/map`}
+          className="flex h-8 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+        >
+          <MapPin className="h-4 w-4" />
+          <span>Karte</span>
+        </Link>
       </div>
 
       {showParticipants && participants && (
