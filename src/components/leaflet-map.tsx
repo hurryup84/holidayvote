@@ -3,18 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 
-// Inject minimal leaflet CSS to avoid lightningcss issues with @tailwindcss/postcss
-useEffect(() => {
-  if (typeof window !== "undefined" && !document.getElementById("leaflet-css")) {
-    const link = document.createElement("link");
-    link.id = "leaflet-css";
-    link.rel = "stylesheet";
-    link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-    link.crossOrigin = "";
-    document.head.appendChild(link);
-  }
-}, []);
-
 interface PropertyMarker {
   id: string;
   title: string | null;
@@ -30,21 +18,34 @@ interface LeafletMapProps {
   className?: string;
 }
 
-// Fix Leaflet marker icon paths
-if (typeof window !== "undefined") {
-  delete (L.Icon.Default.prototype as any)._getIconUrl;
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-  });
-}
-
 export function LeafletMap({ properties, height = "500px", className = "" }: LeafletMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  // Inject Leaflet CSS and fix marker icons on client side
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // Inject Leaflet CSS
+    if (!document.getElementById("leaflet-css")) {
+      const link = document.createElement("link");
+      link.id = "leaflet-css";
+      link.rel = "stylesheet";
+      link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+      link.crossOrigin = "";
+      document.head.appendChild(link);
+    }
+
+    // Fix Leaflet marker icon paths
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+      iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+      shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+    });
+  }, []);
 
   useEffect(() => {
     if (!mapRef.current || map.current || properties.length === 0) return;
