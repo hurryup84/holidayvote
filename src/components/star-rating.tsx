@@ -49,10 +49,10 @@ export function StarRating({
   );
 }
 
-export function StarDisplay({ stars, max = 5, size = "md" }: { stars: number; max?: number; size?: "sm" | "md" }) {
+export function StarDisplay({ stars, max = 5, size = "md", className }: { stars: number; max?: number; size?: "sm" | "md"; className?: string }) {
   const iconSize = size === "sm" ? "h-3 w-3" : "h-4 w-4";
   return (
-    <span className="inline-flex gap-0.5 text-amber-400">
+    <span className={cn("inline-flex gap-0.5 text-amber-400", className)}>
       {Array.from({ length: max }).map((_, i) => (
         <Star
           key={i}

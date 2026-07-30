@@ -107,67 +107,74 @@ function DetailPanel({
   );
 }
 
-function MyVotingOverlay({
-  userVote,
-  onVoteChange,
-  disabled,
-  userId,
-  pending,
-}: {
-  userVote: number | null;
-  onVoteChange: (stars: number) => void;
-  disabled: boolean;
-  userId: string | null;
-  pending: boolean;
-}) {
+interface OverallRatingOverlayProps {
+  averageStars: number;
+  voteCount: number;
+}
+
+function OverallRatingOverlay({ averageStars, voteCount }: OverallRatingOverlayProps) {
+  const hasVotes = voteCount > 0;
+
   return (
     <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10">
       <div className="flex flex-col items-center gap-1.5">
         {/* Blurred background container */}
         <div className="relative">
-          <div className="absolute inset-0 bg-white/85 backdrop-blur-md rounded-xl shadow-lg" />
-          <div className="relative px-3 py-2.5 flex items-center gap-1">
-            <StarRating
-              value={userVote}
-              onChange={onVoteChange}
-              disabled={disabled}
-              size="sm"
-              outlined
-            />
+          <div className="absolute inset-0 bg-white/90 backdrop-blur-md rounded-xl shadow-lg" />
+          <div className="relative px-3 py-2.5">
+            <span className="text-xl font-bold text-amber-600">
+              {hasVotes ? averageStars.toFixed(1) : "–"}
+            </span>
+            <span className="text-slate-500 text-sm ml-1">/ 5</span>
           </div>
         </div>
-        {/* Hint text */}
         {/*
-        <div className="flex items-center gap-1 px-2.5 py-1 bg-white/90 backdrop-blur-sm rounded-full shadow-md">
-          {userId && !userVote && (
-            <span className="text-xs text-slate-600 font-medium">Klicke zum Bewerten</span>
-          )}
-          {userId && userVote && (
-            <span className="text-xs text-teal-600 font-medium">Deine: {userVote}/5</span>
-          )}
-          {!userId && (
-            <span className="text-xs text-slate-500">Login zum Bewerten</span>
-          )}
-        </div>
+        {hasVotes && (
+          <span className="text-xs text-slate-500 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-full shadow-md">
+            {voteCount} {voteCount === 1 ? "Stimme" : "Stimmen"}
+          </span>
+        )}
         */}
       </div>
     </div>
   );
 }
 
-function VotingTabContent({ stats, userId, pending, onVoteChange }: {
+function VotingTabContent({ stats, property, userId, pending, onVoteChange }: {
   stats: ReturnType<typeof getPropertyStats>;
+  property: Property;
   userId: string | null;
   pending: boolean;
   onVoteChange: (stars: number) => void;
 }) {
+  const { voteCount, averageStars, distribution } = stats;
+  const hasVotes = voteCount > 0;
+
+  // Get votes with profile info from property
+  const votes = property.votes ?? [];
+
   return (
     <div className="space-y-3">
-      {/* Distribution bars */}
+      {/* Overall Rating Summary */}
+      <div className="flex items-center gap-4 p-3 bg-slate-50 rounded-lg">
+        <div className="flex items-center gap-2">
+          <span className="text-2xl font-bold text-amber-500">
+            {hasVotes ? averageStars.toFixed(1) : "–"}
+          </span>
+          <span className="text-slate-500">/ 5</span>
+        </div>
+
+        <span className="text-sm text-slate-500">
+          {voteCount} {voteCount === 1 ? "Stimme" : "Stimmen"}
+        </span>
+
+      </div>
+
+      {/* Distribution bars 
       <div className="space-y-1.5">
         {[5, 4, 3, 2, 1].map((star) => {
-          const count = stats.distribution?.[star] ?? 0;
-          const percentage = stats.voteCount > 0 ? (count / stats.voteCount) * 100 : 0;
+          const count = distribution?.[star] ?? 0;
+          const percentage = voteCount > 0 ? (count / voteCount) * 100 : 0;
           return (
             <div key={star} className="flex items-center gap-2 text-xs">
               <span className="text-slate-500 w-5 text-right">{star}★</span>
@@ -181,25 +188,41 @@ function VotingTabContent({ stats, userId, pending, onVoteChange }: {
             </div>
           );
         })}
-      </div>
+      </div>*/}
+
+      {/* Individual votes with names */}
+      {votes.length > 0 && (
+        <div className="space-y-2 pt-2 border-t border-slate-200">
+          <h5 className="text-xs font-medium text-slate-600">Einzelne Stimmen:</h5>
+          <div className="space-y-1.5">
+            {votes
+              .slice()
+              .sort((a, b) => (b.stars ?? 0) - (a.stars ?? 0))
+              .map((vote) => (
+                <div
+                  key={vote.user_id}
+                  className="flex items-center gap-2 text-xs"
+                >
+                  <span className="font-medium text-slate-900 truncate w-32">
+                    {vote.profile?.name ?? "Unbekannt"}
+                  </span>
+                  <StarDisplay
+                    stars={vote.stars ?? 0}
+                    size="sm"
+                    className="text-amber-400 flex-shrink-0"
+                  />
+                  <span className="text-slate-500 w-12 text-right">
+                    {vote.stars}/5
+                  </span>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
 
       <Separator className="my-2" />
 
-      {/* My vote (if logged in) */}
-      {userId && (
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-500 w-20 shrink-0">Meine:</span>
-          <StarRating
-            value={stats.userVote}
-            onChange={onVoteChange}
-            disabled={!userId || pending}
-            size="sm"
-          />
-          {stats.userVote && (
-            <span className="text-xs text-teal-600">{stats.userVote}/5</span>
-          )}
-        </div>
-      )}
+      {/* Note: Personal vote is shown in the card summary above */}
     </div>
   );
 }
@@ -601,6 +624,7 @@ function DetailsAccordion({
             {activeTab === "voting" && (
               <VotingTabContent
                 stats={stats}
+                property={property}
                 userId={userId}
                 pending={pending}
                 onVoteChange={onVoteChange}
@@ -664,6 +688,7 @@ export function PropertyCard({
   const [pending, startTransition] = useTransition();
   const [commentText, setCommentText] = useState("");
   const [editing, setEditing] = useState(false);
+  const [editingVote, setEditingVote] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
 
   const stats = getPropertyStats(property, userId ?? undefined, allVetoes);
@@ -742,11 +767,17 @@ export function PropertyCard({
   return (
     <Card
       className={cn(
-        "overflow-hidden transition-opacity",
+        "overflow-hidden transition-opacity relative",
         property.status === "eliminated" && "opacity-60",
-        property.status === "booked" && "ring-2 ring-emerald-500"
+        property.status === "booked" && "ring-2 ring-emerald-500",
+        // Highlight if user hasn't voted yet
+        userId && stats.userVote === null && "ring-2 ring-amber-400 bg-amber-50/30"
       )}
     >
+      {/* Bold "To Vote" indicator bar on right side */}
+      {userId && stats.userVote === null && (
+        <div className="absolute right-0 top-0 bottom-0 w-2 bg-amber-400 rounded-r-xl" title="Noch nicht bewertet" />
+      )}
       <div className="flex flex-col sm:flex-row">
         {/* Image Column */}
         <div className="relative h-40 w-full shrink-0 sm:h-auto sm:w-48">
@@ -762,14 +793,11 @@ export function PropertyCard({
             </div>
           )}
 
-          {/* My Voting Overlay on Image */}
+          {/* Overall Rating Overlay on Image */}
           {userId && (
-            <MyVotingOverlay
-              userVote={stats.userVote}
-              onVoteChange={handleVote}
-              disabled={!userId || pending}
-              userId={userId}
-              pending={pending}
+            <OverallRatingOverlay
+              averageStars={stats.averageStars}
+              voteCount={stats.voteCount}
             />
           )}
 
@@ -847,26 +875,83 @@ export function PropertyCard({
 
             <Separator className="my-1" />
 
-            {/* Voting Result Summary - Always visible */}
-            <div className="flex items-center justify-between gap-3 p-2 rounded-lg bg-amber-50">
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-lg shadow-sm">
-                  <span className="text-lg font-bold text-amber-600">
-                    {stats.averageStars > 0 ? stats.averageStars.toFixed(1) : "–"}
-                  </span>
-                  <span className="text-slate-500 text-sm">/ 5</span>
+            {/* Personal vote display - interactive in card summary */}
+            {userId && (
+              <div className="flex items-center justify-between gap-3 p-2 rounded-lg bg-teal-50">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-teal-700">Deine Bewertung:</span>
+                  {!editingVote ? (
+                    <div className="flex items-center gap-1.5">
+                      {stats.userVote === null ? (
+                        <StarDisplay stars={0} size="sm" className="text-slate-300" />
+                      ) : (
+                        <>
+                          <StarDisplay
+                            stars={stats.userVote}
+                            size="sm"
+                            className="text-teal-400"
+                          />
+                          <span className="text-sm font-medium text-teal-600">
+                            {stats.userVote}/5
+                          </span>
+                        </>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setEditingVote(true)}
+                        disabled={pending || stats.userVote === null}
+                        className={cn(
+                          "p-0.5 rounded transition-colors",
+                          stats.userVote !== null
+                            ? "text-teal-400 hover:text-teal-600"
+                            : "text-slate-300 cursor-not-allowed"
+                        )}
+                        aria-label={stats.userVote !== null ? "Bewertung ändern" : ""}
+                        title={stats.userVote !== null ? "Bewertung ändern" : "Erst bewerten"}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5">
+                      <StarRating
+                        value={stats.userVote}
+                        onChange={(stars) => {
+                          handleVote(stars);
+                          setEditingVote(false);
+                        }}
+                        disabled={pending}
+                        size="sm"
+                        outlined
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setEditingVote(false)}
+                        disabled={pending}
+                        className="p-0.5 text-slate-400 hover:text-slate-600 transition-colors"
+                        aria-label="Abbrechen"
+                        title="Abbrechen"
+                      >
+                        <XCircle className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  )}
                 </div>
-                <span className="text-xs text-slate-500">
-                  {stats.voteCount} {stats.voteCount === 1 ? "Stimme" : "Stimmen"}
-                </span>
+                {!editingVote && stats.userVote === null && !pending && (
+                  <span className="text-xs text-teal-500 font-medium">Klicke zum Bewerten</span>
+                )}
               </div>
-              {hasVetoes && (
+            )}
+
+            {/* Veto status only - overall rating is on image */}
+            {hasVetoes && (
+              <div className="flex justify-end">
                 <span className="flex items-center gap-1 text-[10px] text-red-600 bg-red-50 px-2 py-1 rounded">
                   <Shield className="h-2.5 w-2.5" />
                   {stats.vetoCount} Veto{stats.vetoCount > 1 ? "s" : ""}
                 </span>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           {/* SINGLE ACCORDION FOR ALL DETAILS */}
