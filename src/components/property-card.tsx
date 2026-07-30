@@ -13,6 +13,7 @@ import {
   updateProperty,
   deleteProperty,
 } from "@/actions/properties";
+import { VotingResults } from "@/components/voting-results";
 import { StarRating, StarDisplay } from "@/components/star-rating";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -296,19 +297,13 @@ export function PropertyCard({
           </div>
 
           <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-2">
-              <StarRating
-                value={stats.userVote}
-                onChange={handleVote}
-                disabled={!userId || pending}
-                size="sm"
-              />
-              <span className="text-sm text-slate-500">
-                {stats.totalStars}/{stats.voteCount * 5 || "–"} (
-                {stats.voteCount} Stimmen)
-              </span>
-            </div>
-
+            <VotingResults
+              stats={stats}
+              userVote={stats.userVote}
+              onVoteChange={handleVote}
+              disabled={!userId || pending}
+              canVote={!!userId}
+            />
             <Button
               variant={stats.userVeto ? "destructive" : "outline"}
               size="sm"

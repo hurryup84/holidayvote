@@ -74,7 +74,7 @@ export default async function HomePage() {
               </div>
               <h3 className="font-semibold">Abstimmen</h3>
               <p className="mt-1 text-sm text-slate-500">
-                Bewertet mit 1–3 Sternen, setzt Vetos – die beste Option steht oben.
+                Bewertet mit Sternen, setzt Vetos – die beste Option steht oben.
               </p>
             </div>
           </div>
