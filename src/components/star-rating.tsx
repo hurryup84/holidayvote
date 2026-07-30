@@ -8,6 +8,7 @@ interface StarRatingProps {
   onChange: (stars: number) => void;
   disabled?: boolean;
   size?: "sm" | "md";
+  outlined?: boolean;
 }
 
 export function StarRating({
@@ -15,6 +16,7 @@ export function StarRating({
   onChange,
   disabled,
   size = "md",
+  outlined = false,
 }: StarRatingProps) {
   const iconSize = size === "sm" ? "h-5 w-5" : "h-7 w-7";
 
@@ -35,7 +37,11 @@ export function StarRating({
           aria-label={`${star} Stern${star > 1 ? "e" : ""}`}
         >
           <Star
-            className={cn(iconSize, value && value >= star && "fill-current")}
+            className={cn(
+              iconSize,
+              value && value >= star && "fill-current",
+              outlined && "stroke-slate-700 stroke-[1.5px]"
+            )}
           />
         </button>
       ))}
@@ -43,13 +49,14 @@ export function StarRating({
   );
 }
 
-export function StarDisplay({ stars, max = 5 }: { stars: number; max?: number }) {
+export function StarDisplay({ stars, max = 5, size = "md" }: { stars: number; max?: number; size?: "sm" | "md" }) {
+  const iconSize = size === "sm" ? "h-3 w-3" : "h-4 w-4";
   return (
     <span className="inline-flex gap-0.5 text-amber-400">
       {Array.from({ length: max }).map((_, i) => (
         <Star
           key={i}
-          className={cn("h-4 w-4", i < stars && "fill-current")}
+          className={cn(iconSize, i < stars && "fill-current")}
         />
       ))}
     </span>

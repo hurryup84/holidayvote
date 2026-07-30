@@ -15,6 +15,14 @@ export function getPropertyStats(
   const userVetoPropertyId =
     allVetoes.find((v) => v.user_id === userId)?.property_id ?? null;
 
+  // Calculate vote distribution
+  const distribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+  votes.forEach((v) => {
+    if (v.stars >= 1 && v.stars <= 5) {
+      distribution[v.stars] = (distribution[v.stars] ?? 0) + 1;
+    }
+  });
+
   return {
     totalStars,
     voteCount,
@@ -23,6 +31,7 @@ export function getPropertyStats(
     userVote,
     userVeto,
     userVetoPropertyId,
+    distribution,
   };
 }
 
