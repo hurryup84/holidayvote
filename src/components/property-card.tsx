@@ -566,7 +566,7 @@ function DetailsAccordion({
   // Determine available tabs
   const availableTabs: DetailTab[] = ["voting", "vetos", "comments"];
   if (userRole === "owner") availableTabs.push("owner");
-  if ((canEdit || canDelete) && userRole !== "owner") availableTabs.push("edit");
+  if (canEdit || canDelete) availableTabs.push("edit");
 
   // Auto-switch to first available tab if current not available
   if (!availableTabs.includes(activeTab)) {
@@ -659,7 +659,7 @@ function DetailsAccordion({
                 onStatusChange={onStatusChange}
               />
             )}
-            {activeTab === "edit" && ((canEdit || canDelete) && userRole !== "owner") && (
+            {activeTab === "edit" && (canEdit || canDelete) && (
               <EditTabContent
                 property={property}
                 inviteCode={inviteCode}
