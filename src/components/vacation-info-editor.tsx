@@ -1,14 +1,17 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { updateVacation } from "@/actions/vacations";
+import { updateVacation, deleteVacation } from "@/actions/vacations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Pencil, X, Save } from "lucide-react";
+import { Pencil, X, Save, Trash2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface VacationInfoEditorProps {
   vacationId: string;
+  inviteCode: string;
   name: string;
   destination?: string | null;
   startDate?: string | null;
@@ -17,14 +20,17 @@ interface VacationInfoEditorProps {
 
 export function VacationInfoEditor({
   vacationId,
+  inviteCode,
   name,
   destination,
   startDate,
   endDate,
 }: VacationInfoEditorProps) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [formName, setFormName] = useState(name);
   const [formDestination, setFormDestination] = useState(destination ?? "");
   const [formStartDate, setFormStartDate] = useState(
@@ -34,7 +40,7 @@ export function VacationInfoEditor({
 
   if (!editing) {
     return (
-      <div className="p-4">
+      <div className="p-4 space-y-2">
         <Button
           variant="ghost"
           size="sm"
@@ -44,6 +50,17 @@ export function VacationInfoEditor({
         >
           <Pencil className="h-3.5 w-3.5 mr-1.5" />
           Urlaub bearbeiten
+        </Button>
+        <Button
+          type="button"
+          variant="destructive"
+          size="sm"
+          onClick={handleDelete}
+          disabled={deleting || pending}
+          className="w-full justify-start"
+        >
+          <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+          {deleting ? "Löschen…" : "Urlaub löschen"}
         </Button>
       </div>
     );
@@ -58,6 +75,20 @@ export function VacationInfoEditor({
         setError(result.error);
       } else {
         setEditing(false);
+      }
+    });
+  }
+
+  async function handleDelete() {
+    if (!confirm("Urlaub wirklich löschen? Alle Häuser und Stimmen gehen verloren.")) return;
+    setDeleting(true);
+    startTransition(async () => {
+      const result = await deleteVacation(vacationId, inviteCode);
+      if (result?.error) {
+        setError(result.error);
+        setDeleting(false);
+      } else {
+        router.replace("/dashboard");
       }
     });
   }
@@ -133,6 +164,7 @@ export function VacationInfoEditor({
           Abbrechen
         </Button>
       </div>
+
     </form>
   );
 }

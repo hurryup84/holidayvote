@@ -187,7 +187,28 @@ export async function getUserVacations() {
     .in("id", vacationIds)
     .order("created_at", { ascending: false });
 
-  return vacations ?? [];
+  if (!vacations?.length) return [];
+
+  // Fetch booked property counts for all vacations at once
+  const { data: properties } = await supabase
+    .from("properties")
+    .select("vacation_id, status")
+    .in("vacation_id", vacationIds);
+
+  const bookedCounts = new Map<string, number>();
+  const totalCounts = new Map<string, number>();
+  for (const p of properties ?? []) {
+    totalCounts.set(p.vacation_id, (totalCounts.get(p.vacation_id) ?? 0) + 1);
+    if (p.status === "booked") {
+      bookedCounts.set(p.vacation_id, (bookedCounts.get(p.vacation_id) ?? 0) + 1);
+    }
+  }
+
+  return vacations.map((v) => ({
+    ...v,
+    property_count: totalCounts.get(v.id) ?? 0,
+    booked_count: bookedCounts.get(v.id) ?? 0,
+  }));
 }
 
 // Field configuration types
