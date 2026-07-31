@@ -147,7 +147,8 @@ export async function getVacationWithDetails(inviteCode: string) {
       suggester:profiles!properties_suggested_by_fkey(*),
       votes(*, profile:profiles(*)),
       vetoes(*, profile:profiles(*)),
-      comments(*, profile:profiles(*))
+      comments(*, profile:profiles(*)),
+      favorites(*, profile:profiles(*))
     `
     )
     .eq("vacation_id", vacation.id);

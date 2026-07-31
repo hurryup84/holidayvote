@@ -9,11 +9,14 @@ export function getPropertyStats(
 ) {
   const votes = property.votes ?? [];
   const vetoes = property.vetoes ?? [];
+  const favorites = property.favorites ?? [];
   const totalStars = votes.reduce((sum, v) => sum + v.stars, 0);
   const voteCount = votes.length;
   const vetoCount = vetoes.length;
+  const favoriteCount = favorites.length;
   const userVote = votes.find((v) => v.user_id === userId)?.stars ?? null;
   const userVeto = vetoes.some((v) => v.user_id === userId);
+  const userFavorite = favorites.some((f) => f.user_id === userId);
   const userVetoPropertyId =
     allVetoes.find((v) => v.user_id === userId)?.property_id ?? null;
 
@@ -45,9 +48,11 @@ export function getPropertyStats(
     totalStars,
     voteCount,
     vetoCount,
+    favoriteCount,
     averageStars: voteCount > 0 ? totalStars / voteCount : 0,
     userVote,
     userVeto,
+    userFavorite,
     userVetoPropertyId,
     distribution,
     distanceFromHome,
@@ -81,7 +86,12 @@ export function sortProperties(properties: Property[]): Property[] {
     const bVetos = (b.vetoes ?? []).length;
     if (aVetos !== bVetos) return aVetos - bVetos;
 
-    // 6. Lower price first
+    // 6. More favorites first
+    const aFav = (a.favorites ?? []).length;
+    const bFav = (b.favorites ?? []).length;
+    if (bFav !== aFav) return bFav - aFav;
+
+    // 7. Lower price first
     const aPrice = a.price ?? Infinity;
     const bPrice = b.price ?? Infinity;
     return aPrice - bPrice;

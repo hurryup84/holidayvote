@@ -43,6 +43,12 @@ export interface Participant {
   profile?: Profile;
 }
 
+export interface Favorite {
+  property_id: string;
+  user_id: string;
+  created_at: string;
+}
+
 export interface Property {
   id: string;
   vacation_id: string;
@@ -64,6 +70,7 @@ export interface Property {
   votes?: Vote[];
   vetoes?: Veto[];
   comments?: Comment[];
+  favorites?: Favorite[];
   address: string | null;
   lat: number | null;
   lng: number | null;
@@ -102,6 +109,8 @@ export interface PropertyStats {
   userVote: number | null;
   userVeto: boolean;
   userVetoPropertyId: string | null;
+  favoriteCount: number;
+  userFavorite: boolean;
 }
 
 export interface OpenGraphData {

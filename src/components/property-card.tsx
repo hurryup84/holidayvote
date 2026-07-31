@@ -7,6 +7,7 @@ import {
   castVeto,
   addComment,
   deleteComment,
+  toggleFavorite,
 } from "@/actions/votes";
 import {
   updatePropertyStatus,
@@ -42,6 +43,7 @@ import {
   Settings,
   ChevronRight,
   HelpCircle,
+  Heart,
 } from "lucide-react";
 import type { Property, ParticipantRole, Profile } from "@/lib/types";
 
@@ -718,6 +720,13 @@ export function PropertyCard({
     });
   }
 
+  function handleToggleFavorite() {
+    if (!userId) return;
+    startTransition(async () => {
+      await toggleFavorite(property.id, inviteCode);
+    });
+  }
+
   function handleEdit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -802,6 +811,35 @@ export function PropertyCard({
               averageStars={stats.averageStars}
               voteCount={stats.voteCount}
             />
+          )}
+
+          {/* Favorite overlay on image */}
+          {userId && (
+            <div className="absolute top-2 left-2 z-10">
+              <button
+                type="button"
+                onClick={handleToggleFavorite}
+                disabled={pending}
+                className={cn(
+                  "flex items-center gap-1 rounded-full bg-white/90 backdrop-blur-sm px-2 py-1 shadow-md transition-colors",
+                  stats.userFavorite
+                    ? "text-rose-500"
+                    : "text-slate-400 hover:text-rose-400"
+                )}
+                aria-label={stats.userFavorite ? "Favorit entfernen" : "Favorit hinzufügen"}
+                title={stats.userFavorite ? "Favorit entfernen" : "Favorit hinzufügen"}
+              >
+                <Heart
+                  className="h-4 w-4"
+                  fill={stats.userFavorite ? "currentColor" : "none"}
+                />
+                {stats.favoriteCount > 0 && (
+                  <span className="text-xs font-medium text-slate-700">
+                    {stats.favoriteCount}
+                  </span>
+                )}
+              </button>
+            </div>
           )}
 
           {/* Status badge on image */}
