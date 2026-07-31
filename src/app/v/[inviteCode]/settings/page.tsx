@@ -7,6 +7,7 @@ import { formatDateRange } from "@/lib/utils";
 import { ArrowLeft, MapPin, Settings } from "lucide-react";
 import Link from "next/link";
 import { FieldConfigManager } from "@/components/field-config-manager";
+import { VacationInfoEditor } from "@/components/vacation-info-editor";
 
 interface PageProps {
   params: Promise<{ inviteCode: string }>;
@@ -67,6 +68,26 @@ export default async function SettingsPage({ params }: { params: Promise<{ invit
         </div>
 
         <div className="rounded-2xl bg-white shadow-sm">
+          <div className="border-b border-slate-200 px-6 py-4">
+            <div className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-teal-600" />
+              <h2 className="text-lg font-semibold">Urlaub bearbeiten</h2>
+            </div>
+            <p className="mt-1 text-sm text-slate-500">
+              Titel, Reiseziel und Zeitraum anpassen.
+            </p>
+          </div>
+          <VacationInfoEditor
+            vacationId={details.vacation.id}
+            inviteCode={inviteCode}
+            name={publicData.name}
+            destination={publicData.destination}
+            startDate={publicData.start_date}
+            endDate={publicData.end_date}
+          />
+        </div>
+
+        <div className="mt-6 rounded-2xl bg-white shadow-sm">
           <div className="border-b border-slate-200 px-6 py-4">
             <div className="flex items-center gap-2">
               <Settings className="h-5 w-5 text-teal-600" />
