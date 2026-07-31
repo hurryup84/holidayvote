@@ -816,8 +816,8 @@ export function PropertyCard({
         <CardContent className="flex flex-1 flex-col gap-2.5 p-3">
           {/* Header: Title + External Link */}
           <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
-              <h3 className="font-semibold text-slate-900 truncate text-base">
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-slate-900 text-base break-words line-clamp-2">
                 {property.title ?? "Unbenanntes Haus"}
               </h3>
               {property.provider && (
