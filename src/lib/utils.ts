@@ -65,6 +65,7 @@ export function detectProvider(url: string): string {
     if (host.includes("airbnb")) return "Airbnb";
     if (host.includes("booking")) return "Booking";
     if (host.includes("fewo-direkt") || host.includes("fewo")) return "FeWo-direkt";
+    if (host.includes("ferienwohnungen")) return "Ferienwohnungen";
     if (host.includes("novasol")) return "Novasol";
     if (host.includes("traum")) return "Traumferienwohnungen";
     return host;

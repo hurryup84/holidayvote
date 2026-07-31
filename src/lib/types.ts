@@ -74,6 +74,7 @@ export interface Property {
   address: string | null;
   lat: number | null;
   lng: number | null;
+  avatar: string | null;
 }
 
 export interface Vote {

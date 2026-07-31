@@ -5,9 +5,9 @@ import { addProperty } from "@/actions/properties";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Link2, AlertCircle, MapPin } from "lucide-react";
+import { PropertyAvatarPicker } from "@/components/property-avatar-picker";
 import type { OpenGraphData } from "@/lib/types";
 
 import type { VacationFieldConfig } from "@/actions/vacations";
@@ -26,6 +26,7 @@ export function PropertyForm({ vacationId, inviteCode, fieldConfig = [] }: Prope
   const [error, setError] = useState<string | null>(null);
   const [ogData, setOgData] = useState<OpenGraphData | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [avatar, setAvatar] = useState<string>("default");
 
   // Helper to check if a field is enabled
   const isFieldEnabled = (fieldName: string) => {
@@ -47,7 +48,12 @@ export function PropertyForm({ vacationId, inviteCode, fieldConfig = [] }: Prope
       });
       const data = await res.json();
       setOgData(data);
-      if (data.error) setFetchError(data.error);
+      if (data.error || (!data.title && !data.image && !data.description)) {
+        setFetchError(
+          data.error ??
+            "Die Website hat keine sichtbaren Daten (Titel, Bild oder Beschreibung) — sie blockiert möglicherweise automatisierte Abfragen."
+        );
+      }
       setShowForm(true);
     } catch {
       setFetchError("Daten konnten nicht geladen werden");
@@ -74,6 +80,8 @@ export function PropertyForm({ vacationId, inviteCode, fieldConfig = [] }: Prope
       setUrl("");
       setOgData(null);
       setShowForm(false);
+      setFetchError(null);
+      setAvatar("default");
       setSubmitting(false);
     }
   }
@@ -105,9 +113,19 @@ export function PropertyForm({ vacationId, inviteCode, fieldConfig = [] }: Prope
         </div>
 
         {fetchError && (
-          <div className="flex items-start gap-2 rounded-xl bg-amber-50 p-3 text-sm text-amber-800">
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>{fetchError}. Bitte Felder manuell ausfüllen.</span>
+          <div className="space-y-3 rounded-xl bg-amber-50 p-4 text-sm text-amber-800">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>
+                Die Website erlaubte keinen automatisierten Zugriff — die
+                Daten konnten nicht geladen werden. Titel und der Link
+                werden trotzdem gespeichert.
+              </span>
+            </div>
+            <div>
+              <Label>Icon für das Haus</Label>
+              <PropertyAvatarPicker value={avatar} onChange={setAvatar} />
+            </div>
           </div>
         )}
 
@@ -148,6 +166,7 @@ export function PropertyForm({ vacationId, inviteCode, fieldConfig = [] }: Prope
             <input type="hidden" name="description" value={ogData?.description ?? ""} />
             <input type="hidden" name="image_url" value={ogData?.image ?? ""} />
             <input type="hidden" name="provider" value={ogData?.provider ?? ""} />
+            <input type="hidden" name="avatar" value={avatar} />
 
             <div className="grid grid-cols-2 gap-3">
               {isFieldEnabled("price") && (

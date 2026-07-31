@@ -64,6 +64,25 @@ const statusConfig = {
   booked: { label: "Gebucht", variant: "success" as const },
 };
 
+const AVATAR_MAP: Record<string, string> = {
+  default: "🏠",
+  beach: "🏖️",
+  mountain: "🏔️",
+  villa: "🏛️",
+  cottage: "🛖",
+  treehouse: "🌲",
+  city: "🏙️",
+  luxury: "🏰",
+  farm: "🌾",
+  sail: "⛵",
+  igloo: "🧊",
+  tent: "⛺",
+};
+
+function getAvatarEmoji(id: string): string {
+  return AVATAR_MAP[id] ?? AVATAR_MAP.default;
+}
+
 type DetailTab = "voting" | "vetos" | "comments" | "owner" | "edit";
 
 function DetailPanel({
@@ -801,7 +820,11 @@ export function PropertyCard({
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-400">
-              Kein Bild
+              {property.avatar ? (
+                <span className="text-6xl">{getAvatarEmoji(property.avatar)}</span>
+              ) : (
+                "Kein Bild"
+              )}
             </div>
           )}
 

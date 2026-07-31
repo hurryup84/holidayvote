@@ -59,6 +59,8 @@ export async function addProperty(vacationId: string, inviteCode: string, formDa
   const bedrooms = formData.get("bedrooms") ? parseInt(formData.get("bedrooms") as string) : null;
   const bathrooms = formData.get("bathrooms") ? parseFloat(formData.get("bathrooms") as string) : null;
   const hasPool = formData.get("has_pool") === "on";
+  const rawAvatar = (formData.get("avatar") as string)?.trim();
+  const avatar = rawAvatar && rawAvatar !== "default" ? rawAvatar : null;
 
   // Get address and geocode it
   const address = (formData.get("address") as string)?.trim() || null;
@@ -85,6 +87,7 @@ export async function addProperty(vacationId: string, inviteCode: string, formDa
     bedrooms,
     bathrooms,
     has_pool: hasPool,
+    avatar,
     suggested_by: user.id,
     address,
     lat,
