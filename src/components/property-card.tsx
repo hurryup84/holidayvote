@@ -949,15 +949,10 @@ export function PropertyCard({
                       <button
                         type="button"
                         onClick={() => setEditingVote(true)}
-                        disabled={pending || stats.userVote === null}
-                        className={cn(
-                          "p-0.5 rounded transition-colors",
-                          stats.userVote !== null
-                            ? "text-teal-400 hover:text-teal-600"
-                            : "text-slate-300 cursor-not-allowed"
-                        )}
-                        aria-label={stats.userVote !== null ? "Bewertung ändern" : ""}
-                        title={stats.userVote !== null ? "Bewertung ändern" : "Erst bewerten"}
+                        disabled={pending}
+                        className="p-0.5 rounded transition-colors text-slate-400 hover:text-teal-600"
+                        aria-label="Bewertung starten"
+                        title="Bewerten"
                       >
                         <Pencil className="h-3.5 w-3.5" />
                       </button>
