@@ -12,16 +12,23 @@ interface PropertyMarker {
   image_url?: string | null;
 }
 
+interface HomeLocation {
+  lat: number;
+  lng: number;
+}
+
 interface LeafletMapProps {
   properties: PropertyMarker[];
+  homeLocation?: HomeLocation | null;
   height?: string;
   className?: string;
 }
 
-export function LeafletMap({ properties, height = "500px", className = "" }: LeafletMapProps) {
+export function LeafletMap({ properties, homeLocation, height = "500px", className = "" }: LeafletMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
+  const homeMarkerRef = useRef<L.Marker | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Inject Leaflet CSS and fix marker icons on client side
@@ -63,6 +70,34 @@ export function LeafletMap({ properties, height = "500px", className = "" }: Lea
 
       const bounds: L.LatLngTuple[] = [];
 
+      // Add home location marker first (if available)
+      if (homeLocation?.lat != null && homeLocation?.lng != null) {
+        const homeIcon = L.divIcon({
+          className: "home-marker",
+          html: `<div style="
+            width: 32px; height: 32px;
+            background: #3b82f6;
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            display: flex; align-items: center; justify-content: center;
+          ">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </div>`,
+          iconSize: [32, 32],
+          iconAnchor: [16, 32],
+        });
+
+        homeMarkerRef.current = L.marker([homeLocation.lat, homeLocation.lng], { icon: homeIcon })
+          .bindPopup("<strong>Dein Zuhause</strong>", { maxWidth: 200 })
+          .addTo(map.current!);
+
+        bounds.push([homeLocation.lat, homeLocation.lng]);
+      }
+
       properties.forEach((prop) => {
         if (prop.lat == null || prop.lng == null) return;
 
@@ -98,12 +133,16 @@ export function LeafletMap({ properties, height = "500px", className = "" }: Lea
     return () => {
       markersRef.current.forEach((m) => m.remove());
       markersRef.current = [];
+      if (homeMarkerRef.current) {
+        homeMarkerRef.current.remove();
+        homeMarkerRef.current = null;
+      }
       if (map.current) {
         map.current.remove();
         map.current = null;
       }
     };
-  }, [properties]);
+  }, [properties, homeLocation]);
 
   if (error) {
     return (

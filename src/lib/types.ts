@@ -6,6 +6,8 @@ export interface Profile {
   email: string;
   name: string | null;
   created_at: string;
+  home_lat: number | null;
+  home_lng: number | null;
 }
 
 export interface Vacation {

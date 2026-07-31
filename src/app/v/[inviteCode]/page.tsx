@@ -170,6 +170,7 @@ export default async function VacationPage({ params }: PageProps) {
                 userRole={details.userRole as ParticipantRole}
                 participantCount={details.participants.length}
                 allVetoes={allVetoes}
+                userProfile={profile}
               />
             ))}
           </div>

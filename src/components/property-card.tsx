@@ -21,7 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { getPropertyStats } from "@/lib/sort-properties";
-import { formatPrice, cn } from "@/lib/utils";
+import { formatPrice, formatDistance, cn } from "@/lib/utils";
 import {
   ExternalLink,
   Ban,
@@ -41,8 +41,9 @@ import {
   ChevronUp,
   Settings,
   ChevronRight,
+  HelpCircle,
 } from "lucide-react";
-import type { Property, ParticipantRole } from "@/lib/types";
+import type { Property, ParticipantRole, Profile } from "@/lib/types";
 
 interface PropertyCardProps {
   property: Property;
@@ -52,6 +53,7 @@ interface PropertyCardProps {
   userRole: ParticipantRole | null;
   participantCount: number;
   allVetoes: { property_id: string; user_id: string }[];
+  userProfile?: Profile | null;
 }
 
 const statusConfig = {
@@ -684,6 +686,7 @@ export function PropertyCard({
   userRole,
   participantCount,
   allVetoes,
+  userProfile,
 }: PropertyCardProps) {
   const [pending, startTransition] = useTransition();
   const [commentText, setCommentText] = useState("");
@@ -691,7 +694,7 @@ export function PropertyCard({
   const [editingVote, setEditingVote] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
 
-  const stats = getPropertyStats(property, userId ?? undefined, allVetoes);
+  const stats = getPropertyStats(property, userId ?? undefined, allVetoes, userProfile);
   const status = statusConfig[property.status];
   const pricePerPerson =
     property.price && participantCount > 0
@@ -871,6 +874,53 @@ export function PropertyCard({
                   <span className="font-semibold text-slate-900">Pool</span>
                 </div>
               )}
+              {/* Distance from home - show distance or question mark if not set */}
+              <button
+                type="button"
+                className={cn(
+                  "flex flex-col items-center gap-0.5 p-1.5 rounded transition-all duration-150",
+                  stats.distanceFromHome != null
+                    ? "bg-blue-50 hover:bg-blue-100 hover:scale-[1.05] cursor-pointer text-blue-700"
+                    : "bg-slate-50 hover:bg-slate-100 hover:scale-[1.05] cursor-pointer text-slate-400"
+                )}
+                title={
+                  stats.distanceFromHome != null
+                    ? "Klicke für Info zur Berechnung"
+                    : "Heimatadresse nicht gesetzt – klicke für Info"
+                }
+                onClick={() => {
+                  if (stats.distanceFromHome == null) {
+                    alert(
+                      "Deine Heimatadresse ist noch nicht gesetzt.\n\n" +
+                        "Gehe zu Einstellungen (oben rechts im Menü) und trage deine Adresse ein.\n" +
+                        "Wir speichern nur die Koordinaten, nicht die Adresse selbst."
+                    );
+                  } else {
+                    alert(
+                      `Entfernung: ${formatDistance(stats.distanceFromHome)}\n\n` +
+                        "Dies ist die Luftlinie (gerade Distanz) zwischen deinem Zuhause und dem Ferienhaus.\n" +
+                        "Keine Fahrstrecke oder Flugroute – nur die direkte Entfernung."
+                    );
+                  }
+                }}
+              >
+                {stats.distanceFromHome != null ? (
+                  <>
+                    <MapPin className="h-3.5 w-3.5 text-blue-500" />
+                    <span className="font-semibold text-blue-700 text-[10px]">
+                      {formatDistance(stats.distanceFromHome)}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <MapPin className="h-3.5 w-3.5 text-slate-400" />
+                    <span className="font-semibold text-slate-400 text-[10px]">—</span>
+                    <span className="text-[8px] text-slate-500 uppercase tracking-wider">
+                      klicken
+                    </span>
+                  </>
+                )}
+              </button>
             </div>
 
             <Separator className="my-1" />

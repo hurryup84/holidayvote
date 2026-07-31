@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getVacationPublic, getVacationWithDetails } from "@/actions/vacations";
-import { Map } from "@/components/map";
+import { LeafletMap } from "@/components/leaflet-map";
 import { Header } from "@/components/header";
-import { getUser } from "@/lib/supabase/server";
+import { getUser, getProfile } from "@/lib/supabase/server";
 import { formatDateRange } from "@/lib/utils";
 import { ArrowLeft, MapPin, Home } from "lucide-react";
 import Link from "next/link";
@@ -37,6 +37,7 @@ export default async function MapPage({ params }: PageProps) {
   // Try to get detailed data if user is logged in, otherwise use public data
   const user = await getUser();
   const details = user ? await getVacationWithDetails(inviteCode) : null;
+  const profile = user ? await getProfile() : null;
 
   // Use public data as fallback if no details available
   const properties = details?.properties ?? [];
@@ -50,6 +51,11 @@ export default async function MapPage({ params }: PageProps) {
       lng: p.lng!,
       image_url: p.image_url,
     }));
+
+  // Prepare home location for map
+  const homeLocation = profile?.home_lat != null && profile?.home_lng != null
+    ? { lat: profile.home_lat, lng: profile.home_lng }
+    : null;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -98,8 +104,18 @@ export default async function MapPage({ params }: PageProps) {
                   Adresse – auf der Karte nicht sichtbar
                 </p>
               )}
+              {homeLocation && (
+                <p className="text-sm text-blue-600 mt-1 flex items-center gap-1">
+                  <MapPin className="h-3.5 w-3.5" />
+                  Dein Zuhause wird angezeigt
+                </p>
+              )}
             </div>
-            <Map properties={propertiesWithCoords} height="600px" />
+            <LeafletMap
+              properties={propertiesWithCoords}
+              homeLocation={homeLocation}
+              height="600px"
+            />
           </div>
         )}
       </main>

@@ -1,9 +1,11 @@
-import type { Property } from "./types";
+import type { Property, Profile } from "./types";
+import { haversineDistance } from "@/lib/utils";
 
 export function getPropertyStats(
   property: Property,
   userId: string | undefined,
-  allVetoes: { property_id: string; user_id: string }[]
+  allVetoes: { property_id: string; user_id: string }[],
+  userProfile?: Profile | null
 ) {
   const votes = property.votes ?? [];
   const vetoes = property.vetoes ?? [];
@@ -14,6 +16,22 @@ export function getPropertyStats(
   const userVeto = vetoes.some((v) => v.user_id === userId);
   const userVetoPropertyId =
     allVetoes.find((v) => v.user_id === userId)?.property_id ?? null;
+
+  // Calculate distance from user's home location
+  let distanceFromHome: number | null = null;
+  if (
+    userProfile?.home_lat != null &&
+    userProfile?.home_lng != null &&
+    property.lat != null &&
+    property.lng != null
+  ) {
+    distanceFromHome = haversineDistance(
+      userProfile.home_lat,
+      userProfile.home_lng,
+      property.lat,
+      property.lng
+    );
+  }
 
   // Calculate vote distribution
   const distribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
@@ -32,6 +50,7 @@ export function getPropertyStats(
     userVeto,
     userVetoPropertyId,
     distribution,
+    distanceFromHome,
   };
 }
 
@@ -52,17 +71,17 @@ export function sortProperties(properties: Property[]): Property[] {
     const bCount = b.votes?.length ?? 0;
     if (bCount !== aCount) return bCount - aCount;
 
-    // 3. Total stars (sum of all stars)
+    // 4. Total stars (sum of all stars)
     const aTotal = a.votes?.reduce((s, v) => s + v.stars, 0) ?? 0;
     const bTotal = b.votes?.reduce((s, v) => s + v.stars, 0) ?? 0;
     if (bTotal !== aTotal) return bTotal - aTotal;
 
-    // 4. Fewer vetoes first
+    // 5. Fewer vetoes first
     const aVetos = (a.vetoes ?? []).length;
     const bVetos = (b.vetoes ?? []).length;
     if (aVetos !== bVetos) return aVetos - bVetos;
 
-    // 5. Lower price first
+    // 6. Lower price first
     const aPrice = a.price ?? Infinity;
     const bPrice = b.price ?? Infinity;
     return aPrice - bPrice;
