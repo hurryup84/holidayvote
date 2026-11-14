@@ -1,0 +1,157 @@
+.onboarding {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  max-width: 520px;
+  margin: 0 auto;
+  padding-top: max(env(safe-area-inset-top), 24px);
+}
+.onboarding-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 24px;
+}
+.onboarding-page h1 {
+  font-size: 1.9rem;
+  font-weight: 700;
+}
+.onboarding-icon {
+  font-size: 56px;
+  color: var(--ion-color-primary);
+}
+.onboarding-footer {
+  padding-bottom: max(env(safe-area-inset-bottom), 16px);
+}
+.onboarding-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.onboarding-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--app-border);
+}
+.onboarding-dots span.active {
+  background: var(--ion-color-primary);
+}
+.onboarding-page.quickstart {
+  justify-content: flex-start;
+  padding-top: 8px;
+}
+.quickstart-input {
+  width: 100%;
+  margin: 8px 0;
+}
+.quickstart-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px;
+  padding-bottom: 16px;
+}
+
+/* ---------- first screen: new table or invited ---------- */
+.onboarding-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: max(env(safe-area-inset-bottom), 16px);
+}
+.onboarding-choice {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  background: var(--app-surface);
+  box-shadow: var(--app-shadow);
+  color: var(--ion-text-color);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.onboarding-choice > ion-icon:first-child {
+  flex-shrink: 0;
+  font-size: 30px;
+  color: var(--ion-color-primary);
+}
+.onboarding-choice > span {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+}
+.onboarding-choice strong {
+  font-size: 1.05rem;
+}
+.onboarding-choice span span {
+  font-size: 0.85rem;
+  line-height: 1.35;
+  color: var(--app-text-muted);
+}
+.onboarding-choice .chev {
+  flex-shrink: 0;
+  color: var(--app-text-muted);
+}
+.onboarding-choice.primary {
+  border-color: var(--ion-color-primary);
+  background: rgba(var(--ion-color-primary-rgb), 0.08);
+}
+.onboarding-back {
+  align-self: flex-start;
+  margin-left: -8px;
+}
+
+/* ---------- invited: code, name, terms ---------- */
+.onboarding-page.join {
+  justify-content: flex-start;
+  padding-top: 8px;
+}
+.join-form {
+  width: 100%;
+  margin: 12px 0;
+  text-align: left;
+}
+ion-input.code-input input.native-input {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+}
+.onboarding-page.form-page {
+  justify-content: flex-start;
+  padding: 8px 0 0;
+}
+.onboarding-page.form-page h1,
+.onboarding-page.form-page > p {
+  padding: 0 24px;
+}
+.join-error {
+  width: 100%;
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(var(--ion-color-danger-rgb), 0.12);
+  color: var(--ion-color-danger);
+  text-align: left;
+}
+.onboarding-recover {
+  align-self: center;
+  margin-top: 2px;
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: 0.95rem;
+}
+ion-input.recovery-input input.native-input {
+  font-size: 1.25rem;
+  letter-spacing: 0.12em;
+}

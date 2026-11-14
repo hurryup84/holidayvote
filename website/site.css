@@ -1,0 +1,71 @@
+/* Gemeinsames Aussehen der Website (Farben wie in der App: Sand, Meeres-Türkis, Koralle – hell und dunkel) */
+:root {
+  --bg: #f4efe6; --ink: #17302f; --muted: #5c6f6d; --accent: #0e7c86; --on-accent: #ffffff; --coral: #c9604a;
+  --card: #fffdf9; --line: rgba(14, 60, 64, 0.14);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #10181a; --ink: #e6efee; --muted: #97aaa9; --accent: #4fb3bc; --on-accent: #062a2e; --coral: #e8907a;
+    --card: #182427; --line: rgba(210, 240, 240, 0.12);
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; padding: 24px 16px 40px; background: var(--bg); color: var(--ink); line-height: 1.55;
+  font-family: system-ui, -apple-system, "SF Pro Text", "Segoe UI", sans-serif;
+}
+main { width: 100%; max-width: 680px; margin: 0 auto; }
+a { color: var(--accent); overflow-wrap: anywhere; }
+h1 { margin: 0 0 4px; font-size: 1.9rem; line-height: 1.2; letter-spacing: -0.01em; }
+h2 { margin: 28px 0 6px; font-size: 1.2rem; }
+p, ul, ol { margin: 0 0 12px; }
+ul, ol { padding-left: 1.2em; }
+ol li { margin-bottom: 8px; }
+.meta { color: var(--muted); margin-bottom: 20px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px 20px; margin: 18px 0; }
+.lang { border-top: 1px solid var(--line); margin-top: 36px; padding-top: 12px; }
+.back { display: inline-block; margin-bottom: 18px; text-decoration: none; font-weight: 600; }
+footer { margin-top: 40px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.92rem; }
+footer a { color: var(--muted); margin-right: 14px; }
+
+/* Startseite (und Einladung) */
+.home { min-height: calc(100vh - 64px); display: flex; flex-direction: column; justify-content: center; text-align: center; max-width: 420px; }
+.home > img { width: 112px; height: 112px; border-radius: 26px; margin: 0 auto; box-shadow: 0 6px 18px rgba(11, 61, 68, 0.25); }
+.home h1 { margin-top: 18px; font-size: 2.2rem; }
+.home h1 span { color: var(--accent); }
+.home .tagline { color: var(--ink); font-weight: 600; margin-bottom: 8px; }
+.home p { color: var(--muted); margin-bottom: 22px; }
+.promises { list-style: none; padding: 0; margin: 0 0 24px; display: grid; gap: 8px; font-size: 0.95rem; }
+.promises li { padding: 10px 14px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); }
+.promises li span[lang="en"] { display: block; color: var(--muted); font-size: 0.85rem; }
+/* Nur eine Sprache sichtbar: die englische Zeile wie die deutsche zeigen (nicht als kleinere Zweitzeile) */
+html[data-lang] .promises li span[lang="en"] { display: inline; color: inherit; font-size: inherit; }
+.stores { display: grid; gap: 10px; margin-bottom: 26px; }
+.stores a, .stores .soon { display: block; padding: 14px; border-radius: 16px; background: var(--accent); color: var(--on-accent); font-weight: 700; text-decoration: none; }
+/* Noch nicht im Store: gleiche Form, aber zurückgenommen und nicht anklickbar */
+.stores .soon { background: transparent; color: var(--muted); border: 1.5px dashed var(--line); font-weight: 600; }
+.stores .soon small { display: block; font-weight: 500; font-size: 0.85rem; }
+.home footer { border: 0; margin-top: 8px; }
+.home footer a { color: var(--ink); margin: 0 8px; }
+
+/* Einladung (join.html) */
+.code { margin: 4px 0 2px; font: 700 2.2rem/1.2 ui-monospace, "SF Mono", Menlo, monospace; letter-spacing: 0.25em; color: var(--ink); }
+.button {
+  display: block; width: 100%; padding: 14px; margin: 10px 0 0; border: 0; border-radius: 16px;
+  background: var(--accent); color: var(--on-accent); font: 700 1.05rem system-ui, sans-serif; text-decoration: none; cursor: pointer;
+}
+.button.secondary { background: transparent; color: var(--accent); border: 1.5px solid var(--accent); }
+.steps { text-align: left; padding-left: 1.3em; margin: 6px 0 0; color: var(--muted); }
+.steps li { margin-bottom: 6px; }
+.home .card p { margin-bottom: 8px; }
+.hidden { display: none; }
+
+/* Sprache: lang.js setzt html[data-lang]; dann nur die aktive Sprache zeigen. Ohne JavaScript bleiben beide sichtbar. */
+html[data-lang="de"] body [lang="en"], html[data-lang="en"] body [lang="de"], html[data-lang] .both-langs { display: none !important; }
+html[data-lang] .lang { border-top: 0; margin-top: 0; padding-top: 0; }
+.lang-switch { float: right; display: flex; gap: 0; justify-content: flex-end; margin: 0 0 6px; font-size: 0.85rem; }
+.lang-switch a { color: var(--muted); text-decoration: none; padding: 4px 2px; }
+.lang-switch a:hover, .lang-switch a:focus-visible { color: var(--accent); text-decoration: underline; }
+html:not([data-lang]) .lang-switch { display: none; }
+.home > .lang-switch { position: absolute; top: 14px; right: 16px; float: none; margin: 0; }

@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Einladung / Invitation – HolidayVote</title>
+  <meta name="description" content="Du bist zu einem Urlaub in HolidayVote eingeladen.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="HolidayVote">
+  <meta property="og:title" content="Einladung zu HolidayVote">
+  <meta property="og:description" content="Sucht das Ferienhaus gemeinsam aus – tippe auf den Link, um beizutreten.">
+  <meta property="og:url" content="https://holidayvote.support-moidev.workers.dev/join">
+  <meta property="og:image" content="https://holidayvote.support-moidev.workers.dev/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="apple-touch-icon" href="/icon.png">
+  <link rel="stylesheet" href="/site.css">
+  <script src="/lang.js"></script>
+  <!--
+    Invite link target: https://holidayvote.support-moidev.workers.dev/join?c=K7P2QX
+    The button opens the app with com.moidev.holidayvote://join/K7P2QX (the app fills in the code).
+    Not installed yet: install, choose "Ich wurde eingeladen" on the first start, enter the code.
+    Code format as in src/core/inviteLink.ts: 6 letters / digits; ?c= or ?code= or /join/CODE.
+  -->
+</head>
+<body>
+  <main class="home">
+    <nav class="lang-switch"><a href="?lang=en" hreflang="en" data-switch="en" lang="de">English</a><a href="?lang=de" hreflang="de" data-switch="de" lang="en">Deutsch</a></nav>
+    <img src="/icon.png" alt="">
+    <h1 lang="de">Du bist eingeladen!</h1>
+    <h1 lang="en">You’re invited!</h1>
+    <p lang="de">Jemand plant einen Urlaub und möchte das Ferienhaus mit dir gemeinsam aussuchen: Häuser sammeln,
+      Sterne vergeben, zusammen entscheiden.</p>
+    <p lang="en">Someone is planning a holiday and wants to choose the holiday home together with you: collect houses,
+      give stars, decide together.</p>
+
+    <div class="card" id="with-code">
+      <p><span lang="de">Dein Einladungs-Code</span><span lang="en">Your invite code</span></p>
+      <div class="code" id="code">······</div>
+      <a class="button" id="open" href="#"><span lang="de">In HolidayVote öffnen</span><span lang="en">Open in HolidayVote</span></a>
+      <button class="button secondary" id="copy" type="button"><span lang="de">Code kopieren</span><span lang="en">Copy code</span></button>
+    </div>
+    <div class="card hidden" id="no-code">
+      <p lang="de">Dieser Link ist unvollständig. Bitte die Person, die dich einlädt, den Link noch einmal zu schicken –
+        oder lass dir den 6-stelligen Code geben.</p>
+      <p lang="en">This link is incomplete. Ask the person who invited you to send the link again –
+        or to give you the 6-character code.</p>
+    </div>
+
+    <div class="card">
+      <p><strong><span lang="de">HolidayVote noch nicht installiert?</span><span lang="en">HolidayVote not installed yet?</span></strong></p>
+      <ol class="steps">
+        <li><span lang="de">HolidayVote installieren</span><span lang="en">Install HolidayVote</span><span id="stores"></span>.</li>
+        <li><span lang="de">Beim ersten Start „Ich wurde eingeladen“ wählen.</span><span lang="en">Choose “I was invited” on the first start.</span></li>
+        <li><span lang="de">Den Code und deinen Namen eingeben – oder danach noch einmal auf den Einladungs-Link tippen. Kein Konto, keine E-Mail.</span><span lang="en">Enter the code and your name – or tap the invite link again afterwards. No account, no email.</span></li>
+      </ol>
+    </div>
+
+    <div class="lang both-langs" lang="en">
+      <p><strong>You’re invited to choose a holiday home together.</strong> Tap “In HolidayVote öffnen” to open the
+        app. Not installed yet? Install HolidayVote, choose “I was invited” on the first start and enter the code above.</p>
+    </div>
+
+    <footer>
+      <a href="/">HolidayVote</a>
+      <a href="/datenschutz"><span lang="de">Datenschutz</span><span lang="en">Privacy</span></a>
+      <a href="/nutzungsbedingungen"><span lang="de">Nutzungsbedingungen</span><span lang="en">Terms of use</span></a>
+      <a href="/support">Support</a>
+      <a href="https://moidev.support-moidev.workers.dev/impressum"><span lang="de">Impressum</span><span lang="en">Legal notice</span></a>
+    </footer>
+  </main>
+  <script>
+    // Store links appear here once the app is published (leave empty until then).
+    var APP_STORE_URL = ''; // TODO: https://apps.apple.com/app/id… once the app exists in App Store Connect
+    var PLAY_STORE_URL = ''; // TODO: https://play.google.com/store/apps/details?id=com.moidev.holidayvote once it is live
+
+    var m = /[?&](?:c|code)=([A-Za-z0-9]{6})(?:&|$)/.exec(location.search) || /\/join\/([A-Za-z0-9]{6})\/?$/.exec(location.pathname);
+    var code = m ? m[1].toUpperCase() : null;
+    if (code) {
+      document.getElementById('code').textContent = code;
+      document.getElementById('open').href = 'com.moidev.holidayvote://join/' + code;
+      document.getElementById('copy').onclick = function () {
+        var btn = this;
+        var done = function () { btn.innerHTML = '<span lang="de">Kopiert ✓</span><span lang="en">Copied ✓</span>'; };
+        if (navigator.clipboard) navigator.clipboard.writeText(code).then(done, function () {});
+      };
+    } else {
+      document.getElementById('with-code').classList.add('hidden');
+      document.getElementById('no-code').classList.remove('hidden');
+    }
+    // lang.js setzt beim Sprachwechsel die Adresse auf location.pathname zurück – den Code aus ?c= dabei behalten
+    // (sonst zeigt ein Neuladen "Link unvollständig"). Läuft nach dem Klick-Handler von lang.js.
+    if (code && !/\/join\/[A-Za-z0-9]{6}\/?$/.test(location.pathname)) {
+      document.querySelectorAll('[data-switch]').forEach(function (a) {
+        a.href = '?c=' + code + '&lang=' + a.getAttribute('data-switch');
+      });
+      document.addEventListener('click', function (event) {
+        if (!(event.target.closest && event.target.closest('[data-switch]'))) return;
+        try { history.replaceState(null, '', location.pathname + '?c=' + code); } catch (e) {}
+      });
+    }
+    var stores = [];
+    if (APP_STORE_URL) stores.push('<a href="' + APP_STORE_URL + '">App Store</a>');
+    if (PLAY_STORE_URL) stores.push('<a href="' + PLAY_STORE_URL + '">Google Play</a>');
+    if (stores.length) document.getElementById('stores').innerHTML = ' (' + stores.join(' · ') + ')';
+  </script>
+</body>
+</html>

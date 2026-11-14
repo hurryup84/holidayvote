@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>Sicherheitsprüfung – HolidayVote</title>
+  <!-- Bot check before the app creates an (anonymous) account – first invite, joining, recovery.
+       Loaded by the app in an embedded frame (src/native/captcha.ts): Turnstile only runs on a real
+       web page, the app itself has no domain. The token goes back to the app by postMessage, only to
+       the app's own origins. Site key: public. Secret key: in Supabase (Auth → Attack Protection).
+       ?test=1 → Cloudflare's test key (always passes; its tokens are refused by the real secret). -->
+  <style>
+    html, body { margin: 0; background: transparent; font: 15px/1.4 -apple-system, system-ui, sans-serif; color: #444; }
+    @media (prefers-color-scheme: dark) { html, body { color: #ccc; } }
+    main { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 4px; }
+    #w { min-height: 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <div id="w"></div>
+  </main>
+  <script>
+    // TODO: site key of the Cloudflare Turnstile widget for hostname holidayvote.support-moidev.workers.dev
+    // (Cloudflare dashboard → Turnstile → Add widget; mode "Invisible" / "Managed"). Its secret key goes to
+    // Supabase → Authentication → Attack Protection → CAPTCHA (Turnstile).
+    const SITE_KEY = 'TODO_TURNSTILE_SITE_KEY';
+    const TEST_KEY = '1x00000000000000000000AA';
+    const params = new URLSearchParams(location.search);
+    // Only the app (iOS capacitor://localhost, Android https://localhost) and local development get the token.
+    const origin = params.get('origin') || '';
+    const allowed = /^(capacitor:\/\/localhost|https?:\/\/localhost(:\d+)?)$/.test(origin) && window.parent !== window;
+
+    function send(msg) {
+      if (allowed) window.parent.postMessage({ source: 'holidayvote-captcha', ...msg }, origin);
+    }
+
+    send({ type: 'ready' }); // the app knows the page arrived (otherwise it goes ahead without a token)
+
+    window.onTurnstileLoad = function () {
+      turnstile.render('#w', {
+        sitekey: params.get('test') === '1' ? TEST_KEY : SITE_KEY,
+        appearance: 'interaction-only', // invisible unless Cloudflare wants a click
+        language: params.get('lang') || 'auto',
+        theme: 'auto',
+        callback: (token) => send({ type: 'token', token }),
+        'before-interactive-callback': () => send({ type: 'interactive' }),
+        'error-callback': (code) => { send({ type: 'error', code: String(code) }); },
+        'expired-callback': () => send({ type: 'expired' }),
+        'unsupported-callback': () => send({ type: 'error', code: 'unsupported' }),
+      });
+    };
+    if (!allowed) document.getElementById('w').textContent = 'Diese Seite gehört zur App HolidayVote.';
+  </script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad&render=explicit" async defer></script>
+</body>
+</html>

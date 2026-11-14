@@ -1,0 +1,1 @@
+First version: create a trip, invite friends by link or code, collect holiday homes, rate them with stars, pick a favourite and a veto, ranking and map.

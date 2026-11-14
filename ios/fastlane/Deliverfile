@@ -1,0 +1,6 @@
+# The Deliverfile allows you to store various App Store Connect metadata
+# https://docs.fastlane.tools/actions/deliver/
+
+# Never submit automatically – submission for review happens in App Store Connect.
+submit_for_review(false)
+automatic_release(false)

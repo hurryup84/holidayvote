@@ -1,0 +1,146 @@
+default_platform(:android)
+
+# Capacitor app: the web app (Vite) is built and copied into the native project before every build.
+# Secrets live OUTSIDE the repo in <apps>/android_signing/:
+#   key.jks + keystore.properties.holidayvote  (release signing, see android/keystore.properties.example)
+#   play-api-key.json              (Google Play service account, see Appfile)
+FASTLANE_DIR = File.expand_path(__dir__)
+ANDROID_DIR = File.expand_path("..", FASTLANE_DIR)
+ROOT = File.expand_path("..", ANDROID_DIR)
+GRADLE_FILE = File.join(ANDROID_DIR, "app/build.gradle")
+AAB = File.join(ANDROID_DIR, "app/build/outputs/bundle/release/app-release.aab")
+METADATA = File.join(FASTLANE_DIR, "metadata/android")
+TRACKS = %w[internal alpha beta production].freeze
+
+# Environment prefix for Gradle: SDK + a JDK it supports: Android Studio's bundled one (the system Java may be too new).
+def gradle_env
+  sdk = ENV["ANDROID_HOME"] || ENV["ANDROID_SDK_ROOT"] || File.expand_path("~/Library/Android/sdk")
+  jdk = ENV["JAVA_HOME"] || "/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+  UI.user_error!("Android SDK not found at #{sdk} (set ANDROID_HOME)") unless File.directory?(sdk)
+  UI.user_error!("No JDK found (install Android Studio or set JAVA_HOME)") unless File.directory?(jdk)
+  "ANDROID_HOME='#{sdk}' JAVA_HOME='#{jdk}'"
+end
+
+def gradle_value(key)
+  value = File.read(GRADLE_FILE)[/^\s*#{key}\s+"?([^"\s]+)"?\s*$/, 1]
+  UI.user_error!("#{key} not found in #{GRADLE_FILE}") unless value
+  value
+end
+
+def set_gradle_value(key, value)
+  quoted = key == "versionName" ? "\"#{value}\"" : value.to_s
+  content = File.read(GRADLE_FILE).sub(/^(\s*#{key}\s+).*$/) { "#{Regexp.last_match(1)}#{quoted}" }
+  File.write(GRADLE_FILE, content)
+end
+
+def package_version
+  JSON.parse(File.read(File.join(ROOT, "package.json")))["version"]
+end
+
+# One file per app (keystore.properties.holidayvote, like .dining_table), or the generic keystore.properties.
+def signing_properties
+  return ENV["HOLIDAYVOTE_KEYSTORE_PROPERTIES"] if ENV["HOLIDAYVOTE_KEYSTORE_PROPERTIES"]
+  dir = File.expand_path("../android_signing", ROOT)
+  per_app = File.join(dir, "keystore.properties.holidayvote")
+  File.exist?(per_app) ? per_app : File.join(dir, "keystore.properties")
+end
+
+platform :android do
+  desc "Highest version code on Google Play (all tracks)"
+  private_lane :latest_play_version_code do
+    TRACKS.flat_map do |track|
+      google_play_track_version_codes(track: track)
+    rescue StandardError
+      [] # track has no release yet
+    end.map(&:to_i).max || 0
+  end
+
+  desc "Set versionCode to the highest on Google Play + 1 and versionName to package.json version"
+  lane :bump do
+    code = latest_play_version_code + 1
+    set_gradle_value("versionCode", code)
+    set_gradle_value("versionName", package_version)
+    UI.success("versionCode #{code}, versionName #{package_version}")
+  end
+
+  desc "Production web build + cap sync + signed release bundle (AAB) – nothing uploaded"
+  lane :build do
+    UI.user_error!("Signing file missing: #{signing_properties}\nCopy android/keystore.properties.example there and fill in the passwords.") unless File.exist?(signing_properties)
+    set_gradle_value("versionName", package_version)
+    sh("cd '#{ROOT}' && npm run build && npx cap sync android")
+    sh("cd '#{ANDROID_DIR}' && #{gradle_env} ./gradlew bundleRelease -q")
+    UI.user_error!("No bundle at #{AAB}") unless File.exist?(AAB)
+    UI.success("Built #{AAB} (versionCode #{gradle_value('versionCode')}, versionName #{gradle_value('versionName')})")
+  end
+
+  desc "Bump + build + upload to the internal testing track. Option status:draft while the app isn't published yet"
+  lane :internal do |options|
+    bump
+    build
+    upload_to_play_store(
+      track: "internal",
+      aab: AAB,
+      release_status: options[:status] || "completed",
+      metadata_path: METADATA,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: false
+    )
+    UI.success("Uploaded versionCode #{gradle_value('versionCode')} to internal testing")
+  end
+
+  desc "Promote the latest internal release to production (after testing)"
+  lane :promote do
+    upload_to_play_store(
+      track: "internal",
+      track_promote_to: "production",
+      version_code: latest_play_version_code,
+      skip_upload_aab: true,
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: true
+    )
+  end
+
+  desc "Upload store texts, icon, feature graphic and screenshots (metadata/android/<locale>/) – no app bundle"
+  lane :update_metadata do
+    # The store listing isn't tied to a release, but supply wants one: without track / version_code it
+    # looks in "production" (empty before the first release) → "Could not find release for version code ''".
+    # So: the track with the newest uploaded version.
+    track, code = TRACKS.reverse.filter_map do |t|
+      codes = begin
+        google_play_track_version_codes(track: t)
+      rescue StandardError
+        []
+      end
+      [t, codes.map(&:to_i).max] unless codes.empty?
+    end.max_by { |(_, c)| c }
+    UI.user_error!("No release on Google Play yet – upload a build first (fastlane android internal)") unless track
+    UI.message("Store listing via release #{code} on track '#{track}'")
+    upload_to_play_store(
+      track: track,
+      version_code: code,
+      metadata_path: METADATA,
+      skip_upload_aab: true,
+      skip_upload_apk: true,
+      skip_upload_changelogs: true,
+      sync_image_upload: true # only uploads images that changed
+    )
+  end
+
+  desc "Check that the Google Play API key works (lists the version codes per track)"
+  lane :check do
+    validate_play_store_json_key
+    TRACKS.each do |track|
+      codes = begin
+        google_play_track_version_codes(track: track)
+      rescue StandardError
+        []
+      end
+      UI.message("#{track}: #{codes.inspect}")
+    end
+  end
+end

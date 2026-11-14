@@ -1,0 +1,88 @@
+/*
+ * Semantic color tokens – the ONLY place where colors are defined (house rule, as in Esstisch).
+ * Components use var(--…) only. Ionic reads the --ion-* variables.
+ * HolidayVote: sea teal (primary), coral (secondary / accents), sand background.
+ */
+:root,
+:root.ios,
+:root.md {
+  --ion-color-primary: #0e7c86;
+  --ion-color-primary-rgb: 14, 124, 134;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #0c6d76;
+  --ion-color-primary-tint: #268992;
+
+  --ion-color-secondary: #d9694c;
+  --ion-color-secondary-rgb: 217, 105, 76;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #bf5c43;
+  --ion-color-secondary-tint: #dd785e;
+
+  --ion-background-color: #f7f3ec;
+  --ion-background-color-rgb: 247, 243, 236;
+  --ion-toolbar-background: #f7f3ec;
+  --ion-item-background: #ffffff;
+  --ion-card-background: #ffffff;
+
+  --app-surface: #ffffff;
+  --app-surface-muted: #eee7db;
+  --app-border: #e2d9ca;
+  --app-text-muted: #6b7178;
+  --app-placeholder-bg: #dcecee;
+  --app-placeholder-fg: #6aa5ab;
+  --app-star: #f2a32b;
+  --app-veto: #c2410c;
+  --app-favorite: #db2777;
+  --app-booked: #15803d;
+  --app-booked-bg: #e3f4e8;
+  --app-eliminated-bg: #efece7;
+  --app-warning: #b7791f;
+  --app-shadow: 0 1px 3px rgba(20, 40, 50, 0.12);
+  --app-radius: 14px;
+  --vote-color: var(--app-star);
+}
+
+/* Same selectors as Ionic's dark palette (:root.ios / :root.md), loaded later → our tokens win. */
+@media (prefers-color-scheme: dark) {
+  :root,
+  :root.ios,
+  :root.md,
+  :root.ios ion-modal {
+    --ion-color-primary: #4fb3bc;
+    --ion-color-primary-rgb: 79, 179, 188;
+    --ion-color-primary-contrast: #06191b;
+    --ion-color-primary-contrast-rgb: 6, 25, 27;
+    --ion-color-primary-shade: #469ea5;
+    --ion-color-primary-tint: #61bbc3;
+
+    --ion-color-secondary: #ec9077;
+    --ion-color-secondary-rgb: 236, 144, 119;
+    --ion-color-secondary-contrast: #1d0d08;
+    --ion-color-secondary-contrast-rgb: 29, 13, 8;
+    --ion-color-secondary-shade: #d07f69;
+    --ion-color-secondary-tint: #ee9b85;
+
+    --ion-background-color: #10181a;
+    --ion-background-color-rgb: 16, 24, 26;
+    --ion-toolbar-background: #10181a;
+    --ion-item-background: #1a2427;
+    --ion-card-background: #1a2427;
+
+    --app-surface: #1a2427;
+    --app-surface-muted: #233034;
+    --app-border: #2e3d41;
+    --app-text-muted: #9aa7ab;
+    --app-placeholder-bg: #1f3a3e;
+    --app-placeholder-fg: #4f8a90;
+    --app-star: #f5b84f;
+    --app-veto: #fb923c;
+    --app-favorite: #f472b6;
+    --app-booked: #4ade80;
+    --app-booked-bg: #183526;
+    --app-eliminated-bg: #1d2426;
+    --app-warning: #e0a83a;
+    --app-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  }
+}

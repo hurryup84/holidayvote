@@ -1,0 +1,130 @@
+.muted {
+  color: var(--app-text-muted);
+}
+.small {
+  font-size: 0.85rem;
+}
+.section-title {
+  margin: 20px 16px 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+}
+.card {
+  background: var(--app-surface);
+  border-radius: var(--app-radius);
+  box-shadow: var(--app-shadow);
+}
+.thumb {
+  object-fit: cover;
+  background: var(--app-placeholder-bg);
+  display: block;
+}
+.thumb-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--app-placeholder-bg);
+  color: var(--app-placeholder-fg);
+}
+.chip-row {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px 12px;
+  scrollbar-width: none;
+}
+.chip-row::-webkit-scrollbar {
+  display: none;
+}
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--app-text-muted);
+}
+.empty-state > ion-icon {
+  font-size: 56px;
+  color: var(--ion-color-primary);
+  margin-bottom: 12px;
+}
+.pre-wrap {
+  white-space: pre-wrap;
+}
+.chip-row ion-chip {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Explanation under an inset list (settings). */
+.list-footer {
+  margin: -8px 20px 16px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--ion-color-medium);
+}
+
+/* Toggle rows: let the explanation wrap instead of cutting it off after one line. */
+ion-toggle::part(label) {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+ion-toggle p {
+  white-space: normal;
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--ion-color-medium);
+}
+
+/* Error box in forms (join, setup). */
+.form-error {
+  margin: 0 16px 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(var(--ion-color-danger-rgb), 0.12);
+  color: var(--ion-color-danger);
+}
+
+/* Invite code sheet */
+.invite-sheet {
+  text-align: center;
+}
+.invite-code {
+  margin: 16px auto;
+  padding: 14px 18px;
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  border-radius: var(--app-radius);
+  background: var(--app-surface-muted);
+  color: var(--ion-color-primary);
+  font-variant-numeric: tabular-nums;
+  user-select: all;
+}
+.terms-item {
+  --background: transparent;
+  margin: 0 8px;
+}
+.terms-item a {
+  color: var(--ion-color-primary);
+}
+
+/* Recovery code (Settings) */
+.recovery-code {
+  padding-bottom: 12px;
+}
+.recovery-code-value {
+  margin: 2px 0 8px;
+  font: 700 1.6rem/1.2 ui-monospace, 'SF Mono', Menlo, monospace;
+  letter-spacing: 0.08em;
+  user-select: all;
+  -webkit-user-select: all;
+}
+.recovery-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}

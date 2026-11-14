@@ -1,0 +1,27 @@
+.preview-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: var(--app-placeholder-bg);
+}
+.preview-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--app-placeholder-fg);
+}
+.preview-fallback span {
+  font-size: 44px;
+  line-height: 1;
+  opacity: 0.85;
+}
+.preview-fallback.loading span {
+  opacity: 0.35;
+  animation: preview-pulse 1.2s ease-in-out infinite;
+}
+@keyframes preview-pulse {
+  50% {
+    opacity: 0.15;
+  }
+}

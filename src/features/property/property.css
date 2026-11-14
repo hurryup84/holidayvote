@@ -1,0 +1,118 @@
+.detail-image {
+  aspect-ratio: 16 / 10;
+  background: var(--app-placeholder-bg);
+}
+.detail-image.status-eliminated {
+  opacity: 0.6;
+}
+.detail-picture-note {
+  margin: 4px 16px 0;
+  font-size: 0.72rem;
+  color: var(--app-text-muted);
+  text-align: right;
+}
+.detail-head {
+  padding: 8px 16px 0;
+}
+.detail-head h1 {
+  margin: 4px 0 2px;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+.detail-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.detail-status.booked {
+  background: var(--app-booked-bg);
+  color: var(--app-booked);
+}
+.detail-status.eliminated {
+  background: var(--app-eliminated-bg);
+  color: var(--app-text-muted);
+}
+.vote-row {
+  display: flex;
+  justify-content: center;
+  padding: 4px 0 8px;
+}
+.vote-row .star-input button {
+  font-size: 36px;
+}
+.pick-row {
+  display: flex;
+  gap: 8px;
+  padding: 0 12px 4px;
+}
+.pick {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 8px;
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  background: transparent;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--ion-text-color);
+  cursor: pointer;
+}
+.pick ion-icon {
+  font-size: 20px;
+}
+.pick.favorite ion-icon,
+.favorite-icon {
+  color: var(--app-favorite);
+}
+.pick.veto ion-icon,
+.veto-icon {
+  color: var(--app-veto);
+}
+.pick.favorite.on {
+  border-color: var(--app-favorite);
+  font-weight: 700;
+}
+.pick.veto.on {
+  border-color: var(--app-veto);
+  font-weight: 700;
+}
+.pick-hint {
+  margin: 6px 16px 12px;
+}
+.listing-text {
+  white-space: pre-wrap;
+  color: var(--ion-text-color) !important;
+}
+.detail-description {
+  margin: 0 20px 16px;
+  line-height: 1.45;
+}
+.comment-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+.comment-head .stars-show {
+  font-size: 12px;
+}
+.comment-text {
+  margin-top: 2px !important;
+  color: var(--ion-text-color) !important;
+}
+.comment-stars {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px 10px;
+}
+.comment-stars .star-input button {
+  font-size: 22px;
+}

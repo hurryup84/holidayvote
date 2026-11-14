@@ -1,0 +1,36 @@
+1. SCREEN RECORDING
+Attached (App Review Information → Attachment), recorded on a physical iPhone with the latest iOS. It starts with launching the app and shows: creating a vacation, adding holiday homes by link (with the live preview), rating, favourite and veto, comments, the ranking, the map, sharing (invite, join with a code), reporting content and a member, blocking a member, and "Delete my data" (account deletion). There is no registration and no login.
+
+2. PURPOSE AND AUDIENCE
+HolidayVote helps friends or a family choose a holiday home together. Problem: everyone sends links to holiday homes (Airbnb, Booking.com, Vrbo …) into a group chat, and nobody keeps track of who liked which house. The organiser creates a vacation (name, destination, dates) and invites the others with a code or link. Everyone adds links (the app shows a live preview; only the link is stored), rates the houses with 1–5 stars, sets one favourite and one veto, and comments. A ranking shows the group's top picks, with price per person and a map. The organiser marks the house that was booked.
+
+3. HOW TO TEST (no login needed)
+Sharing needs at least two people (two devices). With one device, please use our demo vacation:
+a) Join the demo vacation: start the app → "I was invited" → enter the code {{INVITE_CODE}} and any name → accept the Terms of Use → "Join" → the vacation "Review trip" opens. It already contains houses, ratings and comments added by the member "Demo".
+- Rate a house with stars, set it as your favourite or veto it, write a comment. The ranking updates at once.
+- Add a house: "+" → paste the link of any holiday-home listing (e.g. from booking.com or airbnb.com) → the preview appears → save.
+- Map: shows the houses of the vacation.
+- Report content: open a house → "…" (top right) → "Report content"; for a comment: tap someone else's comment → choose a reason.
+- Report / block a member: in the vacation, tab "People" → tap "Demo" → "Report person" / "Block".
+- Invite: the person icon at the top right of a vacation (or "People" → "Invite") shows a code and a link to share.
+b) Alone: create your own vacation (name, destination, dates) and add houses – everything works the same; the invite code can be entered on a second device.
+c) Account deletion: Settings → "Delete my data" → confirm. This deletes the anonymous account and its server data.
+Content is only visible to people invited to the same vacation: no public content, no discovery, no contact with strangers. Terms of Use (zero tolerance): https://holidayvote.support-moidev.workers.dev/nutzungsbedingungen?lang=en. Reports reach the developer and are reviewed within 24 hours; content is removed and accounts banned when needed.
+
+4. EXTERNAL SERVICES
+- Supabase (EU): database, anonymous accounts and realtime updates for shared vacations.
+- Cloudflare: our website (privacy policy, support, terms, invite links) and a bot check (Cloudflare Turnstile) before an anonymous account is created.
+- OpenStreetMap: map tiles and address search (Nominatim) for the map.
+- Link previews: the app loads the public page of the holiday-home link the user added, directly from the device, to show its title and picture; nothing of it is stored except the link.
+No in-app purchases, no AI services, no analytics, no ads, no tracking. Listing links open the provider's website in the browser.
+
+5. REGIONS
+The app works the same in all regions. The interface is in English and German and follows the device language.
+
+6. REGULATION / THIRD-PARTY MATERIAL
+Not applicable: no regulated industry, no booking or payment in the app, no licensed third-party content. Links are added by the users; listing pictures are only shown as a preview of the linked page and cached on the user's device; they are never uploaded to our server.
+
+OTHER
+- No camera, no photo library, no location, no notifications.
+- The app is free, without in-app purchases.
+- Runs on iPhone and iPad.

@@ -1,0 +1,35 @@
+"Which holiday home shall we take?" – HolidayVote turns forty links in the group chat into a decision you make together.
+
+You're planning a holiday with friends or family. Everyone sends links from Airbnb, Booking.com, Vrbo, Novasol and the like – and in the end nobody remembers who liked which house. HolidayVote keeps all the houses in one place, everyone rates them, and the ranking shows at a glance which house the group likes best.
+
+CREATE YOUR TRIP
+• Name, destination and dates – done
+• Invite friends and family by link or 6-character code
+• No sign-up, no e-mail address, no password
+
+COLLECT HOUSES
+• Paste a link – from Airbnb, Booking.com, Vrbo, Novasol and many other sites
+• Preview of each listing with picture – pictures stay on your phone; only the link with title and description goes to the server
+• Enter the price and HolidayVote works out the price per person
+• All houses on a map
+
+DECIDE TOGETHER
+• Everyone rates every house with 1 to 5 stars
+• Each person has one favourite – and one veto for the absolute no-go
+• Comments on every house
+• The ranking shows the group's top picks
+• Booked? Whoever created the trip marks the booked house – everyone knows
+
+ALWAYS UP TO DATE
+• Ratings and new houses from the others arrive within seconds
+• Works offline too – everything syncs as soon as you're back online
+• New phone? With your recovery code you're back in right away
+• iPhone, iPad and Android – everyone plans along
+
+FREE AND PRIVATE
+• Free, no ads, no tracking
+• No account, no e-mail address, no password
+• Your trip is visible only to the people you invite – stored on a server in the EU
+
+Terms of Use: https://holidayvote.support-moidev.workers.dev/nutzungsbedingungen?lang=en
+Privacy policy: https://holidayvote.support-moidev.workers.dev/datenschutz?lang=en

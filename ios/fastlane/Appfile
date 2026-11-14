@@ -1,0 +1,4 @@
+# AppStore Connect / Team Info
+app_identifier("com.moidev.holidayvote")
+apple_id("stmattis@gmail.com")
+team_id("9RQR986GQX") # Developer Portal team (same as DEVELOPMENT_TEAM in ios/App/App.xcodeproj)

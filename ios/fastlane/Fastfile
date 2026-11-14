@@ -1,0 +1,171 @@
+default_platform(:ios)
+
+# Capacitor app: the web app (Vite) is built and copied into the native project before every
+# iOS build. The Xcode project uses Swift Package Manager (no workspace).
+FASTLANE_DIR = File.expand_path(__dir__) # resolved once here; __dir__ inside lane blocks is unreliable
+# Project root = nearest folder above fastlane/ that has package.json (works in ./fastlane and ios/fastlane).
+ROOT = begin
+  dir = File.expand_path("..", FASTLANE_DIR)
+  dir = File.expand_path("..", dir) until File.exist?(File.join(dir, "package.json")) || dir == "/"
+  UI.user_error!("package.json not found above #{FASTLANE_DIR}") if dir == "/"
+  dir
+end
+PROJECT = File.join(ROOT, "ios/App/App.xcodeproj")
+SCHEME = "App"
+PBXPROJ = File.join(PROJECT, "project.pbxproj")
+
+# Build/version numbers are read straight from the project file (single source of truth,
+# also used by Xcode). Both build configurations always carry the same value.
+def project_setting(key)
+  values = File.read(PBXPROJ).scan(/#{key} = ([^;]+);/).flatten.uniq
+  UI.user_error!("#{key} differs between build configurations: #{values}") if values.size > 1
+  UI.user_error!("#{key} not found in project") if values.empty?
+  values.first
+end
+
+def set_project_build_number(number)
+  content = File.read(PBXPROJ).gsub(/CURRENT_PROJECT_VERSION = [^;]+;/, "CURRENT_PROJECT_VERSION = #{number};")
+  File.write(PBXPROJ, content)
+end
+
+# package.json "version" (shown in the web build) must match MARKETING_VERSION.
+def check_versions_match
+  pkg = JSON.parse(File.read(File.join(ROOT, "package.json")))["version"]
+  marketing = project_setting("MARKETING_VERSION")
+  return if pkg == marketing
+  UI.user_error!("package.json version #{pkg} != MARKETING_VERSION #{marketing}. Set both to the same value.")
+end
+
+platform :ios do
+  # Loaded lazily so offline lanes like `build` don't need the key.
+  private_lane :asc_api_key do
+    # Shared App Store Connect API key of the moidev team (same as Esstisch / once_a_week / in_10_minutes).
+    # The .p8 file lives in fastlane/ and is gitignored.
+    app_store_connect_api_key(
+      key_id: "YS2GQ53D2P",
+      issuer_id: "10fd4d97-c40e-4af1-8b6b-c1d30a466e3e",
+      key_filepath: File.join(FASTLANE_DIR, "AuthKey_YS2GQ53D2P.p8"),
+      duration: 1200,
+      in_house: false
+    )
+  end
+
+  private_lane :latest_uploaded_build do
+    asc_api_key
+    latest_testflight_build_number(
+      version: project_setting("MARKETING_VERSION"),
+      initial_build_number: 0
+    ).to_i
+  end
+
+  desc "Production web build (no debug tools) + copy into the iOS project"
+  private_lane :web do
+    sh("cd #{ROOT} && npm run build && npx cap sync ios")
+  end
+
+  desc "Compile the app for the simulator (quick sanity check, no signing, no upload)"
+  lane :build do
+    web
+    sh("xcodebuild -project #{PROJECT.shellescape} -scheme #{SCHEME} " \
+       "-destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build -quiet")
+  end
+
+  desc "Set the build number to (latest TestFlight build of this version) + 1"
+  lane :bump do
+    next_build = latest_uploaded_build + 1
+    set_project_build_number(next_build)
+    UI.success("Version #{project_setting('MARKETING_VERSION')} – build number set to #{next_build}")
+  end
+
+  private_lane :signed_ipa do
+    web
+    build_app(
+      project: PROJECT,
+      scheme: SCHEME,
+      configuration: "Release",
+      clean: true,
+      output_directory: File.join(FASTLANE_DIR, "build"),
+      export_method: "app-store",
+      # Automatic signing: lets Xcode create/download the distribution certificate & profile.
+      xcargs: "-allowProvisioningUpdates",
+      export_xcargs: "-allowProvisioningUpdates"
+    )
+  end
+
+  desc "Build and sign the App Store IPA locally (checks signing) – no upload"
+  lane :archive do
+    check_versions_match
+    signed_ipa
+    UI.success("Signed IPA in fastlane/build – nothing uploaded")
+  end
+
+  desc "Build, sign and push a new beta build to TestFlight (bumps the build number automatically)"
+  lane :beta do
+    check_versions_match
+    version = project_setting("MARKETING_VERSION")
+    latest = latest_uploaded_build
+    build_number = project_setting("CURRENT_PROJECT_VERSION").to_i
+    if build_number <= latest
+      build_number = latest + 1
+      set_project_build_number(build_number)
+      UI.message("Build number raised to #{build_number} (TestFlight has #{latest})")
+    end
+
+    signed_ipa
+
+    upload_to_testflight(
+      api_key: lane_context[SharedValues::APP_STORE_CONNECT_API_KEY],
+      skip_waiting_for_build_processing: true
+    )
+    UI.success("Uploaded #{version} (#{build_number}) to TestFlight")
+  end
+
+  desc "Upload only the App Store metadata (texts, URLs, categories, age rating, review info) – no binary, no screenshots"
+  lane :update_metadata do
+    asc_api_key
+    review_path = File.join(FASTLANE_DIR, "metadata/review_information")
+    read = ->(name) { File.read(File.join(review_path, "#{name}.txt")).strip }
+
+    # Demo invite code for App Review (a "Review trip" vacation with sample houses, see review/README.md):
+    # kept out of the notes file so it can be renewed without editing the text.
+    code_file = File.join(FASTLANE_DIR, "review/invite_code.txt")
+    UI.user_error!("Missing #{code_file} – create the review vacation + invite code first (review/README.md)") unless File.exist?(code_file)
+    notes = read.call("notes").gsub("{{INVITE_CODE}}", File.read(code_file).strip)
+    UI.user_error!("Review notes still contain a placeholder") if notes.include?("{{")
+    UI.user_error!("Review notes are #{notes.length} characters (max 4000)") if notes.length > 4000
+    # Screen recording for App Review (guideline 2.1): review/screen-recording.mov or .mp4
+    recording = Dir[File.join(FASTLANE_DIR, "review/screen-recording.{mov,mp4}")].first
+    UI.important("No screen recording in review/ – App Review asked for one (guideline 2.1)") unless recording
+
+    deliver(
+      api_key: lane_context[SharedValues::APP_STORE_CONNECT_API_KEY],
+      force: true,
+      skip_screenshots: true,
+      skip_binary_upload: true,
+      precheck_include_in_app_purchases: false, # no in-app purchases (and API keys don't support the IAP precheck)
+      app_rating_config_path: File.join(FASTLANE_DIR, "app_rating_config.json"),
+      app_review_information: {
+        first_name: read.call("first_name"),
+        last_name: read.call("last_name"),
+        email_address: read.call("email_address"),
+        phone_number: read.call("phone_number"),
+        notes: notes
+      },
+      app_review_attachment_file: recording
+    )
+  end
+
+  desc "Upload only the screenshots (ios/fastlane/screenshots/<locale>/) – replaces the ones in App Store Connect"
+  lane :upload_screenshots do
+    asc_api_key
+    deliver(
+      api_key: lane_context[SharedValues::APP_STORE_CONNECT_API_KEY],
+      force: true,
+      skip_metadata: true,
+      skip_binary_upload: true,
+      skip_app_version_update: true,
+      overwrite_screenshots: true,
+      precheck_include_in_app_purchases: false
+    )
+  end
+end

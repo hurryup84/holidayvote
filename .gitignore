@@ -1,46 +1,50 @@
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
+node_modules/
+dist/
 .DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files
-.env
-.env*.local
-
-# vercel
-.vercel
-
-# typescript
+*.log
 *.tsbuildinfo
-next-env.d.ts
+ios/App/Pods/
+ios/DerivedData/
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+.env*
+!.env.example
+test-results/
+playwright-report/
+screenshots/
+assets/src/preview.png
+
+# Supabase CLI state (project ref, versions)
+supabase/.temp/
+supabase/.branches/
+
+# fastlane – never commit the App Store Connect API key
+**/fastlane/*.p8
+**/fastlane/report.xml
+**/fastlane/Preview.html
+**/fastlane/test_output/
+**/fastlane/build/
+
+# Android release signing + Google Play API key – never commit (they live in ../android_signing/)
+android/keystore.properties
+**/*.jks
+**/*.keystore
+**/play-api-key*.json
+**/fastlane/*.json
+!ios/fastlane/app_rating_config.json
+
+# App Review screen recording (large) – attached by fastlane ios update_metadata
+ios/fastlane/review/screen-recording.*
+# Recovery code of the App Review demo account – a key to that account, keep it out of git
+ios/fastlane/review/demo_recovery_code.txt
+
+# Claude Code local state
 .claude/dev-server.log
+.claude/dev-server.pid
 .claude/settings.json
 .claude/settings copy.json
 .claude/settings.json_local
-.claude/dev-server.pid
-vacation-debug.log
+.claude/settings.json_pause_for_now
+.claude/settings.local.json

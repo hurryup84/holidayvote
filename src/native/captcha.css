@@ -1,0 +1,42 @@
+/* Bot check sheet (captcha.ts): short "checking …" note, the Turnstile frame only takes space when it needs a click. */
+.captcha-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+}
+.captcha-sheet {
+  width: 100%;
+  max-width: 480px;
+  box-sizing: border-box;
+  padding: 18px 16px calc(14px + env(safe-area-inset-bottom));
+  border-radius: 18px 18px 0 0;
+  background: var(--ion-background-color, #fff);
+  color: var(--ion-text-color, #222);
+  text-align: center;
+}
+.captcha-sheet p {
+  margin: 0 0 6px;
+}
+.captcha-sheet iframe {
+  display: block;
+  width: 100%;
+  height: 8px;
+  border: 0;
+  background: transparent;
+  transition: height 0.2s;
+}
+.captcha-sheet.is-interactive iframe {
+  height: 80px;
+}
+.captcha-cancel {
+  margin-top: 6px;
+  padding: 8px 16px;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--ion-color-medium, #888);
+}

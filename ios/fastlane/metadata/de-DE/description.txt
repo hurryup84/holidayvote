@@ -1,0 +1,35 @@
+„Welches Ferienhaus nehmen wir?“ – HolidayVote macht aus vierzig Links im Gruppenchat eine gemeinsame Entscheidung.
+
+Ihr plant einen Urlaub mit Freunden oder der Familie. Alle schicken Links von Airbnb, Booking.com, FeWo-direkt, Novasol & Co. – und am Ende weiß niemand mehr, wer welches Haus gut fand. HolidayVote sammelt alle Häuser an einem Ort, alle bewerten mit, und die Rangliste zeigt sofort, welches Haus der Gruppe am besten gefällt.
+
+URLAUB ANLEGEN
+• Name, Reiseziel und Reisezeitraum – fertig
+• Freunde und Familie per Link oder 6-stelligem Code einladen
+• Ohne Anmeldung, ohne E-Mail-Adresse, ohne Passwort
+
+HÄUSER SAMMELN
+• Link einfügen – von Airbnb, Booking.com, FeWo-direkt, Novasol und vielen anderen Seiten
+• Vorschau des Angebots mit Bild – Bilder bleiben auf deinem Handy, auf den Server kommt nur der Link mit Titel und Beschreibung
+• Preis eintragen, HolidayVote rechnet den Preis pro Person aus
+• Alle Häuser auf einer Karte
+
+GEMEINSAM ENTSCHEIDEN
+• Alle bewerten jedes Haus mit 1 bis 5 Sternen
+• Jede Person hat einen Favoriten – und ein Veto für das absolute No-Go
+• Kommentare zu jedem Haus
+• Die Rangliste zeigt die Top-Favoriten der Gruppe
+• Gebucht? Wer den Urlaub angelegt hat, markiert das gebuchte Haus – alle wissen Bescheid
+
+IMMER AKTUELL
+• Bewertungen und neue Häuser der anderen kommen in Sekunden an
+• Funktioniert auch offline – alles wird übertragen, sobald ihr wieder Netz habt
+• Neues Handy? Mit dem Wiederherstellungs-Code seid ihr sofort wieder dabei
+• iPhone, iPad und Android – alle planen mit
+
+KOSTENLOS UND PRIVAT
+• Kostenlos, ohne Werbung, ohne Tracking
+• Kein Konto, keine E-Mail-Adresse, kein Passwort
+• Euer Urlaub ist nur für eingeladene Personen sichtbar – gespeichert auf einem Server in der EU
+
+Nutzungsbedingungen (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Datenschutz: https://holidayvote.support-moidev.workers.dev/datenschutz?lang=de

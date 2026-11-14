@@ -1,0 +1,14 @@
+/privacy /datenschutz 301
+/privacy-policy /datenschutz 301
+# Impressum liegt zentral auf der moidev-Seite (moidev_architecture/website)
+/impressum https://moidev.support-moidev.workers.dev/impressum 301
+/imprint https://moidev.support-moidev.workers.dev/impressum 301
+/legal https://moidev.support-moidev.workers.dev/impressum 301
+/terms /nutzungsbedingungen 301
+/terms-of-use /nutzungsbedingungen 301
+/agb /nutzungsbedingungen 301
+/help /support 301
+/hilfe /support 301
+/delete-account /konto-loeschen 301
+/account-loeschen /konto-loeschen 301
+/loeschen /konto-loeschen 301

@@ -1,0 +1,1 @@
+Erste Version: Urlaub anlegen, Freunde per Link oder Code einladen, Ferienhäuser sammeln, mit Sternen bewerten, Favorit und Veto vergeben, Rangliste und Karte.

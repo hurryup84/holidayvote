@@ -1,0 +1,2 @@
+/* App name on the home screen (English). German: de.lproj/InfoPlist.strings */
+"CFBundleDisplayName" = "HolidayVote";

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">HolidayVote</string>
+    <string name="title_activity_main">HolidayVote</string>
+    <string name="package_name">com.moidev.holidayvote</string>
+    <string name="custom_url_scheme">com.moidev.holidayvote</string>
+</resources>

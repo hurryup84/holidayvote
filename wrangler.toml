@@ -1,0 +1,17 @@
+# HolidayVote – Website (Ordner ./website) als Cloudflare Worker mit statischen Dateien, ohne eigenen Code.
+# Seiten: / (Startseite), /datenschutz, /nutzungsbedingungen, /support, /konto-loeschen,
+# /join?c=CODE (Einladungs-Link → öffnet die App), /captcha (Bot-Prüfung, in der App eingebettet),
+# /moderation (Betreiber-Seite); Impressum zentral auf der moidev-Seite.
+# Adresse nach dem Hochladen: https://holidayvote.support-moidev.workers.dev (= APP_CONFIG.websiteUrl in der App)
+#
+# Hochladen, wenn sich etwas an ./website ändert:
+#   npx wrangler login     # einmalig, öffnet den Browser
+#   npx wrangler deploy    # in diesem Ordner (ferienhaus/) ausführen
+name = "holidayvote"
+compatibility_date = "2025-09-01"
+
+[assets]
+directory = "./website"
+# /join liefert join.html aus (Standard), Unbekanntes ergibt die 404-Seite.
+html_handling = "auto-trailing-slash"
+not_found_handling = "404-page"

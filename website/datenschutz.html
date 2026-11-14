@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Datenschutz / Privacy – HolidayVote</title>
+  <link rel="icon" href="/icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="HolidayVote">
+  <meta property="og:title" content="Datenschutz – HolidayVote">
+  <meta property="og:description" content="Datenschutzerklärung der App HolidayVote.">
+  <meta property="og:url" content="https://holidayvote.support-moidev.workers.dev/datenschutz">
+  <meta property="og:image" content="https://holidayvote.support-moidev.workers.dev/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="apple-touch-icon" href="/icon.png">
+  <link rel="stylesheet" href="/site.css">
+  <script src="/lang.js"></script>
+  <!-- Grundlage: supabase/migrations (Tabellen, Löschfristen), src/native/linkPreview.ts (Vorschau live, nichts
+       gespeichert), src/native/geocode.ts + APP_CONFIG.tileUrl (OpenStreetMap), src/native/captcha.ts (Turnstile).
+       Bei Änderungen an der App mitpflegen. -->
+</head>
+<body>
+  <main>
+    <nav class="lang-switch"><a href="?lang=en" hreflang="en" data-switch="en" lang="de">English</a><a href="?lang=de" hreflang="de" data-switch="de" lang="en">Deutsch</a></nav>
+    <a class="back" href="/">← HolidayVote</a>
+    <div lang="de">
+    <h1>Datenschutzerklärung</h1>
+    <p class="meta">Stand: 14. November 2026<span class="both-langs"> · <a href="#en" lang="en">English version below</a></span></p>
+
+    <p>Danke, dass du HolidayVote nutzt. Kurz gesagt: Die App speichert <strong>nur die Links</strong> zu
+      Ferienhäusern und was ihr selbst eintippt – <strong>niemals Bilder der Häuser</strong>, weder auf dem Handy
+      noch auf dem Server. Solange du niemanden einlädst und keiner Einladung folgst, bleibt alles auf deinem Gerät.
+      Erst beim gemeinsamen Planen werden die Daten eines Urlaubs auf einem Server in Frankfurt (EU) gespeichert –
+      sichtbar nur für die Menschen, die an diesem Urlaub teilnehmen. Es gibt keine Werbung, keine Analyse- oder
+      Tracking-Dienste, keine Käufe in der App und kein Konto mit E-Mail-Adresse oder Passwort.</p>
+
+    <h2>Verantwortlich</h2>
+    <p>Stefan Mattis, Sünnslag 4, 21647 Moisburg, Deutschland<br>
+      E-Mail: <a href="mailto:support.moidev@proton.me">support.moidev@proton.me</a></p>
+
+    <h2>Was die App auf deinem Gerät speichert</h2>
+    <p>Deine Urlaube (Name, Reiseziel, Beschreibung, Reisedaten), die Häuser darin (Link, Titel, Beschreibung,
+      Anbieter, Preis, Betten, Schlaf- und Badezimmer, Pool, Adresse und daraus ermittelte Koordinaten, ein
+      gewähltes Symbol, Status wie „aussortiert“ oder „gebucht“), die Sterne, Vetos, Favoriten und Kommentare,
+      die Mitglieder mit ihren Anzeigenamen sowie deine Einstellungen werden lokal auf deinem Gerät gespeichert.
+      Nutzt du die Sicherung deines Geräts (iCloud bzw. Android-Backup), können diese Daten Teil der Sicherung
+      sein – das steuerst du in den Einstellungen deines Geräts.</p>
+
+    <h2>Ferienhaus-Links und Vorschaubilder</h2>
+    <p>Von einem Ferienhaus speichert HolidayVote den Link, die Angaben, die ihr selbst eintragt, und den
+      <strong>Text der Link-Vorschau</strong> (Titel, Beschreibung, Name der Website), den der Anbieter auf seiner Seite
+      dafür bereitstellt – damit ihr die Häuser später durchsuchen könnt. Dazu ruft die App die Seite des Anbieters
+      (z. B. Airbnb, Booking.com, FeWo-direkt, Novasol) <strong>direkt von deinem Gerät</strong> ab, wenn ein Haus
+      hinzugefügt oder zum ersten Mal auf deinem Gerät angezeigt wird.</p>
+    <p><strong>Bilder kommen nie auf unseren Server</strong> – auch nicht die Adresse eines Bildes. Das Vorschaubild
+      wird nur <strong>auf deinem Gerät</strong> zwischengespeichert (verkleinert, ohne Metadaten, im Speicher der App),
+      damit die App die Seiten nicht bei jedem Start neu laden muss. Jede Person hat ihren eigenen Zwischenspeicher.
+      Du kannst ihn in den Einstellungen unter „Vorschaubilder“ leeren oder bei einem Haus über „…“ → „Vorschau neu
+      laden“ aktualisieren; beim Löschen deiner Daten oder der App wird er mitgelöscht. Liefert eine Seite kein Bild,
+      zeigt die App stattdessen ein Symbol.</p>
+    <p>Dabei erhält der Anbieter – wie bei jedem Aufruf seiner Seite im Browser – die üblichen technischen Daten,
+      vor allem deine IP-Adresse, Gerätetyp und Spracheinstellung, und kann eigene Cookies oder Messungen einsetzen,
+      auf die ich keinen Einfluss habe. Es gilt die Datenschutzerklärung des jeweiligen Anbieters. Unser Server ist
+      an diesen Abrufen nicht beteiligt. Öffnest du einen Link, wird die Seite in einem Browser angezeigt.</p>
+
+    <h2>Karte und Adressen</h2>
+    <p><strong>Kartenausschnitte</strong> lädt die App von den Kartenservern von OpenStreetMap
+      (OpenStreetMap Foundation, Cambridge, Vereinigtes Königreich), wenn du die Karte öffnest. Dabei erhält die
+      OpenStreetMap Foundation deine IP-Adresse, den angezeigten Kartenausschnitt und technische Angaben zur App.</p>
+    <p><strong>Adresse → Kartenposition:</strong> Nur wenn du bei einem Haus (oder in den Einstellungen für dein Zuhause) ausdrücklich auf die Suche nach der
+      Adresse tippst, schickt die App die eingetippte Adresse an den Dienst Nominatim von OpenStreetMap, um die
+      Koordinaten zu ermitteln – sonst nichts über dich. Die Koordinaten werden mit dem Haus gespeichert; die Position deines Zuhauses bleibt nur auf deinem Handy
+      (für „Entfernung von zu Hause“) und wird nie übertragen.</p>
+    <p>Rechtsgrundlage ist die Bereitstellung der Funktion, die du nutzt (Art. 6 Abs. 1 lit. b DSGVO). Für das
+      Vereinigte Königreich gilt ein Angemessenheitsbeschluss der EU. Mehr dazu in der
+      <a href="https://osmfoundation.org/wiki/Privacy_Policy">Datenschutzerklärung der OpenStreetMap Foundation</a>.
+      Auf deinen Standort greift die App nicht zu.</p>
+
+    <h2>Gemeinsam planen (Einladen und Beitreten)</h2>
+    <p><strong>Anonymes Konto.</strong> Lädst du jemanden ein oder nimmst eine Einladung an, legt die App ein
+      anonymes Konto an – eine zufällige Kennung, ohne E-Mail-Adresse, Telefonnummer oder Passwort. Das Konto
+      gehört zu diesem Gerät. Ab dann werden deine Urlaube auf dem Server gespeichert und mit den Geräten der
+      anderen Mitglieder abgeglichen.</p>
+    <p><strong>Sicherheitsprüfung.</strong> Damit niemand massenhaft Konten anlegt, prüft vorher
+      Cloudflare Turnstile (Cloudflare, Inc.) kurz, dass ein Mensch die App bedient – einmal pro Gerät, meist
+      unsichtbar. Dafür verarbeitet Cloudflare deine IP-Adresse und technische Merkmale des Geräts bzw.
+      Browsers; Werbe-Cookies oder ein Nutzerprofil gibt es dabei nicht. Die App übermittelt nur das Ergebnis
+      der Prüfung an unseren Server. Rechtsgrundlage ist unser berechtigtes Interesse am Schutz des Dienstes
+      (Art. 6 Abs. 1 lit. f DSGVO); es gilt zusätzlich die
+      <a href="https://www.cloudflare.com/privacypolicy/">Datenschutzerklärung von Cloudflare</a>.</p>
+    <p><strong>Was auf dem Server gespeichert wird:</strong></p>
+    <ul>
+      <li>dein Anzeigename (den du selbst wählst)</li>
+      <li>die Urlaube (Name, Reiseziel, Beschreibung, Reisedaten, Einstellungen) und die Mitgliedschaften
+        (Rolle, Anzeigename, Beitrittsdatum)</li>
+      <li>die Häuser mit Link und den eingetippten Angaben (siehe oben, ohne Bilder), wer sie hinzugefügt oder
+        geändert hat</li>
+      <li>Sterne, Veto und Favorit jeder Person sowie die Kommentare mit Verfasser:in und Zeitpunkt</li>
+      <li>Einladungs-Codes (gültig 14 Tage)</li>
+      <li>Zeitpunkt und Version der akzeptierten Nutzungsbedingungen</li>
+      <li>falls du einen Wiederherstellungs-Code erstellst: nur dessen Prüfsumme (nicht der Code selbst) und der
+        Zeitpunkt; fehlgeschlagene Eingaben werden zum Schutz vor Ausprobieren einen Tag lang gezählt</li>
+    </ul>
+    <p><strong>Wer das sieht:</strong> nur die Mitglieder des jeweiligen Urlaubs – einschließlich der Sterne,
+      Vetos, Favoriten und Kommentare der anderen. Das stellen Zugriffsregeln in der Datenbank sicher.</p>
+    <p><strong>Wie lange:</strong> solange der Urlaub besteht. Gelöschte Häuser, Kommentare und Bewertungen werden
+      nach spätestens 30 Tagen endgültig entfernt (bis dahin werden sie nur noch genutzt, um sie von allen Geräten
+      zu entfernen), abgelaufene Einladungs-Codes 30 Tage nach Ablauf. Löscht die Person, die den Urlaub angelegt
+      hat, den Urlaub, wird er mit allem Inhalt sofort gelöscht.</p>
+    <p><strong>Technische Daten:</strong> Bei jeder Verbindung verarbeitet der Server technisch notwendige Daten
+      wie deine IP-Adresse und den Zeitpunkt, um den Dienst bereitzustellen und vor Missbrauch zu schützen. Die
+      Übertragung ist verschlüsselt (HTTPS).</p>
+    <p><strong>Dienstleister:</strong> Die Datenbank wird von Supabase, Inc. (USA) als Auftragsverarbeiter
+      betrieben (Art. 28 DSGVO); die Daten liegen in einem Rechenzentrum in Frankfurt am Main. Soweit Supabase
+      dabei Daten aus Drittländern verarbeitet, geschieht das auf Grundlage der EU-Standardvertragsklauseln.
+      Mehr dazu in der <a href="https://supabase.com/privacy">Datenschutzerklärung von Supabase</a>.</p>
+    <p><strong>Rechtsgrundlage:</strong> Art. 6 Abs. 1 lit. b DSGVO – das gemeinsame Planen ist eine Funktion,
+      die du ausdrücklich nutzt.</p>
+
+    <h2>Wiederherstellungs-Code (neues Handy)</h2>
+    <p>In der App kannst du einen Wiederherstellungs-Code (Form XXXX-XXXX-XXXX) erstellen. Er wird nur einmal
+      angezeigt; gespeichert wird nur seine Prüfsumme. Gibst du ihn auf einem neuen Handy ein, übernimmt dessen
+      Konto deine Urlaube, deinen Namen und deine Bewertungen; das alte Konto wird dabei gelöscht, das alte Handy
+      verliert sofort den Zugriff. Bewahre den Code sicher auf – wer ihn kennt, kann dein Konto übernehmen.</p>
+
+    <h2>Meldungen und Sperren</h2>
+    <p>Häuser, Kommentare und Personen in einem Urlaub kannst du in der App melden und Personen blockieren. Eine
+      Meldung enthält den gemeldeten Inhalt (bzw. dessen Kennung), den Grund, deine optionale Notiz, den Urlaub
+      und die Kennung deines Kontos. Ich prüfe Meldungen und sehe mir dafür den gemeldeten Inhalt an. Bei
+      Verstößen gegen die Nutzungsbedingungen können Inhalte entfernt und Konten gesperrt werden. Meldungen,
+      Blockierungen und Sperren werden so lange gespeichert, wie es für die Prüfung und zum Verhindern erneuter
+      Verstöße nötig ist (berechtigtes Interesse an einem sicheren Dienst, Art. 6 Abs. 1 lit. f DSGVO).</p>
+
+    <h2>Was die App nicht tut</h2>
+    <ul>
+      <li>keine Analyse- oder Tracking-Dienste, keine Werbung, keine Werbe-Kennungen</li>
+      <li>keine Bilder von Ferienhäusern hochladen (sie bleiben nur im Zwischenspeicher auf deinem Gerät)</li>
+      <li>kein Zugriff auf Standort, Kontakte, Kamera oder Fotos</li>
+      <li>keine Käufe oder Abos in der App</li>
+      <li>kein Verkauf und keine Weitergabe deiner Daten an Dritte (außer an die genannten Dienstleister)</li>
+    </ul>
+
+    <h2>Löschen</h2>
+    <p><strong>In der App:</strong> Einstellungen → „Meine Daten löschen“ löscht dein Konto, dein Profil und
+      deine Mitgliedschaften mit deinen Sternen, Vetos und Favoriten – und alle Daten auf deinem Gerät. Urlaube,
+      an denen sonst niemand mehr teilnimmt, werden mit allem Inhalt gelöscht; bei Urlauben, die du angelegt hast
+      und an denen noch andere teilnehmen, geht die Verwaltung an das am längsten dabei seiende Mitglied über.
+      Häuser und Kommentare, die du in einem Urlaub eingetragen hast, an dem noch andere teilnehmen, bleiben dort
+      als Teil der gemeinsamen Planung (ohne deinen Namen); die anderen können sie löschen, oder du schreibst mir.</p>
+    <p><strong>Urlaub verlassen:</strong> Dein Zugriff endet sofort, deine Sterne, dein Veto und dein Favorit in
+      diesem Urlaub werden gelöscht und die Daten des Urlaubs von deinem Gerät entfernt.</p>
+    <p><strong>App deinstallieren:</strong> Entfernt alle Daten auf dem Gerät. Hast du mit anderen geplant, bleibt
+      das anonyme Konto auf dem Server bestehen – nutze deshalb vorher „Meine Daten löschen“ oder schreib mir.</p>
+
+    <h2>Diese Website</h2>
+    <p>Diese Website wird bei Cloudflare, Inc. (USA) betrieben. Beim Aufruf verarbeitet Cloudflare technisch
+      notwendige Daten wie deine IP-Adresse, Datum und Uhrzeit sowie die aufgerufene Seite (bei Einladungs-Links
+      also auch den Einladungs-Code in der Adresse), um die Seite auszuliefern und vor Angriffen zu schützen
+      (berechtigtes Interesse, Art. 6 Abs. 1 lit. f DSGVO). Die Website setzt keine Cookies und nutzt keine
+      Analyse-Dienste; nur die Seite für die Sicherheitsprüfung, die die App einbettet, lädt Cloudflare Turnstile
+      (siehe oben). Cloudflare ist nach dem EU-US Data Privacy Framework zertifiziert. Mehr dazu in der
+      <a href="https://www.cloudflare.com/privacypolicy/">Datenschutzerklärung von Cloudflare</a>.</p>
+
+    <h2>Kontakt per E-Mail</h2>
+    <p>Wenn du mir schreibst, verwende ich deine E-Mail-Adresse und deine Nachricht nur, um deine Anfrage zu
+      beantworten (Art. 6 Abs. 1 lit. b bzw. f DSGVO), und lösche sie, wenn sie nicht mehr gebraucht werden.</p>
+
+    <h2>Deine Rechte</h2>
+    <p>Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung,
+      Datenübertragbarkeit und Widerspruch sowie das Recht, dich bei einer Datenschutz-Aufsichtsbehörde zu
+      beschweren. Wende dich dafür einfach an die oben genannte E-Mail-Adresse. Damit ich dein anonymes Konto
+      finde, nenne mir am besten den Namen des Urlaubs und deinen Anzeigenamen.</p>
+
+    <h2>Änderungen</h2>
+    <p>Ändert sich die App (z. B. durch neue Funktionen), wird diese Erklärung angepasst. Es gilt die hier
+      veröffentlichte Fassung.</p>
+
+    </div>
+
+    <div class="lang" id="en" lang="en">
+      <h1>Privacy Policy</h1>
+      <p class="meta">Effective date: 14 November 2026</p>
+      <p>Thank you for using HolidayVote. In short: the app stores <strong>only the links</strong> to holiday homes
+        and what you type in yourselves – <strong>never pictures of the houses</strong>, neither on the phone nor on
+        the server. As long as you don’t invite anyone or accept an invitation, everything stays on your device. Only
+        when you plan together is a holiday’s data stored on a server in Frankfurt (EU), visible only to the people
+        taking part in that holiday. There are no ads, no analytics or tracking services, no in-app purchases and no
+        account with an email address or password.</p>
+      <p><strong>Controller:</strong> Stefan Mattis, Sünnslag 4, 21647 Moisburg, Germany,
+        <a href="mailto:support.moidev@proton.me">support.moidev@proton.me</a></p>
+      <p><strong>On your device:</strong> your holidays (name, destination, description, dates), their houses (link,
+        title, description, provider, price, beds, bedrooms, bathrooms, pool, address and the coordinates found for
+        it, a chosen symbol, status such as “ruled out” or “booked”), stars, vetoes, favourites and comments, the
+        members’ display names and your settings. Your device backup (iCloud / Android backup) may include them.</p>
+      <p><strong>Holiday-home links and preview pictures:</strong> for a holiday home, HolidayVote stores only the link
+        and the details you enter, plus the <strong>link-preview text</strong> the provider offers on its page (title,
+        description, site name), so houses can be searched later. For this the app loads the provider’s page (e.g.
+        Airbnb, Booking.com, Vrbo, Novasol) <strong>directly from your device</strong> when a house is added or first
+        shown on your device. <strong>Pictures never reach our server</strong> – not even a picture’s address. The
+        preview picture is cached <strong>only on your device</strong> (downscaled, without metadata, in the app’s
+        storage) so the app doesn’t reload the pages on every start; everyone has their own cache. You can clear it in
+        Settings → “Preview pictures” or reload a single house via “…” → “Reload preview”; it is deleted together with
+        your data or the app. The provider
+        receives the usual technical data, above all your IP address, device type and language, just as when you open
+        its page in a browser, and may use its own cookies or measurements beyond my control; its privacy policy
+        applies. Our server is not involved. Opening a link shows the page in a browser.</p>
+      <p><strong>Map and addresses:</strong> map tiles are loaded from OpenStreetMap’s tile servers (OpenStreetMap
+        Foundation, Cambridge, UK) when you open the map; the foundation receives your IP address, the map area shown
+        and technical details about the app. Only when you explicitly tap to look up an address (of a house, or of your home in Settings) does
+        the app send the typed address – nothing about you – to OpenStreetMap’s Nominatim service to get its
+        coordinates. A house’s coordinates are saved with the house; your home position stays on your phone only (for
+        “distance from home”) and is never uploaded. Legal basis: Art. 6(1)(b) GDPR; the UK is covered by an EU adequacy decision
+        (<a href="https://osmfoundation.org/wiki/Privacy_Policy">OSMF privacy policy</a>). The app does not access your
+        location.</p>
+      <p><strong>Planning together:</strong> inviting or joining creates an anonymous account (a random ID, no email,
+        phone number or password) that belongs to this device; from then on your holidays are stored on the server and
+        synced with the other members’ devices. Before that, Cloudflare Turnstile (Cloudflare, Inc.) briefly checks
+        that a human is using the app – once per device, usually invisible – to prevent mass sign-ups; Cloudflare
+        processes your IP address and technical device / browser features for this (no advertising cookies, no
+        profile), and only the result reaches our server (legitimate interest, Art. 6(1)(f) GDPR;
+        <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare’s privacy policy</a>). Stored on the server:
+        your display name; the holidays (name, destination, description, dates, settings) and memberships (role, display
+        name, joining date); the houses with link, typed details and link-preview text (no pictures) and who added or changed them; each
+        person’s stars, veto and favourite; comments with author and time; invite codes (valid 14 days); time and
+        version of the accepted terms; if you create a recovery code, only its checksum (not the code) and when it was
+        created – failed entries are counted for one day to prevent guessing. Only the members of a holiday can see
+        it, including the others’ stars, vetoes, favourites and comments, enforced by database access rules. Data is
+        kept as long as the holiday exists; deleted houses, comments and ratings are removed for good after at most
+        30 days, expired invite codes 30 days after expiry, and a holiday deleted by its organiser immediately with
+        everything in it. The server processes technically necessary data such as your IP address and time to provide
+        and protect the service; transfers are encrypted (HTTPS). The database is operated by Supabase, Inc. (USA) as
+        processor (Art. 28 GDPR), with the data stored in Frankfurt am Main, Germany; any processing in third countries
+        is covered by the EU Standard Contractual Clauses (<a href="https://supabase.com/privacy">Supabase privacy
+        policy</a>). Legal basis: Art. 6(1)(b) GDPR.</p>
+      <p><strong>Recovery code:</strong> you can create a recovery code (XXXX-XXXX-XXXX) in the app. It is shown once;
+        only its checksum is stored. Entered on a new phone, that phone’s account takes over your holidays, name and
+        ratings, and the old account is deleted – the old phone loses access immediately. Keep it safe: whoever knows
+        it can take over your account.</p>
+      <p><strong>Reports and blocking:</strong> you can report houses, comments and people in a holiday and block
+        people. A report contains the reported content (or its ID), the reason, your optional note, the holiday and
+        your account ID. I review reports, which includes viewing the reported content, and may remove content
+        and ban accounts that violate the terms of use. Reports, blocks and bans are kept as long as needed for the
+        review and to prevent repeated violations (legitimate interest in a safe service, Art. 6(1)(f) GDPR).</p>
+      <p><strong>What the app doesn’t do:</strong> no analytics, tracking, ads or advertising IDs; no storing or
+        uploading of holiday-home pictures; no access to location, contacts, camera or photos; no in-app purchases or
+        subscriptions; no selling or sharing of your data with third parties (other than the providers named here).</p>
+      <p><strong>Deleting:</strong> Settings → “Delete my data” deletes your account, profile and memberships with your
+        stars, vetoes and favourites, plus all data on your device. Holidays nobody else takes part in are deleted with
+        everything in them; holidays you organise that others still take part in are handed over to the longest-standing
+        member. Houses and comments you added to a holiday others still use stay there as part of the shared planning
+        (without your name); they can delete them, or email me. Leaving a holiday ends your access immediately, deletes
+        your stars, veto and favourite there and removes its data from your device. Uninstalling removes the data on the
+        device; if you planned with others, the anonymous account stays on the server, so use “Delete my data” first or
+        email me.</p>
+      <p>This website is run on Cloudflare, Inc. (USA), which processes technically necessary data such as your
+        IP address, time and requested page (for invite links including the invite code in the address) to deliver
+        the site and protect it from attacks (legitimate interest, Art. 6(1)(f) GDPR). The website sets no cookies
+        and uses no analytics; only the security-check page embedded by the app loads Cloudflare Turnstile. Cloudflare
+        is certified under the EU-US Data Privacy Framework.</p>
+      <p>If you email me, your address and message are used only to answer your request. You have the right to
+        access, rectification, erasure, restriction, data portability and objection, and to lodge a complaint with
+        a supervisory authority – just contact the email address above (to find your anonymous account, mention
+        the holiday’s name and your display name). This policy will be updated when the app changes.</p>
+    </div>
+
+    <footer>
+      <a href="/datenschutz"><span lang="de">Datenschutz</span><span lang="en">Privacy</span></a>
+      <a href="/nutzungsbedingungen"><span lang="de">Nutzungsbedingungen</span><span lang="en">Terms of use</span></a>
+      <a href="/support">Support</a>
+      <a href="https://moidev.support-moidev.workers.dev/impressum"><span lang="de">Impressum</span><span lang="en">Legal notice</span></a>
+      <a href="https://moidev.support-moidev.workers.dev/">moidev</a>
+    </footer>
+  </main>
+</body>
+</html>

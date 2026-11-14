@@ -1,0 +1,5 @@
+# Google Play
+package_name("com.moidev.holidayvote")
+# Service account key (Play Console → Setup → API access), OUTSIDE the repo next to the signing key.
+# Override with PLAY_JSON_KEY=/path/to/key.json
+json_key_file(ENV["PLAY_JSON_KEY"] || File.expand_path("../../../android_signing/play-api-key.json", __dir__))

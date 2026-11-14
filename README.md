@@ -1,229 +1,139 @@
 # HolidayVote
 
-Webservice zur gemeinsamen Auswahl von Ferienhäusern. Gruppen können Links sammeln, mit 1–3 Sternen bewerten, Vetos setzen und so schneller eine Entscheidung treffen.
+Choose the holiday home together. A group collects **links** to holiday homes (Airbnb, Booking.com, FeWo-direkt,
+Novasol, …), everyone rates them with 1–5 stars, has **one favourite** and **one veto** per vacation, comments,
+and the ranked list shows the group's top picks. The organiser marks the house that was booked.
+Concept, architecture and data model: [concept/](concept/README.md).
 
-## Tech Stack
+**No pictures of holiday homes in the database.** A house is stored with its link, what people type in (title is
+editable) and the link-preview **text** the page offers (title, description, site – searchable). Pictures go into
+each phone's **own preview cache** (`src/data/media/previewCache.ts`): fetched once from the provider's page,
+downscaled, kept on the phone, never uploaded. Refresh: house menu "…" → "Reload preview", or Settings →
+"Preview pictures" → "Clear cache".
 
-- **Frontend:** Next.js 16, React 19, Tailwind CSS
-- **Backend:** Supabase (PostgreSQL, Auth, Row Level Security)
-- **Hosting:** Vercel + Supabase Cloud
+Same architecture, login and release setup as **Esstisch** (`../dining_table`): Capacitor + Ionic React, local
+SQLite + own sync engine, Supabase with **anonymous accounts** (no sign-up, no e-mail, no password), a
+**Cloudflare Turnstile bot check** before an account is created, and **recovery codes** for a new phone.
+No Premium / in-app purchases (for now).
 
-## Voraussetzungen
+## Getting started
 
-- Node.js **20.9+** (empfohlen: 22 LTS)
-- npm
-- Ein [Supabase](https://supabase.com)-Projekt
-- Ein [Vercel](https://vercel.com)-Account (für Deployment)
+Use Node 22 (`.nvmrc`):
 
----
-
-## Lokale Entwicklung
-
-### 1. Repository klonen & Dependencies installieren
-
-```bash
-git clone <repo-url> ferienhaus
-cd ferienhaus
+```sh
+nvm use 22
 npm install
+npm run dev       # → http://localhost:5182
 ```
 
-### 2. Supabase-Projekt einrichten
+Without `.env.local` the app runs fully local (no sharing). Supabase setup: [supabase/README.md](supabase/README.md).
 
-#### 2.1 Neues Projekt anlegen
+## Commands
 
-1. Gehe zu [supabase.com/dashboard](https://supabase.com/dashboard)
-2. **New Project** → Name z. B. `holidayvote`, Region wählen, Passwort setzen
-3. Warte, bis das Projekt bereit ist (~2 Minuten)
-
-#### 2.2 Datenbank-Schema migrieren
-
-1. Öffne im Supabase Dashboard **SQL Editor**
-2. Kopiere den gesamten Inhalt von `supabase/migrations/001_initial_schema.sql`
-3. Führe das SQL aus (**Run**)
-
-Alternativ mit der Supabase CLI:
-
-```bash
-npm install -g supabase
-supabase login
-supabase link --project-ref <deine-project-ref>
-supabase db push
-```
-
-#### 2.3 Auth konfigurieren (Magic Link)
-
-1. Dashboard → **Authentication** → **Providers** → **Email**
-2. Stelle sicher, dass **Email** aktiviert ist
-3. Unter **Authentication** → **URL Configuration**:
-   - **Site URL:** `http://localhost:3000`
-   - **Redirect URLs** hinzufügen:
-     ```
-     http://localhost:3000/auth/callback
-     http://localhost:3000/**
-     ```
-
-> Für Production später die Vercel-URL ergänzen (siehe unten).
-
-#### 2.4 API-Keys kopieren
-
-Dashboard → **Project Settings** → **API**:
-
-| Variable | Wo finden |
+| Command | What it does |
 |---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | anon / public Key |
+| `npm run dev` | App in the browser at http://localhost:5182 (database: sql.js, saved in IndexedDB) |
+| `npm run sync` | Build and copy to iOS and Android (`cap sync`) |
+| `npm test` | Unit tests + SQL tests against the real migrations (PGlite) incl. two simulated phones syncing |
+| `npm run test:e2e` | End-to-end test in Chrome (Playwright, without Supabase); `SCREENSHOTS=dir` saves screenshots |
+| `npm run typecheck` / `npm run lint` | `tsc --noEmit` / ESLint |
+| `npm run ios` / `npm run android` | Build, `cap sync`, run on a device / simulator |
+| `npm run android:install` | Dev build → install on the connected Android phone (`-- prod` for a production build) |
+| `npm run assets:icons` | Render icon / splash (`assets/src/`) and generate the native icons and splash screens |
+| `npm run supabase:setup` | One-time: create the Supabase project, migrations, auth config, `.env.local` |
+| `npm run supabase:bundle` | Refresh `supabase/setup_all.sql` (all migrations in one file) |
+| `npm run release:test` | Test release: iOS → TestFlight and Android → internal testing |
 
-### 3. Umgebungsvariablen setzen
+## Test release (both stores, one command)
 
-```bash
-cp .env.local.example .env.local
+```sh
+npm run release:test
 ```
 
-`.env.local` ausfüllen:
+Runs lint and tests, then for **iOS** a production build with build number = latest TestFlight build + 1 →
+**TestFlight**, and for **Android** a production build with versionCode = highest on Google Play + 1 →
+**internal testing**. Both copy the current web app into the native project first (`cap sync`).
+Takes ~10–15 min; afterwards commit the new build numbers (`git commit -am "Test release …"`).
 
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIs...
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+| Variant | |
+|---|---|
+| `npm run release:test -- ios` / `-- android` | Only one platform |
+| `npm run release:test -- --draft` | Android release as draft (while the app isn't published on Google Play yet) |
+| `npm run release:test -- --skip-tests` | Without lint and tests |
+
+Needs the signing / API keys described in "iOS release" and "Android release" below. Version name: `package.json`
+`version` (must match Xcode `MARKETING_VERSION`).
+
+## iOS release (fastlane)
+
+Run from `ios/` (`cd ios && fastlane ios beta`). The App Store Connect API key
+(`ios/fastlane/AuthKey_YS2GQ53D2P.p8`, shared moidev key, same as Esstisch) is gitignored.
+
+| Command | What it does |
+|---|---|
+| `fastlane ios build` | Production web build + `cap sync` + simulator compile (no signing, offline) |
+| `fastlane ios archive` | Signed App Store IPA in `ios/fastlane/build/` – nothing uploaded |
+| `fastlane ios beta` | Signed build → TestFlight (build number = latest TestFlight build + 1, automatically) |
+| `fastlane ios bump` | Only set the build number to latest TestFlight build + 1 |
+| `fastlane ios update_metadata` | Store texts, URLs, categories, age rating, review notes (no binary); texts in `ios/fastlane/metadata/` |
+| `fastlane ios upload_screenshots` | Only the screenshots from `ios/fastlane/screenshots/<locale>/`, replaces the old ones |
+
+App Review: `update_metadata` inserts the demo invite code from `ios/fastlane/review/invite_code.txt` into the
+review notes and attaches `ios/fastlane/review/screen-recording.mov` – how to set up the demo vacation and
+the recording: `ios/fastlane/review/README.md`.
+
+Version: `package.json` `version` and Xcode `MARKETING_VERSION` must match (the lanes check this).
+Store builds never contain the Debug page; `npm run build:dev` builds do.
+
+## Android release (fastlane)
+
+Run from `android/` (`cd android && fastlane android internal`). Secrets stay **outside** the repo in
+`<apps>/android_signing/`: the keystore (`key.jks`, shared upload key, or an own one) + `keystore.properties.holidayvote`
+(template: `android/keystore.properties.example`; override with `HOLIDAYVOTE_KEYSTORE_PROPERTIES=/path`)
+and `play-api-key.json` (Play Console → Setup → API access → service account with release rights for HolidayVote).
+
+| Command | What it does |
+|---|---|
+| `fastlane android check` | Tests the Play API key, lists the version codes per track |
+| `fastlane android build` | Production web build + `cap sync` + signed release bundle (AAB) – nothing uploaded |
+| `fastlane android internal` | versionCode = highest on Play + 1, build, upload to internal testing (`status:draft` while the app isn't published) |
+| `fastlane android promote` | Latest internal release → production |
+| `fastlane android update_metadata` | Texts, icon, feature graphic, screenshots from `android/fastlane/metadata/android/` (no bundle; needs one uploaded build) |
+| `fastlane android bump` | Only set versionCode (Play + 1) and versionName (`package.json`) |
+
+## Website
+
+`website/` (landing page, `/join?c=CODE` invite page, `/captcha` bot check, `/datenschutz`, `/nutzungsbedingungen`,
+`/support`, `/konto-loeschen`, `/moderation`) is a Cloudflare Worker with static assets (`wrangler.toml`) →
+https://holidayvote.support-moidev.workers.dev
+
+```sh
+npx wrangler login     # once
+npx wrangler deploy
 ```
 
-### 4. Dev-Server starten
-
-```bash
-npm run dev
-```
-
-App öffnen: [http://localhost:3000](http://localhost:3000)
-
----
-
-## Deployment auf Vercel
-
-### 1. Repository mit GitHub verbinden
-
-1. Code auf GitHub pushen
-2. [vercel.com/new](https://vercel.com/new) → Repository importieren
-3. Framework Preset: **Next.js** (wird automatisch erkannt)
-
-### 2. Umgebungsvariablen in Vercel setzen
-
-Unter **Settings** → **Environment Variables**:
-
-| Name | Value | Environments |
-|---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | `https://xxxxx.supabase.co` | Production, Preview, Development |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `eyJ...` | Production, Preview, Development |
-| `NEXT_PUBLIC_APP_URL` | `https://deine-app.vercel.app` | Production |
-| `NEXT_PUBLIC_APP_URL` | `https://$VERCEL_URL` oder Preview-URL | Preview |
-
-> **Wichtig:** `NEXT_PUBLIC_APP_URL` muss in Production die finale Domain sein – sie wird für Magic-Link-Redirects und Einladungslinks verwendet.
-
-### 3. Deployen
-
-```bash
-# Optional: Vercel CLI
-npm install -g vercel
-vercel
-```
-
-Oder: Push auf `main` → Vercel deployt automatisch.
-
-### 4. Supabase für Production anpassen
-
-Nach dem ersten Deploy in Supabase unter **Authentication** → **URL Configuration**:
-
-- **Site URL:** `https://deine-app.vercel.app`
-- **Redirect URLs** ergänzen:
-  ```
-  https://deine-app.vercel.app/auth/callback
-  https://deine-app.vercel.app/**
-  https://*.vercel.app/auth/callback
-  ```
-
-Die letzte Zeile erlaubt Preview-Deployments.
-
----
-
-## Projektstruktur
+## Code map
 
 ```
 src/
-├── app/                    # Next.js App Router
-│   ├── page.tsx            # Landing Page
-│   ├── dashboard/          # Urlaubs-Übersicht
-│   ├── vacation/new/       # Urlaub erstellen
-│   ├── v/[inviteCode]/     # Urlaub-Detail (Einladungslink)
-│   ├── auth/callback/      # Magic-Link Callback
-│   └── api/og-fetch/       # OpenGraph-Extraktion
-├── actions/                # Server Actions
-├── components/             # UI-Komponenten
-└── lib/                    # Utils, Supabase Client, Types
-supabase/
-└── migrations/             # SQL-Schema
-concept/
-└── HolidayVote_Entwicklungsplan.md
+  app/          Root (boot, session, account, invite links), App (tabs + routes), AppContext, theme tokens
+  core/         clock, dates, format, ids (uuid v7), config, inviteLink, ogParse (link preview parser)
+  data/db/      schema.ts, Db interface, drivers (capacitorDb = phones, webDb/sqljsDb = browser/tests), useLiveQuery
+  data/sync/    engine.ts (upload queue + sync_pull), supabase.ts (backend), account.ts (accounts, invites, recovery)
+  data/         repositories/ (vacations, properties, votes/vetoes/favourites, comments, kv), demo.ts
+  data/media/   previewCache.ts (this phone's link previews + picture files, never synced)
+  domain/       models.ts, services/ (ranking, provider, geo)
+  native/       captcha, linkPreview (page + picture fetch), files, geocode, browser, share, platform
+  features/     onboarding, vacations (list), vacation (houses / map / people), property (detail),
+                sharing (account setup, invite), settings (recovery code), debug
+  i18n/         de.json, en.json
+supabase/       migrations/, functions/ (link-preview, moderation, report-digest), README.md
+tests/          unit/, sql/ (PGlite: RLS, RPCs, recovery, two-phone sync), e2e/ (Playwright)
+website/        static site (Cloudflare Worker)
 ```
 
----
+Rules (as in Esstisch): features never import `data/db` or Capacitor plugins directly; only `data/sync/` talks
+to Supabase; every write goes through a repository (stamps `vacation_id`, `created_by`, timestamps); colours only
+as tokens in `src/app/theme/tokens.css`; no hard-coded texts.
 
-## Features (V1 MVP)
-
-- [x] Magic-Link-Login (kein Passwort)
-- [x] Urlaub anlegen mit Einladungscode
-- [x] Einladungslink teilen (WhatsApp/Signal)
-- [x] Ferienhaus-Link einfügen mit OpenGraph-Vorschau
-- [x] Manuelle Felder: Preis, Betten, Schlafzimmer, Pool
-- [x] Bewertung 1–3 Sterne
-- [x] Ein Veto pro Person pro Urlaub
-- [x] Sortierung: Sterne → Vetos → Preis
-- [x] Kommentare
-- [x] Status: Aktiv / Ausgeschieden / Gebucht
-- [x] Mobile-First UI
-
----
-
-## Häufige Probleme
-
-### Magic Link funktioniert nicht
-
-- Prüfe, ob `NEXT_PUBLIC_APP_URL` korrekt gesetzt ist
-- Prüfe Supabase Redirect URLs (localhost vs. Production)
-- Magic-Link-E-Mails landen im Spam-Ordner
-
-### OpenGraph-Daten werden nicht geladen
-
-- Manche Portale blockieren serverseitige Requests
-- Felder können manuell ausgefüllt werden (Fallback)
-- In Production kann es je nach Portal anders funktionieren als lokal
-
-### „Urlaub nicht gefunden" nach Einladungslink
-
-- SQL-Migration vollständig ausgeführt?
-- `join_vacation_by_invite` Funktion vorhanden?
-- Einladungscode in der URL korrekt?
-
-### Build schlägt fehl
-
-- Node.js Version prüfen: `node -v` → mindestens 20.9
-- Mit nvm: `nvm use 22`
-
----
-
-## Nützliche Befehle
-
-```bash
-npm run dev       # Entwicklungsserver
-npm run build     # Production Build
-npm run start     # Production Server lokal
-npm run lint      # ESLint
-```
-
----
-
-## Weiterentwicklung
-
-Siehe [concept/HolidayVote_Entwicklungsplan.md](concept/HolidayVote_Entwicklungsplan.md) für die Roadmap (V1.1, V2, V3).
-
-## Lizenz
-
-Privates Projekt.
+The previous Next.js web version of this app (magic-link login, Vercel) is in the git history before this rewrite.

@@ -1,0 +1,45 @@
+.star-input {
+  display: inline-flex;
+  gap: 2px;
+}
+.star-input button {
+  background: none;
+  border: 0;
+  padding: 4px;
+  font-size: 30px;
+  line-height: 0;
+  color: var(--ion-color-medium);
+  cursor: pointer;
+}
+.star-input button.on {
+  color: var(--vote-color, var(--ion-color-primary));
+}
+.stars-show {
+  display: inline-flex;
+  gap: 1px;
+  color: var(--vote-color, var(--ion-color-primary));
+  font-size: 15px;
+}
+.rating-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.78em;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--ion-color-medium);
+}
+.rating-badge ion-icon {
+  font-size: 0.95em;
+}
+.rating-badge.top ion-icon,
+.rating-badge.good ion-icon {
+  color: var(--vote-color, var(--ion-color-primary));
+}
+.rating-badge.top {
+  color: var(--ion-text-color);
+}
+.rating-count {
+  font-weight: 400;
+  margin-left: 1px;
+}

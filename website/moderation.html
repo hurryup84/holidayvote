@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>Moderation – HolidayVote</title>
+  <link rel="icon" href="/icon.png">
+  <link rel="stylesheet" href="/site.css">
+  <!-- Operator page: open reports, without joining the vacation. Opened via the link in the daily report e-mail
+       (#t=<signed token>, 7 days) or a link made in the SQL editor (supabase/README.md "Moderation").
+       Data + actions: Edge Function `moderation` (GET → {reports: [...]}, POST {report, action: dismiss|remove|ban}).
+       User content is only ever set as text (textContent); house links open only if they are http(s). -->
+  <style>
+    .report { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; margin: 14px 0; }
+    .report h2 { margin: 0 0 4px; font-size: 1.05rem; }
+    .report .meta { margin: 0 0 10px; font-size: 0.9rem; }
+    .report dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 8px 0; font-size: 0.95rem; }
+    .report dt { color: var(--muted); }
+    .report dd { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .actions button { font: inherit; padding: 8px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+    .actions .remove { border-color: var(--coral); color: var(--coral); }
+    .actions .ban { background: #b3261e; border-color: #b3261e; color: #fff; }
+    .actions button:disabled { opacity: 0.5; cursor: default; }
+    #state { margin: 18px 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <a class="back" href="/">← HolidayVote</a>
+    <h1>Meldungen</h1>
+    <p class="meta">Offene Meldungen aller Urlaube. Entscheide innerhalb von 24 Stunden.</p>
+    <div id="state">Lädt …</div>
+    <div id="list"></div>
+  </main>
+  <script>
+    // TODO: the Supabase project URL (Project Settings → API), e.g. https://abcdefghijklmnop.supabase.co
+    const SUPABASE_URL = 'https://TODO.supabase.co';
+    const API = `${SUPABASE_URL}/functions/v1/moderation`;
+    const token = new URLSearchParams(location.hash.slice(1)).get('t');
+    const $state = document.getElementById('state');
+    const $list = document.getElementById('list');
+
+    const TYPE = { property: 'Haus', comment: 'Kommentar', member: 'Person' };
+    const REASON = { offensive: 'anstößig', illegal: 'rechtswidrig', spam: 'Spam', other: 'sonstiges' };
+
+    function el(tag, props = {}, ...children) {
+      const e = document.createElement(tag);
+      for (const [k, v] of Object.entries(props)) {
+        if (k === 'text') e.textContent = v;
+        else if (k === 'onclick') e.onclick = v;
+        else e.setAttribute(k, v);
+      }
+      for (const c of children) if (c) e.append(c);
+      return e;
+    }
+    const row = (dl, label, value) => {
+      if (value === null || value === undefined || value === '') return;
+      dl.append(el('dt', { text: label }), el('dd', {}, value instanceof Node ? value : String(value)));
+    };
+    // A reported link: clickable only for http(s) (never javascript: etc.), opened without referrer.
+    const link = (url) =>
+      /^https?:\/\//i.test(url || '') ? el('a', { href: url, target: '_blank', rel: 'noopener noreferrer nofollow', text: url }) : url;
+    const when = (iso) => new Date(iso).toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short' });
+
+    async function call(method, body) {
+      const res = await fetch(API, {
+        method,
+        headers: { 'x-moderation-token': token || '', ...(body ? { 'content-type': 'application/json' } : {}) },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || res.status);
+      return data;
+    }
+
+    function render(reports) {
+      $list.replaceChildren();
+      $state.textContent = reports.length ? `${reports.length} offene Meldung${reports.length === 1 ? '' : 'en'}` : 'Keine offenen Meldungen. 🎉';
+      for (const r of reports) {
+        const t = r.target || {};
+        const card = el('section', { class: 'report' });
+        card.append(el('h2', { text: `${TYPE[r.target_type] || r.target_type} · ${REASON[r.reason] || r.reason}` }));
+        card.append(el('p', { class: 'meta', text: `${when(r.created_at)} · Urlaub „${r.vacation?.name ?? '?'}“ (${r.vacation?.members ?? '?'} Personen) · gemeldet von ${r.reporter?.name || 'unbekannt'}${r.reports_on_target > 1 ? ` · ${r.reports_on_target}× gemeldet` : ''}` }));
+        const dl = el('dl');
+        row(dl, 'Notiz', r.note);
+        if (!r.target) row(dl, 'Inhalt', '– nicht mehr vorhanden –');
+        if (r.target_type === 'property') {
+          row(dl, 'Haus', t.title); row(dl, 'Link', link(t.url)); row(dl, 'Beschreibung', t.description);
+          row(dl, 'Adresse', t.address); row(dl, 'Von', t.author_name || t.author_id);
+        } else if (r.target_type === 'comment') {
+          row(dl, 'Kommentar', t.text); row(dl, 'Zum Haus', t.property); row(dl, 'Von', t.author_name || t.author_id);
+        } else if (r.target_type === 'member') {
+          row(dl, 'Person', t.name || t.author_id);
+          row(dl, 'Rolle', !t.still_member ? 'nicht mehr im Urlaub' : t.role === 'owner' ? 'Organisator:in' : 'Mitglied');
+          if (t.banned) row(dl, 'Status', 'gesperrt');
+        }
+        if (t.deleted) row(dl, 'Status', 'schon gelöscht');
+        card.append(dl);
+
+        const actions = el('div', { class: 'actions' });
+        const act = (action, label, cls, confirmText) =>
+          el('button', { class: cls, text: label, onclick: async () => {
+            if (confirmText && !confirm(confirmText)) return;
+            actions.querySelectorAll('button').forEach((b) => (b.disabled = true));
+            try { await call('POST', { report: r.id, action }); await load(); }
+            catch (err) { alert(`Hat nicht geklappt: ${err.message}`); actions.querySelectorAll('button').forEach((b) => (b.disabled = false)); }
+          } });
+        const isMember = r.target_type === 'member';
+        actions.append(act('dismiss', 'In Ordnung – verwerfen', '', null));
+        actions.append(act('remove', isMember ? 'Aus dem Urlaub entfernen' : 'Inhalt entfernen', 'remove',
+          isMember ? 'Diese Person aus dem Urlaub entfernen?' : 'Inhalt löschen? Er verschwindet bei allen in diesem Urlaub.'));
+        actions.append(act('ban', 'Entfernen + Person sperren', 'ban', 'Inhalt entfernen und die Person dauerhaft sperren? Sie verliert den Zugang zu allen Urlauben.'));
+        card.append(actions);
+        $list.append(card);
+      }
+    }
+
+    async function load() {
+      if (!token) { $state.textContent = 'Kein Zugangslink. Öffne den Link aus der Meldungs-E-Mail.'; return; }
+      try { render((await call('GET')).reports || []); }
+      catch (err) {
+        $state.textContent = String(err.message).includes('link_invalid_or_expired')
+          ? 'Der Link ist abgelaufen oder ungültig. Nimm den aus der neuesten Meldungs-E-Mail oder erstelle einen im SQL-Editor.'
+          : `Laden fehlgeschlagen: ${err.message}`;
+      }
+    }
+    load();
+  </script>
+</body>
+</html>
