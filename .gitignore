@@ -46,8 +46,6 @@ ios/fastlane/review/demo_recovery_code.txt
 # Claude Code local state
 .claude/dev-server.log
 .claude/dev-server.pid
-.claude/settings.json
-.claude/settings copy.json
-.claude/settings.json_local
-.claude/settings.json_pause_for_now
-.claude/settings.local.json
+
+
+.claude/*
