@@ -27,6 +27,7 @@ import { PreviewImage } from '../../components/PreviewImage';
 import type { Property, PropertyInput, VacationSettings } from '../../domain/models';
 import { detectProvider, extractUrl, isHttpUrl } from '../../domain/services/provider';
 import { geocode } from '../../native/geocode';
+import { fetchLinkPreview } from '../../native/linkPreview';
 import { fieldOn } from './fields';
 
 interface Form {
@@ -85,14 +86,22 @@ export function PropertyEditModal({
   settings,
   property,
   onClose,
+  onDismissed,
   onSaved,
+  initialPropertyUrl,
+  initialTitle,
 }: {
   isOpen: boolean;
   vacationId: string;
   settings: VacationSettings;
   property: Property | null;
   onClose(): void;
+  onDismissed?(): void;
   onSaved?(id: string): void;
+  /** URL of a shared holiday-home link prefilled into the form. */
+  initialPropertyUrl?: string;
+  /** Suggested title read from the shared link's page (not yet typed by the user). */
+  initialTitle?: string;
 }) {
   const { t } = useTranslation();
   const { repos } = useApp();
@@ -103,7 +112,11 @@ export function PropertyEditModal({
   const [duplicate, setDuplicate] = useState<Property | null>(null);
   const [geocoding, setGeocoding] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [titleLoading, setTitleLoading] = useState(false);
+  const [titleUnavailable, setTitleUnavailable] = useState(false);
   const lastFetched = useRef('');
+  const titleChanged = useRef(false);
+  const urlChanged = useRef(false);
   const on = (f: Parameters<typeof fieldOn>[1]) => fieldOn(settings, f);
 
   useEffect(() => {
@@ -131,9 +144,23 @@ export function PropertyEditModal({
             previewDescription: property.previewDescription,
             previewSite: property.previewSite,
           }
-        : empty,
+        : { ...empty, url: initialPropertyUrl ?? '', title: initialTitle ?? '' }
     );
-  }, [isOpen, property]);
+    titleChanged.current = false;
+    urlChanged.current = false;
+    setTitleUnavailable(false);
+    setTitleLoading(false);
+    if (!property && initialPropertyUrl) {
+      setTitleLoading(true);
+      void fetchLinkPreview(initialPropertyUrl).then((preview) => {
+        if (!isOpen) return;
+        const title = preview?.title ?? null;
+        if (title && !titleChanged.current && !urlChanged.current) setForm((f) => ({ ...f, title }));
+        setTitleUnavailable(!title);
+        setTitleLoading(false);
+      });
+    }
+  }, [isOpen, property, initialPropertyUrl, initialTitle]);
 
   const url = isHttpUrl(form.url.trim()) ? form.url.trim() : null;
 
@@ -164,7 +191,11 @@ export function PropertyEditModal({
     };
   }, [url, repos, vacationId, property?.id]);
 
-  const set = (k: keyof Form) => (e: { detail: { value?: string | null } }) => setForm((f) => ({ ...f, [k]: String(e.detail.value ?? '') }));
+  const set = (k: keyof Form) => (e: { detail: { value?: string | null } }) => {
+    if (k === 'title') titleChanged.current = true;
+    if (k === 'url') urlChanged.current = true;
+    setForm((f) => ({ ...f, [k]: String(e.detail.value ?? '') }));
+  };
 
   const paste = async () => {
     try {
@@ -223,7 +254,7 @@ export function PropertyEditModal({
   };
 
   return (
-    <IonModal isOpen={isOpen} onDidDismiss={onClose}>
+    <IonModal isOpen={isOpen} onDidDismiss={() => { onClose(); onDismissed?.(); }}>
       <IonHeader>
         <IonToolbar>
           <IonButtons slot="start">
@@ -231,13 +262,20 @@ export function PropertyEditModal({
           </IonButtons>
           <IonTitle>{property ? t('property.edit') : t('property.add')}</IonTitle>
           <IonButtons slot="end">
-            <IonButton strong disabled={!url || saving} onClick={() => void save()}>
+            <IonButton strong disabled={!url || saving || titleLoading} onClick={() => void save()}>
               {t('common.save')}
             </IonButton>
           </IonButtons>
         </IonToolbar>
       </IonHeader>
       <IonContent>
+        {initialPropertyUrl && (
+          <div className="edit-preview-note ion-padding-horizontal" role="status">
+            <p>{t('property.sharedPhotoNotice')}</p>
+            {titleLoading && <p>{t('property.sharedTitleLoading')}</p>}
+            {titleUnavailable && <p>{t('property.sharedTitleUnavailable')}</p>}
+          </div>
+        )}
         <IonList inset>
           <IonItem>
             <IonInput
@@ -252,6 +290,7 @@ export function PropertyEditModal({
               spellcheck={false}
               onIonInput={(e) => {
                 const v = String(e.detail.value ?? '');
+                urlChanged.current = true;
                 setForm((f) => ({ ...f, url: extractUrl(v) ?? v }));
               }}
             />

@@ -136,4 +136,21 @@ Rules (as in Esstisch): features never import `data/db` or Capacitor plugins dir
 to Supabase; every write goes through a repository (stamps `vacation_id`, `created_by`, timestamps); colours only
 as tokens in `src/app/theme/tokens.css`; no hard-coded texts.
 
+## Share a holiday-home link into the app
+
+In a browser's Share menu, choose **HolidayVote**. Android opens the app directly.
+On iPhone/iPad the share extension saves the link locally; tap Done, then open the app.
+After onboarding (or once a vacation exists), pick the vacation the house is added to; the house form opens with the
+link prefilled and the title suggested from the page's OpenGraph data. Save creates the house; Cancel discards the
+share. Multiple shares wait in a local inbox and are reviewed one at a time.
+
+Website photos are never imported. The form explains that they cannot be copied and encourages taking your own photo.
+Only the page HTML is requested for the title; image files are never requested.
+
+iOS signing needs the App Group **group.com.moidev.holidayvote** enabled for both
+**com.moidev.holidayvote** and the new extension **com.moidev.holidayvote.share**. Enable/register these
+in the Apple Developer account and refresh provisioning profiles before a device/store build.
+The extension is embedded automatically by the App target. Native changes require rebuilding
+and reinstalling the app (`npm run ios` / `npm run android`), not just refreshing the web app.
+
 The previous Next.js web version of this app (magic-link login, Vercel) is in the git history before this rewrite.

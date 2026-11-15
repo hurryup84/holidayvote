@@ -200,7 +200,15 @@
     "refreshPreview": "Reload preview",
     "previewRefreshed": "Preview updated",
     "previewRefreshFailed": "The page offers no preview right now – the previous one stays.",
-    "fromListing": "According to {{site}}"
+    "fromListing": "According to {{site}}",
+    "sharedPickVacation": "Add to a vacation",
+    "sharedPickVacationHint": "Choose the vacation the shared holiday home is added to.",
+    "sharedNoVacations": "You have no vacation yet. Create one first.",
+    "sharedPhotoNotice": "I am not allowed to automatically add photos from websites here. Add the holiday home, then take your own photo if you like!",
+    "sharedTitleLoading": "Looking up the holiday-home name…",
+    "sharedTitleUnavailable": "Couldn't read the name. Please check or enter the title before saving.",
+    "sharedLinkInvalid": "The shared item doesn't contain a valid holiday-home link (http or https).",
+    "sharedLinkError": "Couldn't read or dismiss the shared link. Please reopen the app to try again."
   },
   "votes": {
     "yours": "Your rating",

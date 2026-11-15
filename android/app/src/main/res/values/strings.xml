@@ -4,4 +4,5 @@
     <string name="title_activity_main">HolidayVote</string>
     <string name="package_name">com.moidev.holidayvote</string>
     <string name="custom_url_scheme">com.moidev.holidayvote</string>
+    <string name="share_save_error">The holiday-home link couldn\'t be saved. Please try sharing it again.</string>
 </resources>

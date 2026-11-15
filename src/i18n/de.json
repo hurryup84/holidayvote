@@ -200,7 +200,15 @@
     "refreshPreview": "Vorschau neu laden",
     "previewRefreshed": "Vorschau aktualisiert",
     "previewRefreshFailed": "Die Seite gibt gerade keine Vorschau her – die bisherige bleibt.",
-    "fromListing": "Laut {{site}}"
+    "fromListing": "Laut {{site}}",
+    "sharedPickVacation": "Zu einem Urlaub hinzufügen",
+    "sharedPickVacationHint": "Wähle den Urlaub, zu dem das geteilte Ferienhaus hinzugefügt werden soll.",
+    "sharedNoVacations": "Du hast noch keinen Urlaub. Lege zuerst einen an.",
+    "sharedPhotoNotice": "Ich darf Fotos von Webseiten nicht automatisch hier einfügen. Füge das Ferienhaus hinzu und mach danach ein eigenes Foto, wenn du möchtest!",
+    "sharedTitleLoading": "Den Ferienhausnamen ermitteln …",
+    "sharedTitleUnavailable": "Der Name konnte nicht gelesen werden. Bitte prüfe oder ergänze den Titel, bevor du speicherst.",
+    "sharedLinkInvalid": "Der geteilte Inhalt enthält keinen gültigen Ferienhaus-Link (http oder https).",
+    "sharedLinkError": "Der geteilte Link konnte nicht gelesen oder entfernt werden. Bitte öffne die App erneut."
   },
   "votes": {
     "yours": "Deine Bewertung",

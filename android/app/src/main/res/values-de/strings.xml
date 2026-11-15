@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">HolidayVote</string>
+    <string name="title_activity_main">HolidayVote</string>
+    <string name="share_save_error">Der Ferienhaus-Link konnte nicht gespeichert werden. Bitte teile ihn erneut.</string>
+</resources>

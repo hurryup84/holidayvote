@@ -1,0 +1,5 @@
+"reading" = "Ferienhaus-Link wird gelesen…";
+"saved" = "Link gespeichert. Öffne HolidayVote, um das Ferienhaus einem Urlaub hinzuzufügen. Webseitenfotos dürfen nicht kopiert werden; mach am besten ein eigenes Foto!";
+"invalid" = "Bitte teile einen Ferienhaus-Link, der mit http oder https beginnt.";
+"failed" = "Der Ferienhaus-Link konnte nicht gespeichert werden. Bitte versuche es erneut.";
+"done" = "Fertig";

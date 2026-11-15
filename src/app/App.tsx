@@ -10,6 +10,7 @@ import { PropertyPage } from '../features/property/PropertyPage';
 import { SettingsPage } from '../features/settings/SettingsPage';
 import { VacationPage } from '../features/vacation/VacationPage';
 import { VacationsPage } from '../features/vacations/VacationsPage';
+import { SharedProperty } from '../features/property/SharedProperty';
 import { useApp } from './AppContext';
 
 /** Invite link while the app is open: show the vacation list with the join dialog. */
@@ -35,6 +36,7 @@ export function App() {
   return (
     <IonReactRouter>
       <InviteRouting startInvite={start.invite} />
+      <SharedProperty />
       <IonTabs>
         <IonRouterOutlet>
           <Route path="/vacations" element={<VacationsPage />} />
