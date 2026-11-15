@@ -31,5 +31,5 @@ KOSTENLOS UND PRIVAT
 • Kein Konto, keine E-Mail-Adresse, kein Passwort
 • Euer Urlaub ist nur für eingeladene Personen sichtbar – gespeichert auf einem Server in der EU
 
-Nutzungsbedingungen: https://holidayvote.support-moidev.workers.dev/nutzungsbedingungen?lang=de
-Datenschutz: https://holidayvote.support-moidev.workers.dev/datenschutz?lang=de
+Nutzungsbedingungen: https://holidayvote.support-moidev.workers.dev/nutzungsbedingungen
+Datenschutz: https://holidayvote.support-moidev.workers.dev/datenschutz

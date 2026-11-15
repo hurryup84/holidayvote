@@ -32,4 +32,4 @@ FREE AND PRIVATE
 • Your trip is visible only to the people you invite – stored on a server in the EU
 
 Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-Privacy policy: https://holidayvote.support-moidev.workers.dev/datenschutz?lang=en
+Privacy policy: https://holidayvote.support-moidev.workers.dev/datenschutz

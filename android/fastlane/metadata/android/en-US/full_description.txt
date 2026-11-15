@@ -31,5 +31,5 @@ FREE AND PRIVATE
 • No account, no e-mail address, no password
 • Your trip is visible only to the people you invite – stored on a server in the EU
 
-Terms of Use: https://holidayvote.support-moidev.workers.dev/nutzungsbedingungen?lang=en
-Privacy policy: https://holidayvote.support-moidev.workers.dev/datenschutz?lang=en
+Terms of Use: https://holidayvote.support-moidev.workers.dev/nutzungsbedingungen
+Privacy policy: https://holidayvote.support-moidev.workers.dev/datenschutz

@@ -15,7 +15,7 @@ a) Join the demo vacation: start the app → "I was invited" → enter the code 
 - Invite: the person icon at the top right of a vacation (or "People" → "Invite") shows a code and a link to share.
 b) Alone: create your own vacation (name, destination, dates) and add houses – everything works the same; the invite code can be entered on a second device.
 c) Account deletion: Settings → "Delete my data" → confirm. This deletes the anonymous account and its server data.
-Content is only visible to people invited to the same vacation: no public content, no discovery, no contact with strangers. Terms of Use (zero tolerance): https://holidayvote.support-moidev.workers.dev/nutzungsbedingungen?lang=en. Reports reach the developer and are reviewed within 24 hours; content is removed and accounts banned when needed.
+Content is only visible to people invited to the same vacation: no public content, no discovery, no contact with strangers. Terms of Use (zero tolerance): https://holidayvote.support-moidev.workers.dev/nutzungsbedingungen. Reports reach the developer and are reviewed within 24 hours; content is removed and accounts banned when needed.
 
 4. EXTERNAL SERVICES
 - Supabase (EU): database, anonymous accounts and realtime updates for shared vacations.
