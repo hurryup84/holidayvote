@@ -18,7 +18,7 @@ export default defineConfig({
     command: 'npx vite --port 5183 --strictPort',
     url: 'http://localhost:5183',
     env: { VITE_SUPABASE_URL: '', VITE_SUPABASE_ANON_KEY: '' },
-    reuseExistingServer: false,
+    reuseExistingServer: true,
     timeout: 60_000,
   },
 });

@@ -21,12 +21,14 @@
     "android": "npm run sync && cap run android",
     "android:open": "npm run sync && cap open android",
     "test:e2e": "playwright test",
+    "screenshots": "SCREENSHOTS=./screenshots playwright test screenshots",
     "build:dev": "vite build --mode development",
     "android:dev": "bash scripts/android-install.sh",
     "android:install": "bash scripts/android-install.sh",
     "supabase:bundle": "node scripts/bundle-supabase-sql.mjs",
     "supabase:setup": "bash scripts/setup-supabase.sh",
     "release:test": "bash scripts/release-test.sh",
+    "screenshots:store": "STORE_SCREENSHOTS=1 playwright test store-screenshots --workers=2",
     "assets:icons": "node assets/src/render.mjs && npx capacitor-assets generate --ios --android --iconBackgroundColor '#0e7c86' --iconBackgroundColorDark '#0b3d44' --splashBackgroundColor '#f4efe6' --splashBackgroundColorDark '#10181a'"
   },
   "dependencies": {
