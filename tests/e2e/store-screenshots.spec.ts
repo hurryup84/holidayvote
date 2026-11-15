@@ -1,76 +1,87 @@
-import { expect, test, type Page } from '@playwright/test';
+import { test, type Page } from '@playwright/test';
+import { completeOnboarding, seedDemoVacation, shoot } from './screenshotFlow';
 
 /**
  * App Store / Play screenshots with the demo data and real holiday home photos (assets/demo-photos/).
- *   npm run screenshots:store
- * → ios/fastlane/screenshots/<locale>/ (iPhone 6.9", iPhone Duo, iPad 13") for `fastlane ios upload_screenshots`
+ *   STORE_SCREENSHOTS=1 npx playwright test store-screenshots --workers=2
+ * → ios/fastlane/screenshots/<locale>/ (iPhone 6.9", light & dark) for `fastlane ios upload_screenshots`
  * → android/fastlane/metadata/android/<locale>/images/phoneScreenshots/ (1080 × 1920) for Google Play
+ *
+ * Writes directly into ios/fastlane/screenshots/<locale>/ using the committed naming convention
+ * (<scheme>-<locale>-<scene>.png, 6 key scenes × 2 themes = 12 per locale), so they are committed for fastlane.
  */
 test.skip(!process.env.STORE_SCREENSHOTS, 'only on demand: npm run screenshots:store');
 test.setTimeout(120_000);
 
-const TEXT = {
-  'de-DE': { debug: 'Debug', detail: 'Reetdachhaus' },
-  'en-US': { debug: 'Debug', detail: 'Thatched cottage' },
-} as const;
+const DEVICE = {
+  // iPhone 6.9" (1320 × 2868 @ 3x): 440 × 956 CSS px
+  viewport: { width: 440, height: 956 },
+  scale: 3,
+};
 
-// Only iPhone devices - reduced from 4 to 2 for faster execution
-const DEVICES = [
-  // iPhone 6.9" (1320 × 2868)
-  { dir: (l: string) => `ios/fastlane/screenshots/${l}`, prefix: 'iphone69', viewport: { width: 440, height: 956 }, scale: 3 },
-  // iPhone Duo unfolded (2007 × 2853) – wide layout: houses | map side by side
-  { dir: (l: string) => `ios/fastlane/screenshots/${l}`, prefix: 'iphoneduo', viewport: { width: 669, height: 951 }, scale: 3 },
-];
-
-async function settle(page: Page, ms = 700) {
-  await expect(page.locator('ion-action-sheet:not(.overlay-hidden), ion-toast')).toHaveCount(0, { timeout: 10_000 });
-  await page.waitForTimeout(ms);
+async function goToHouses(page: Page) {
+  await page.locator('.vacation-card').first().click();
+  await page.waitForTimeout(2000);
 }
 
-for (const locale of ['de-DE', 'en-US'] as const) {
-  for (const device of DEVICES) {
-    test(`store ${device.prefix} ${locale}`, async ({ browser }) => {
-      const tx = TEXT[locale];
-      const ctx = await browser.newContext({ colorScheme: 'light', locale, viewport: device.viewport, deviceScaleFactor: device.scale });
+async function goToMap(page: Page) {
+  await page.locator('ion-segment-button').filter({ hasText: /Karte|Map/ }).click();
+  await page.waitForTimeout(1200);
+}
+
+async function goToPeople(page: Page) {
+  await page.locator('ion-segment-button').filter({ hasText: /Personen|People/ }).click();
+  await page.waitForTimeout(800);
+}
+
+async function goToDetail(page: Page) {
+  await page.locator('ion-segment-button').filter({ hasText: /Häuser|Houses/ }).click();
+  await page.locator('.property-card').first().click();
+  await page.waitForTimeout(800);
+}
+
+async function goToSettings(page: Page) {
+  await page.locator('ion-back-button').last().click();
+  await page.waitForTimeout(600);
+  await page.goto('/settings');
+  await page.waitForTimeout(600);
+}
+
+for (const scheme of ['light', 'dark'] as const) {
+  for (const locale of ['de-DE', 'en-US'] as const) {
+    test(`store ${scheme} ${locale}`, async ({ browser }) => {
+      const ctx = await browser.newContext({
+        colorScheme: scheme,
+        locale,
+        viewport: DEVICE.viewport,
+        deviceScaleFactor: DEVICE.scale,
+      });
       const page = await ctx.newPage();
-      let n = 0;
-      const shot = async (name: string) => {
-        await settle(page);
-        await page.screenshot({ path: `${device.dir(locale)}/${device.prefix}-${++n}-${name}.png` });
-      };
 
-      // Onboarding: 3 intro pages (collect, vote, decide)
+      const dir = `ios/fastlane/screenshots/${locale}`;
       await page.goto('/');
-      await page.getByRole('button', { name: /Plan a vacation|Urlaub planen/ }).click({ timeout: 30_000 });
-      for (let i = 0; i < 3; i++) await page.getByRole('button', { name: /Continue|Weiter/ }).click();
-      // Fill name and click "Later" to skip immediate creation
-      await page.getByLabel(/Dein Name|Your name/).fill('Anna');
-      await page.getByRole('button', { name: /Create it later|Später anlegen/ }).click();
-      await page.waitForTimeout(1200);
+      await completeOnboarding(page);
+      await seedDemoVacation(page);
+      await page.goto('/vacations');
+      await page.waitForTimeout(800);
 
-      // If no vacation card exists, create one via FAB
-      const cardCount = await page.locator('.vacation-card').count();
-      if (cardCount === 0) {
-        await page.locator('ion-fab-button').click();
-        await page.waitForTimeout(500);
-        const modal = page.locator('ion-modal.show-modal').last();
-        await modal.locator('ion-input input[type="url"]').fill('https://www.airbnb.de/rooms/123?utm_source=x');
-        await modal.locator('ion-input', { hasText: 'Title' }).locator('input').fill('Thatched cottage');
-        await modal.locator('ion-input', { hasText: 'Total price' }).locator('input').fill('2400');
-        await modal.getByRole('button', { name: 'Save' }).click();
-        await expect(page.locator('.property-card', { hasText: 'Thatched cottage' })).toBeVisible({ timeout: 30_000 });
-      }
-
-      // Key screenshots only: vacations, houses, map
-      await shot('vacations');
-      await page.locator('.vacation-card').first().click();
-      await expect(page.locator('.property-card').first()).toBeVisible();
-      await shot('houses');
-
-      // Map tab
-      await page.locator('ion-segment-button').filter({ hasText: /Karte|Map/ }).click();
-      await page.waitForTimeout(1200);
-      await shot('map');
+      // Vacations list
+      await shoot(page, dir, scheme, locale, '0-vacations');
+      // Houses: open first vacation
+      await goToHouses(page);
+      await shoot(page, dir, scheme, locale, '2-houses');
+      // Map
+      await goToMap(page);
+      await shoot(page, dir, scheme, locale, '3-map');
+      // People
+      await goToPeople(page);
+      await shoot(page, dir, scheme, locale, '4-people');
+      // Detail: back to houses then open first property
+      await goToDetail(page);
+      await shoot(page, dir, scheme, locale, '5-detail');
+      // Settings: back from detail then open settings
+      await goToSettings(page);
+      await shoot(page, dir, scheme, locale, '6-settings');
 
       await ctx.close();
     });

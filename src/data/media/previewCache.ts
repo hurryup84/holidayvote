@@ -127,6 +127,16 @@ export function previewCache(db: Db, clock: Clock) {
       await files.removeDir(PREVIEW_DIR);
     },
 
+    /** Seed a demo preview from a local photo (no network). Used by the debug seeder and store screenshots. */
+    async seed(url: string, title: string | null, description: string | null, siteName: string | null, imageUrl: string): Promise<void> {
+      const now = clock.nowIso();
+      await db.execute(
+        `INSERT OR REPLACE INTO preview_cache (id, title, description, site_name, image_url, image_file, status, fetched_at)
+         VALUES (?, ?, ?, ?, ?, NULL, 'ok', ?)`,
+        [url, title, description, siteName, imageUrl, now],
+      );
+    },
+
     async stats(): Promise<{ count: number; bytes: number }> {
       const r = await db.getOptional<{ n: number }>("SELECT COUNT(*) AS n FROM preview_cache WHERE status = 'ok'");
       return { count: Number(r?.n ?? 0), bytes: await files.dirSize(PREVIEW_DIR) };
