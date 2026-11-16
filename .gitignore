@@ -49,3 +49,4 @@ ios/fastlane/review/demo_recovery_code.txt
 
 
 .claude/*
+android/fastlane/metadata/android/*/images/phoneScreenshots/*.png
