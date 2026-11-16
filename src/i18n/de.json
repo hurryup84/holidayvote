@@ -201,6 +201,7 @@
     "previewRefreshed": "Vorschau aktualisiert",
     "previewRefreshFailed": "Die Seite gibt gerade keine Vorschau her – die bisherige bleibt.",
     "fromListing": "Laut {{site}}",
+    "previewTemporary": "Dieser Text kommt von der Anbieter-Seite und wird nicht gespeichert. Übernehme selbst, was relevant ist, in Titel und Beschreibung.",
     "sharedPickVacation": "Zu einem Urlaub hinzufügen",
     "sharedPickVacationHint": "Wähle den Urlaub, zu dem das geteilte Ferienhaus hinzugefügt werden soll.",
     "sharedNoVacations": "Du hast noch keinen Urlaub. Lege zuerst einen an.",

@@ -44,10 +44,14 @@ interface Form {
   lat: number | null;
   lng: number | null;
   avatar: string;
-  /** What the listing page said (stored with the link for search). */
-  previewTitle: string | null;
-  previewDescription: string | null;
-  previewSite: string | null;
+}
+
+/** Preview info from the listing page – shown to the user, never stored.
+ * The user manually takes over what's relevant into title/description above. */
+interface PreviewInfo {
+  title: string | null;
+  description: string | null;
+  siteName: string | null;
 }
 
 const empty: Form = {
@@ -64,9 +68,6 @@ const empty: Form = {
   lat: null,
   lng: null,
   avatar: 'house',
-  previewTitle: null,
-  previewDescription: null,
-  previewSite: null,
 };
 
 const str = (v: number | null) => (v === null ? '' : String(v));
@@ -77,8 +78,8 @@ const toNum = (s: string, int = false): number | null => {
 };
 
 /**
- * Add a house (paste a link) or edit one. The link's preview fills in title, text and provider –
- * the picture is only shown, never saved.
+ * Add a house (paste a link) or edit one. The link's preview is shown to the user but never stored –
+ * the user manually takes over what's relevant into title and description. Only the link is saved.
  */
 export function PropertyEditModal({
   isOpen,
@@ -100,13 +101,14 @@ export function PropertyEditModal({
   onSaved?(id: string): void;
   /** URL of a shared holiday-home link prefilled into the form. */
   initialPropertyUrl?: string;
-  /** Suggested title read from the shared link's page (not yet typed by the user). */
+  /** Suggested title read from the shared link's page (shown to the user, not prefilled). */
   initialTitle?: string;
 }) {
   const { t } = useTranslation();
   const { repos } = useApp();
   const [toast] = useIonToast();
   const [form, setForm] = useState<Form>(empty);
+  const [preview, setPreview] = useState<PreviewInfo | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [previewFailed, setPreviewFailed] = useState(false);
   const [duplicate, setDuplicate] = useState<Property | null>(null);
@@ -124,39 +126,48 @@ export function PropertyEditModal({
     lastFetched.current = property?.url ?? '';
     setPreviewFailed(false);
     setDuplicate(null);
-    setForm(
-      property
-        ? {
-            url: property.url,
-            title: property.title ?? '',
-            description: property.description ?? '',
-            provider: property.provider ?? '',
-            price: str(property.price),
-            beds: str(property.beds),
-            bedrooms: str(property.bedrooms),
-            bathrooms: str(property.bathrooms),
-            hasPool: property.hasPool,
-            address: property.address ?? '',
-            lat: property.lat,
-            lng: property.lng,
-            avatar: property.avatar ?? 'house',
-            previewTitle: property.previewTitle,
-            previewDescription: property.previewDescription,
-            previewSite: property.previewSite,
-          }
-        : { ...empty, url: initialPropertyUrl ?? '', title: initialTitle ?? '' }
+    setForm(property
+      ? {
+          url: property.url,
+          title: property.title ?? '',
+          description: property.description ?? '',
+          provider: property.provider ?? '',
+          price: str(property.price),
+          beds: str(property.beds),
+          bedrooms: str(property.bedrooms),
+          bathrooms: str(property.bathrooms),
+          hasPool: property.hasPool,
+          address: property.address ?? '',
+          lat: property.lat,
+          lng: property.lng,
+          avatar: property.avatar ?? 'house',
+        }
+      : { ...empty, url: initialPropertyUrl ?? '' }
     );
     titleChanged.current = false;
     urlChanged.current = false;
     setTitleUnavailable(false);
     setTitleLoading(false);
+
+    // Show this house's existing preview info (if any) as temporary, not-stored info.
+    if (property) {
+      setPreview({
+        title: property.previewTitle ?? null,
+        description: property.previewDescription ?? null,
+        siteName: property.previewSite ?? null,
+      });
+    }
+
     if (!property && initialPropertyUrl) {
       setTitleLoading(true);
-      void fetchLinkPreview(initialPropertyUrl).then((preview) => {
+      void fetchLinkPreview(initialPropertyUrl).then((p) => {
         if (!isOpen) return;
-        const title = preview?.title ?? null;
-        if (title && !titleChanged.current && !urlChanged.current) setForm((f) => ({ ...f, title }));
-        setTitleUnavailable(!title);
+        setPreview({
+          title: p?.title ?? null,
+          description: p?.description ?? null,
+          siteName: p?.siteName ?? null,
+        });
+        setTitleUnavailable(!p?.title);
         setTitleLoading(false);
       });
     }
@@ -164,7 +175,8 @@ export function PropertyEditModal({
 
   const url = isHttpUrl(form.url.trim()) ? form.url.trim() : null;
 
-  // New link → duplicate check + preview (from this phone's cache, or fetched once). Prefills only empty fields.
+  // New link → duplicate check + preview (from this phone's cache, or fetched once).
+  // The preview is shown to the user but NOT stored – the user takes over what's relevant.
   useEffect(() => {
     if (!url || url === lastFetched.current) return;
     lastFetched.current = url;
@@ -176,15 +188,11 @@ export function PropertyEditModal({
       if (!active) return;
       setLoadingPreview(false);
       setPreviewFailed(!p || p.status === 'failed' || (!p.title && !p.imageSrc));
-      setForm((f) => ({
-        ...f,
-        title: f.title || p?.title || '',
-        description: f.description || p?.description || '',
-        provider: f.provider || detectProvider(url) || p?.siteName || '',
-        previewTitle: p?.title ?? null,
-        previewDescription: p?.description ?? null,
-        previewSite: p?.siteName ?? null,
-      }));
+      setPreview({
+        title: p?.title ?? null,
+        description: p?.description ?? null,
+        siteName: p?.siteName ?? null,
+      });
     });
     return () => {
       active = false;
@@ -234,9 +242,6 @@ export function PropertyEditModal({
       lat: form.address.trim() ? form.lat : null,
       lng: form.address.trim() ? form.lng : null,
       avatar: form.avatar,
-      previewTitle: form.previewTitle,
-      previewDescription: form.previewDescription,
-      previewSite: form.previewSite,
     };
     try {
       if (property) {
@@ -317,6 +322,15 @@ export function PropertyEditModal({
           </div>
         )}
         {url && <p className="list-footer">{previewFailed ? t('property.previewFailed') : t('property.previewNote')}</p>}
+
+        {url && preview && (
+          <div className="preview-temporary" role="note">
+            <p>{t('property.previewTemporary')}</p>
+            {preview.title && <p><strong>{preview.title}</strong></p>}
+            {preview.description && <p className="listing-text">{preview.description}</p>}
+            {preview.siteName && <p><em>{t('property.fromListing', { site: preview.siteName })}</em></p>}
+          </div>
+        )}
 
         <IonList inset>
           <IonItem>

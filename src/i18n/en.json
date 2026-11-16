@@ -201,6 +201,7 @@
     "previewRefreshed": "Preview updated",
     "previewRefreshFailed": "The page offers no preview right now – the previous one stays.",
     "fromListing": "According to {{site}}",
+    "previewTemporary": "This text comes from the listing page and is not stored. Take over what's relevant into title and description yourself.",
     "sharedPickVacation": "Add to a vacation",
     "sharedPickVacationHint": "Choose the vacation the shared holiday home is added to.",
     "sharedNoVacations": "You have no vacation yet. Create one first.",

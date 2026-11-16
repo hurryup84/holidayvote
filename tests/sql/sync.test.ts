@@ -151,13 +151,10 @@ describe('sync (two phones, real migrations)', () => {
     expect(await server.as(A, 'select count(*)::int as n from vetoes')).toEqual([{ n: 1 }]);
   });
 
-  it('preview text syncs with the link; the preview cache (with the picture) stays on the phone', async () => {
+  it('preview text is shown but not stored with the link; the preview cache (with the picture) stays on the phone', async () => {
     const id = await repos(anna).properties.create(vacation, {
       url: 'https://www.booking.com/hotel/dk/x.html',
       title: 'Mein Titel',
-      previewTitle: 'Hotel X – Booking.com',
-      previewDescription: 'Ferienhaus mit Sauna',
-      previewSite: 'Booking.com',
     });
     await anna.db.execute(
       "INSERT INTO preview_cache (id, title, image_url, image_file, status, fetched_at) VALUES ('https://www.booking.com/hotel/dk/x.html', 'x', 'https://cf.bstatic.com/1.jpg', 'previews/1.jpg', 'ok', '2026-11-15')",
@@ -165,10 +162,10 @@ describe('sync (two phones, real migrations)', () => {
     expect(await anna.sync.pendingUploads()).toBe(1); // the house only
     await anna.sync.syncNow();
     expect(await server.as(A, 'select title, preview_title, preview_description, preview_site from properties where id = $1', [id])).toEqual([
-      { title: 'Mein Titel', preview_title: 'Hotel X – Booking.com', preview_description: 'Ferienhaus mit Sauna', preview_site: 'Booking.com' },
+      { title: 'Mein Titel', preview_title: null, preview_description: null, preview_site: null },
     ]);
     await ben.sync.syncNow();
-    expect(await repos(ben).properties.get(id)).toMatchObject({ title: 'Mein Titel', previewDescription: 'Ferienhaus mit Sauna' });
+    expect(await repos(ben).properties.get(id)).toMatchObject({ title: 'Mein Titel' });
     expect(await ben.db.getAll('SELECT id FROM preview_cache')).toEqual([]);
     await repos(anna).properties.remove(id);
     await anna.sync.syncNow();

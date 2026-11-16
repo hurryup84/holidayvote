@@ -75,7 +75,9 @@ test('a queued share waits for a vacation pick, prefills the house form, and per
 
   const houseModal = page.locator('ion-modal').last();
   await expect(houseModal.getByText(/I am not allowed to automatically add photos/)).toBeVisible();
-  await expect(houseModal.getByRole('textbox', { name: 'Title', exact: true })).toHaveValue('Seevilla Rømø');
+  await expect(houseModal.getByRole('textbox', { name: 'Title', exact: true })).toHaveValue('');
+  // The preview title is shown to the user but not stored – the user takes it over themselves.
+  await expect(houseModal.getByText('Seevilla Rømø')).toBeVisible();
   await expect(houseModal.getByRole('textbox', { name: 'Link to the holiday home', exact: true })).toHaveValue(
     'https://example.com/haus/rovnjag?n=2#bestaetigung'
   );

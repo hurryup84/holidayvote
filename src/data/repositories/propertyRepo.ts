@@ -42,9 +42,6 @@ const fieldValues = (i: PropertyInput) => [
   i.lat ?? null,
   i.lng ?? null,
   i.avatar ?? null,
-  i.previewTitle?.trim().slice(0, 300) || null,
-  i.previewDescription?.trim().slice(0, 2000) || null,
-  i.previewSite?.trim().slice(0, 100) || null,
 ];
 
 export function propertyRepo({ db, session, clock }: RepoContext) {
@@ -78,8 +75,8 @@ export function propertyRepo({ db, session, clock }: RepoContext) {
       const now = clock.nowIso();
       await db.execute(
         `INSERT INTO properties (id, vacation_id, url, title, description, provider, price, beds, bedrooms, bathrooms, has_pool,
-           address, lat, lng, avatar, preview_title, preview_description, preview_site, status, created_by, updated_by, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, ?, ?)`,
+           address, lat, lng, avatar, status, created_by, updated_by, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, ?, ?)`,
         [id, vacationId, input.url.trim(), ...fieldValues(input), u, u, now, now],
       );
       return id;
@@ -88,7 +85,7 @@ export function propertyRepo({ db, session, clock }: RepoContext) {
     async update(id: string, input: PropertyInput): Promise<void> {
       await db.execute(
         `UPDATE properties SET url = ?, title = ?, description = ?, provider = ?, price = ?, beds = ?, bedrooms = ?, bathrooms = ?,
-           has_pool = ?, address = ?, lat = ?, lng = ?, avatar = ?, preview_title = ?, preview_description = ?, preview_site = ?,
+           has_pool = ?, address = ?, lat = ?, lng = ?, avatar = ?,
            updated_by = ?, updated_at = ?
          WHERE id = ?`,
         [input.url.trim(), ...fieldValues(input), u, clock.nowIso(), id],
