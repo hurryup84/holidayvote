@@ -52,7 +52,8 @@ export function VacationPage() {
   const [tab, setTab] = useState<Tab>('houses');
   const [sort, setSort] = useState<SortKey>('rank');
   const [adding, setAdding] = useState(false);
-  const [editing, setEditing] = useState(false);
+  const [editingProperty, setEditingProperty] = useState<string | null>(null);
+  const [editingVacation, setEditingVacation] = useState(false);
   const [showEliminated, setShowEliminated] = useState(false);
   const [query, setQuery] = useState('');
 
@@ -84,6 +85,7 @@ export function VacationPage() {
   }, [houses, sort, home, query]);
   const unrated = houses?.filter((h) => h.status === 'active' && h.myVote === null).length ?? 0;
   const located = houses?.filter((h) => h.lat !== null && h.lng !== null) ?? [];
+  const propertyToEdit = houses?.find((h) => h.id === editingProperty) ?? null;
 
   if (!vacation) return <IonPage />;
   const n = nights(vacation.startDate, vacation.endDate);
@@ -193,6 +195,7 @@ export function VacationPage() {
                   settings={vacation.settings}
                   distanceKm={distance(p)}
                   onOpen={() => openHouse(p.id)}
+                  onEdit={() => setEditingProperty(p.id)}
                 />
               ))}
               {visible.eliminated.length > 0 && (
@@ -202,7 +205,7 @@ export function VacationPage() {
               )}
               {showEliminated &&
                 visible.eliminated.map((p) => (
-                  <PropertyCard key={p.id} p={p} rank={null} people={people} settings={vacation.settings} distanceKm={distance(p)} onOpen={() => openHouse(p.id)} />
+                  <PropertyCard key={p.id} p={p} rank={null} people={people} settings={vacation.settings} distanceKm={distance(p)} onOpen={() => openHouse(p.id)} onEdit={() => setEditingProperty(p.id)} />
                 ))}
             </div>
           </>
@@ -221,7 +224,7 @@ export function VacationPage() {
             members={members}
             iAmOwner={iAmOwner}
             onInvite={() => sharing.createInvite(id, vacation.name)}
-            onEdit={() => setEditing(true)}
+            onEdit={() => setEditingVacation(true)}
           />
         )}
 
@@ -234,11 +237,11 @@ export function VacationPage() {
         )}
       </IonContent>
 
-      <PropertyEditModal isOpen={adding} vacationId={id} settings={vacation.settings} property={null} onClose={() => setAdding(false)} />
+      <PropertyEditModal isOpen={adding || editingProperty !== null} vacationId={id} settings={vacation.settings} property={propertyToEdit} onClose={() => { setAdding(false); setEditingProperty(null); }} />
       <VacationEditModal
-        isOpen={editing}
+        isOpen={editingVacation}
         initial={vacation}
-        onClose={() => setEditing(false)}
+        onClose={() => setEditingVacation(false)}
         onSave={(input) => repos.vacations.update(id, input)}
       />
       {sharing.ui}

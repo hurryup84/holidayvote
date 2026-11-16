@@ -1,5 +1,5 @@
 import { IonIcon } from '@ionic/react';
-import { banOutline, bedOutline, checkmarkCircle, chatbubbleOutline, heart, navigateOutline, waterOutline } from 'ionicons/icons';
+import { banOutline, bedOutline, checkmarkCircle, chatbubbleOutline, create, heart, navigateOutline, waterOutline } from 'ionicons/icons';
 import { useTranslation } from 'react-i18next';
 import { PreviewImage } from '../../components/PreviewImage';
 import { RatingBadge } from '../../components/Stars';
@@ -15,6 +15,7 @@ export function PropertyCard({
   settings,
   distanceKm,
   onOpen,
+  onEdit,
 }: {
   p: PropertyWithStats;
   rank: number | null;
@@ -22,6 +23,7 @@ export function PropertyCard({
   settings: VacationSettings;
   distanceKm: number | null;
   onOpen(): void;
+  onEdit?(): void;
 }) {
   const { t, i18n } = useTranslation();
   const on = (f: Parameters<typeof fieldOn>[1]) => fieldOn(settings, f);
@@ -29,6 +31,18 @@ export function PropertyCard({
     <button className={`property-card card status-${p.status}`} onClick={onOpen}>
       <div className="property-image">
         <PreviewImage url={p.url} avatar={p.avatar} />
+        {onEdit && (
+          <button
+            className="property-card-edit"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit();
+            }}
+            aria-label={t('property.edit')}
+          >
+            <IonIcon icon={create} />
+          </button>
+        )}
         {p.status === 'booked' && (
           <span className="property-flag booked">
             <IonIcon icon={checkmarkCircle} /> {t('status.booked')}

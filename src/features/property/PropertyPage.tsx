@@ -23,6 +23,7 @@ import {
   banOutline,
   checkmarkCircle,
   closeCircleOutline,
+  create,
   ellipsisHorizontal,
   heart,
   heartOutline,
@@ -183,6 +184,9 @@ export function PropertyPage() {
           </IonButtons>
           <IonTitle>{p.title || p.provider || t('property.house')}</IonTitle>
           <IonButtons slot="end">
+            <IonButton onClick={() => setEditing(true)} aria-label={t('property.edit')}>
+              <IonIcon slot="icon-only" icon={create} />
+            </IonButton>
             <IonButton onClick={more} aria-label={t('common.more')}>
               <IonIcon slot="icon-only" icon={ellipsisHorizontal} />
             </IonButton>
