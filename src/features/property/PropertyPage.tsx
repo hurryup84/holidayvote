@@ -197,7 +197,6 @@ export function PropertyPage() {
         <div className={`detail-image status-${p.status}`}>
           <PreviewImage url={p.url} avatar={p.avatar} alt={p.title ?? ''} />
         </div>
-        <p className="detail-picture-note">{t('property.pictureLive')}</p>
 
         <div className="detail-head">
           {p.status === 'booked' && (

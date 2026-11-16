@@ -1,15 +1,16 @@
 .detail-image {
   aspect-ratio: 16 / 10;
   background: var(--app-placeholder-bg);
+  overflow: hidden;
 }
 .detail-image.status-eliminated {
   opacity: 0.6;
 }
 .detail-picture-note {
-  margin: 4px 16px 0;
-  font-size: 0.72rem;
+  margin: 12px 16px 0;
+  font-size: 0.8rem;
   color: var(--app-text-muted);
-  text-align: right;
+  text-align: left;
 }
 .detail-head {
   padding: 8px 16px 0;

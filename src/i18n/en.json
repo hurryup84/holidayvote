@@ -163,7 +163,6 @@
     "pasteFailed": "Can't paste – please tap into the field and paste there.",
     "duplicate": "This house is already in the list: {{title}}",
     "loadingPreview": "Loading preview …",
-    "previewNote": "The page's title and description are saved with the link (searchable). The picture stays on your phone only – everyone has their own cache.",
     "previewFailed": "The page doesn't offer a preview. Just enter the title and details yourself and pick an icon below.",
     "title": "Title",
     "provider": "Provider",
@@ -192,7 +191,6 @@
     "vetoes_other": "{{count}} vetoes",
     "open": "View on {{provider}}",
     "website": "the website",
-    "pictureLive": "Picture from the provider's page, stored on this phone only",
     "facts": "Details",
     "distanceFromHome": "Distance from home",
     "deleteTitle": "Delete house?",
@@ -202,10 +200,10 @@
     "previewRefreshFailed": "The page offers no preview right now – the previous one stays.",
     "fromListing": "According to {{site}}",
     "previewTemporary": "This text comes from the listing page and is not stored. Take over what's relevant into title and description yourself.",
+    "addPictureManually": "No image from the listing page visible? You can add your own photo (gallery or camera).",
     "sharedPickVacation": "Add to a vacation",
     "sharedPickVacationHint": "Choose the vacation the shared holiday home is added to.",
     "sharedNoVacations": "You have no vacation yet. Create one first.",
-    "sharedPhotoNotice": "I am not allowed to automatically add photos from websites here. Add the holiday home, then take your own photo if you like!",
     "sharedTitleLoading": "Looking up the holiday-home name…",
     "sharedTitleUnavailable": "Couldn't read the name. Please check or enter the title before saving.",
     "sharedLinkInvalid": "The shared item doesn't contain a valid holiday-home link (http or https).",
@@ -360,6 +358,7 @@
     "previewClear": "Clear cache",
     "previewClearTitle": "Reload previews?",
     "previewClearText": "Stored pictures and previews are deleted and loaded again from the pages the next time they are shown.",
-    "previewHint": "Pictures and previews of the holiday homes are loaded once from the provider's page and stored on this phone only – never uploaded. Single houses: in the house via “…” → “Reload preview”."
+    "previewHint": "Pictures are not downloaded or stored. The image is shown live from the provider's page and never uploaded. Single houses: in the house via “…” → “Reload preview”.",
+    "previewHotlinkingInfo": "The image is hotlinked directly from the provider's page. It is neither downloaded nor stored – never on this phone, never on a server."
   }
 }

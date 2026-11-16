@@ -187,6 +187,7 @@ export function SettingsPage() {
           </IonItem>
         </IonList>
         <p className="list-footer">{t('settings.previewHint')}</p>
+        <p className="list-footer settings-note">{t('settings.previewHotlinkingInfo')}</p>
 
         {online ? <RecoveryCard /> : <p className="list-footer recovery-later">{t('recovery.later')}</p>}
 

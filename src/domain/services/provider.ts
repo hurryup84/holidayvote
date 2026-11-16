@@ -1,23 +1,7 @@
-const KNOWN: [RegExp, string][] = [
-  [/airbnb\./, 'Airbnb'],
-  [/booking\./, 'Booking.com'],
-  [/fewo-direkt\.|vrbo\.|homeaway\./, 'FeWo-direkt / Vrbo'],
-  [/novasol\./, 'Novasol'],
-  [/traum-ferienwohnungen\.|traumferienwohnungen\./, 'Traum-Ferienwohnungen'],
-  [/ferienwohnungen\.de/, 'Ferienwohnungen.de'],
-  [/holidu\./, 'Holidu'],
-  [/interhome\./, 'Interhome'],
-  [/hometogo\./, 'HomeToGo'],
-  [/e-domizil\./, 'e-domizil'],
-  [/dancenter\./, 'DanCenter'],
-  [/sonnenklar\.|tui\./, 'TUI'],
-];
-
-/** "Airbnb", "Booking.com" … or the plain host name. */
+/** Provider name derived from the link's host (e.g. "airbnb.de", "booking.com"). No hardcoded list. */
 export function detectProvider(url: string): string | null {
   try {
-    const host = new URL(url).hostname.toLowerCase().replace(/^www\./, '');
-    return KNOWN.find(([re]) => re.test(host))?.[1] ?? host;
+    return new URL(url).hostname.toLowerCase().replace(/^www\./, '');
   } catch {
     return null;
   }

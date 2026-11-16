@@ -1,18 +1,14 @@
 import type { Clock } from '../../core/clock';
-import { newId } from '../../core/ids';
 import type { Preview } from '../../domain/models';
-import { files } from '../../native/files';
-import { downloadImage, fetchLinkPreview } from '../../native/linkPreview';
-import { isNative } from '../../native/platform';
+import { fetchLinkPreview } from '../../native/linkPreview';
 import type { Db } from '../db/db';
 
 /**
  * This phone's cache of link previews – so opening the app doesn't fetch every holiday-home page again.
  * - Text (title, description, site) + picture URL in the local-only table `preview_cache`.
- * - The picture as a downscaled JPEG file in `previews/` (data directory; browser: only the URL).
- * Never synced, never uploaded: every person has their own cache; there is no picture in the database
- * on the server. Entries stay until refreshed by hand (house menu) or the cache is cleared (Settings).
- * A failed fetch is retried after a day; a missing picture file (cleared by the OS) is fetched again.
+ * - The picture is NOT downloaded or stored. The OpenGraph image URL is hotlinked directly from
+ *   the provider's page (copyright). No picture is kept on this phone or any server.
+ * Never synced, never uploaded: every person has their own cache.
  */
 export const PREVIEW_DIR = 'previews';
 const RETRY_FAILED_MS = 24 * 3600_000;
@@ -45,13 +41,12 @@ async function slot<T>(fn: () => Promise<T>): Promise<T> {
 
 export function previewCache(db: Db, clock: Clock) {
   async function toPreview(r: Row): Promise<Preview> {
-    const imageSrc = r.image_file ? await files.src(r.image_file) : isNative ? null : r.image_url;
     return {
       url: r.id,
       title: r.title,
       description: r.description,
       siteName: r.site_name,
-      imageSrc,
+      imageSrc: r.image_url ?? null,
       status: r.status === 'failed' ? 'failed' : 'ok',
       fetchedAt: r.fetched_at,
     };
@@ -76,20 +71,11 @@ export function previewCache(db: Db, clock: Clock) {
       );
       return null;
     }
-    let imageFile: string | null = null;
-    if (p.image && isNative) {
-      const base64 = await downloadImage(p.image);
-      if (base64) {
-        imageFile = `${PREVIEW_DIR}/${newId()}.jpg`;
-        await files.write(imageFile, base64);
-      }
-    }
     await db.execute(
       `INSERT OR REPLACE INTO preview_cache (id, title, description, site_name, image_url, image_file, status, fetched_at)
-       VALUES (?, ?, ?, ?, ?, ?, 'ok', ?)`,
-      [url, p.title, p.description, p.siteName, p.image, imageFile, now],
+       VALUES (?, ?, ?, ?, ?, NULL, 'ok', ?)`,
+      [url, p.title, p.description, p.siteName ?? null, p.image ?? null, now],
     );
-    if (old?.image_file && old.image_file !== imageFile) await files.remove(old.image_file);
     return (await row(url).then((r) => (r ? toPreview(r) : null))) ?? null;
   }
 
@@ -100,18 +86,17 @@ export function previewCache(db: Db, clock: Clock) {
       return r ? toPreview(r) : null;
     },
 
-    /** Cached preview, fetched first if there is none yet (or a failure is old, or the picture file is gone). */
+    /** Cached preview, fetched first if there is none yet (or a failure is old). */
     async ensure(url: string): Promise<Preview | null> {
       const r = await row(url);
       if (r) {
         const failedLongAgo = r.status === 'failed' && Date.now() - new Date(r.fetched_at).getTime() > RETRY_FAILED_MS;
-        const fileGone = !!r.image_file && !(await files.src(r.image_file));
-        if (!failedLongAgo && !fileGone) return toPreview(r);
+        if (!failedLongAgo) return toPreview(r);
       }
       return this.refresh(url);
     },
 
-    /** Fetch the page (and picture) again now. Parallel calls for the same link share one fetch. */
+    /** Fetch the page text again now. No picture is downloaded. Parallel calls for the same link share one fetch. */
     refresh(url: string): Promise<Preview | null> {
       let p = inFlight.get(url);
       if (!p) {
@@ -124,7 +109,6 @@ export function previewCache(db: Db, clock: Clock) {
     /** Settings → "Clear cache": everything goes; previews load again when a house is shown. */
     async clear(): Promise<void> {
       await db.execute('DELETE FROM preview_cache');
-      await files.removeDir(PREVIEW_DIR);
     },
 
     /** Seed a demo preview from a local photo (no network). Used by the debug seeder and store screenshots. */
@@ -139,7 +123,7 @@ export function previewCache(db: Db, clock: Clock) {
 
     async stats(): Promise<{ count: number; bytes: number }> {
       const r = await db.getOptional<{ n: number }>("SELECT COUNT(*) AS n FROM preview_cache WHERE status = 'ok'");
-      return { count: Number(r?.n ?? 0), bytes: await files.dirSize(PREVIEW_DIR) };
+      return { count: Number(r?.n ?? 0), bytes: 0 };
     },
   };
 }

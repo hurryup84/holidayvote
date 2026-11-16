@@ -52,6 +52,7 @@ interface PreviewInfo {
   title: string | null;
   description: string | null;
   siteName: string | null;
+  imageSrc: string | null;
 }
 
 const empty: Form = {
@@ -119,6 +120,7 @@ export function PropertyEditModal({
   const lastFetched = useRef('');
   const titleChanged = useRef(false);
   const urlChanged = useRef(false);
+  const providerChanged = useRef(false);
   const on = (f: Parameters<typeof fieldOn>[1]) => fieldOn(settings, f);
 
   useEffect(() => {
@@ -155,6 +157,7 @@ export function PropertyEditModal({
         title: property.previewTitle ?? null,
         description: property.previewDescription ?? null,
         siteName: property.previewSite ?? null,
+        imageSrc: null,
       });
     }
 
@@ -166,7 +169,12 @@ export function PropertyEditModal({
           title: p?.title ?? null,
           description: p?.description ?? null,
           siteName: p?.siteName ?? null,
+          imageSrc: p?.image ?? null,
         });
+        // Auto-fill provider from the link's host (no hardcoded list).
+        if (!providerChanged.current) {
+          setForm((f) => ({ ...f, provider: detectProvider(initialPropertyUrl) || '' }));
+        }
         setTitleUnavailable(!p?.title);
         setTitleLoading(false);
       });
@@ -192,7 +200,12 @@ export function PropertyEditModal({
         title: p?.title ?? null,
         description: p?.description ?? null,
         siteName: p?.siteName ?? null,
+        imageSrc: p?.imageSrc ?? null,
       });
+      // Auto-fill provider from the link's host (no hardcoded list).
+      if (!providerChanged.current) {
+        setForm((f) => ({ ...f, provider: detectProvider(url) || '' }));
+      }
     });
     return () => {
       active = false;
@@ -202,6 +215,7 @@ export function PropertyEditModal({
   const set = (k: keyof Form) => (e: { detail: { value?: string | null } }) => {
     if (k === 'title') titleChanged.current = true;
     if (k === 'url') urlChanged.current = true;
+    if (k === 'provider') providerChanged.current = true;
     setForm((f) => ({ ...f, [k]: String(e.detail.value ?? '') }));
   };
 
@@ -267,7 +281,7 @@ export function PropertyEditModal({
           </IonButtons>
           <IonTitle>{property ? t('property.edit') : t('property.add')}</IonTitle>
           <IonButtons slot="end">
-            <IonButton strong disabled={!url || saving || titleLoading} onClick={() => void save()}>
+            <IonButton strong disabled={!url || saving || titleLoading || !form.title.trim()} onClick={() => void save()}>
               {t('common.save')}
             </IonButton>
           </IonButtons>
@@ -276,7 +290,6 @@ export function PropertyEditModal({
       <IonContent>
         {initialPropertyUrl && (
           <div className="edit-preview-note ion-padding-horizontal" role="status">
-            <p>{t('property.sharedPhotoNotice')}</p>
             {titleLoading && <p>{t('property.sharedTitleLoading')}</p>}
             {titleUnavailable && <p>{t('property.sharedTitleUnavailable')}</p>}
           </div>
@@ -321,14 +334,19 @@ export function PropertyEditModal({
             )}
           </div>
         )}
-        {url && <p className="list-footer">{previewFailed ? t('property.previewFailed') : t('property.previewNote')}</p>}
+        {preview?.imageSrc === null && previewFailed && (
+          <p className="list-footer">{t('property.addPictureManually')}</p>
+        )}
+        {preview?.siteName && (
+          <p className="list-footer from-listing"><em>{t('property.fromListing', { site: preview.siteName })}</em></p>
+        )}
+        {url && previewFailed && <p className="list-footer">{t('property.previewFailed')}</p>}
 
-        {url && preview && (
+        {url && preview && !property && (
           <div className="preview-temporary" role="note">
             <p>{t('property.previewTemporary')}</p>
             {preview.title && <p><strong>{preview.title}</strong></p>}
             {preview.description && <p className="listing-text">{preview.description}</p>}
-            {preview.siteName && <p><em>{t('property.fromListing', { site: preview.siteName })}</em></p>}
           </div>
         )}
 

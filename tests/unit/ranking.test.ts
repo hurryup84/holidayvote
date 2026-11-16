@@ -31,8 +31,8 @@ describe('ranking', () => {
 
 describe('links', () => {
   it('provider names and duplicate keys', () => {
-    expect(detectProvider('https://www.airbnb.de/rooms/1')).toBe('Airbnb');
-    expect(detectProvider('https://www.booking.com/hotel/x.html')).toBe('Booking.com');
+    expect(detectProvider('https://www.airbnb.de/rooms/1')).toBe('airbnb.de');
+    expect(detectProvider('https://www.booking.com/hotel/x.html')).toBe('booking.com');
     expect(detectProvider('https://example.org/x')).toBe('example.org');
     expect(urlKey('https://www.airbnb.de/rooms/123/?adults=2')).toBe(urlKey('https://AIRBNB.de/rooms/123'));
     expect(urlKey('https://airbnb.de/rooms/123')).not.toBe(urlKey('https://airbnb.de/rooms/124'));

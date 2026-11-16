@@ -163,7 +163,6 @@
     "pasteFailed": "Einfügen nicht möglich – bitte ins Feld tippen und einfügen.",
     "duplicate": "Dieses Haus ist schon in der Liste: {{title}}",
     "loadingPreview": "Vorschau wird geladen …",
-    "previewNote": "Titel und Beschreibung der Seite werden mit dem Link gespeichert (durchsuchbar). Das Bild bleibt nur auf deinem Handy – jede Person hat ihren eigenen Zwischenspeicher.",
     "previewFailed": "Die Seite gibt keine Vorschau her. Trag Titel und Angaben einfach selbst ein und wähl unten ein Symbol.",
     "title": "Titel",
     "provider": "Anbieter",
@@ -192,7 +191,6 @@
     "vetoes_other": "{{count}} Vetos",
     "open": "Bei {{provider}} ansehen",
     "website": "der Seite",
-    "pictureLive": "Bild von der Anbieter-Seite, nur auf diesem Handy gespeichert",
     "facts": "Angaben",
     "distanceFromHome": "Entfernung von zu Hause",
     "deleteTitle": "Haus löschen?",
@@ -202,10 +200,10 @@
     "previewRefreshFailed": "Die Seite gibt gerade keine Vorschau her – die bisherige bleibt.",
     "fromListing": "Laut {{site}}",
     "previewTemporary": "Dieser Text kommt von der Anbieter-Seite und wird nicht gespeichert. Übernehme selbst, was relevant ist, in Titel und Beschreibung.",
+    "addPictureManually": "Kein Bild von der Anbieter-Seite sichtbar? Du kannst ein eigenes Foto hinzufügen (Galerie oder Kamera).",
     "sharedPickVacation": "Zu einem Urlaub hinzufügen",
     "sharedPickVacationHint": "Wähle den Urlaub, zu dem das geteilte Ferienhaus hinzugefügt werden soll.",
     "sharedNoVacations": "Du hast noch keinen Urlaub. Lege zuerst einen an.",
-    "sharedPhotoNotice": "Ich darf Fotos von Webseiten nicht automatisch hier einfügen. Füge das Ferienhaus hinzu und mach danach ein eigenes Foto, wenn du möchtest!",
     "sharedTitleLoading": "Den Ferienhausnamen ermitteln …",
     "sharedTitleUnavailable": "Der Name konnte nicht gelesen werden. Bitte prüfe oder ergänze den Titel, bevor du speicherst.",
     "sharedLinkInvalid": "Der geteilte Inhalt enthält keinen gültigen Ferienhaus-Link (http oder https).",
@@ -360,6 +358,7 @@
     "previewClear": "Zwischenspeicher leeren",
     "previewClearTitle": "Vorschauen neu laden?",
     "previewClearText": "Gespeicherte Bilder und Vorschauen werden gelöscht und beim nächsten Anzeigen neu von den Seiten geladen.",
-    "previewHint": "Bilder und Vorschauen der Ferienhäuser werden einmal von der Anbieter-Seite geladen und nur auf diesem Handy gespeichert – nie hochgeladen. Einzelne Häuser: im Haus über „…“ → „Vorschau neu laden“."
+    "previewHint": "Bilder werden nicht heruntergeladen oder gespeichert. Das Bild wird direkt von der Anbieter-Seite angezeigt und nie hochgeladen. Einzelne Häuser: im Haus über „…“ → „Vorschau neu laden“.",
+    "previewHotlinkingInfo": "Bild wird direkt von der Anbieter-Seite verlinkt (Hotlinking). Es wird weder heruntergeladen noch gespeichert – nie auf diesem Handy, nie auf einem Server."
   }
 }
