@@ -18,6 +18,9 @@ export interface AppContextValue {
   /** Invite code from a link that opened the app (not yet used). */
   invite: string | null;
   clearInvite(): void;
+  /** Vacation route from a push notification tap. */
+  pushRoute: string | null;
+  setPushRoute(route: string | null): void;
   /** Own home address for "distance from home" – only on this phone, never synced. */
   home: HomeLocation | null;
   setHome(h: HomeLocation | null): Promise<void>;

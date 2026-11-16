@@ -31,8 +31,17 @@ function InviteRouting({ startInvite }: { startInvite: string | null }) {
 
 export function App() {
   const { t } = useTranslation();
-  const { invite } = useApp();
+  const { invite, pushRoute, setPushRoute } = useApp();
+  const router = useIonRouter();
   const [start] = useState(() => ({ invite }));
+
+  // Tapping a push notification opens the vacation.
+  useEffect(() => {
+    if (!pushRoute) return;
+    router.push(pushRoute, 'root');
+    setPushRoute(null);
+  }, [pushRoute, router, setPushRoute]);
+
   return (
     <IonReactRouter>
       <InviteRouting startInvite={start.invite} />

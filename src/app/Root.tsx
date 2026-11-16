@@ -14,6 +14,7 @@ import { AccountService, type AccountState } from '../data/sync/account';
 import type { Session } from '../domain/models';
 import { Onboarding } from '../features/onboarding/Onboarding';
 import { isNative } from '../native/platform';
+import { addListeners, onPushTap, start as pushStart } from '../native/pushNotifications';
 import { App } from './App';
 import { AppContext, type AppContextValue, type HomeLocation } from './AppContext';
 
@@ -39,6 +40,7 @@ export function Root() {
   const [boot, setBoot] = useState<Boot>({ state: 'loading' });
   const [today, setToday] = useState(clock.today());
   const [invite, setInvite] = useState<string | null>(null);
+  const [pushRoute, setPushRouteState] = useState<string | null>(null);
   const [home, setHomeState] = useState<HomeLocation | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const sessionRef = useRef<Session | null>(null);
@@ -94,6 +96,14 @@ export function Root() {
         setAccountState(account.state());
         account.onChange(setAccountState);
         void account.start().catch((e) => console.error('[account]', e));
+        if (isNative) {
+          void pushStart().catch((e) => console.error('[push] start', e));
+          addListeners();
+          onPushTap((route) => {
+            // Navigate to the vacation from a push tap.
+            void setPushRouteState(route.startsWith('/') ? route : `/${route}`);
+          });
+        }
       }
       setBoot({ state: 'ready', db, sync, onboarded: (await store.get('onboarding_completed')) === '1' });
     } catch (e) {
@@ -135,6 +145,8 @@ export function Root() {
       today,
       invite,
       clearInvite: () => setInvite(null),
+      pushRoute,
+      setPushRoute: setPushRouteState,
       home,
       setHome: async (h) => {
         setHomeState(h);
@@ -143,7 +155,7 @@ export function Root() {
       account: accountRef.current,
       accountState,
     };
-  }, [ready, session, repos, today, accountState, invite, home]);
+  }, [ready, session, repos, today, accountState, invite, home, pushRoute]);
 
   return (
     <IonApp>

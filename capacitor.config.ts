@@ -12,6 +12,7 @@ const config: CapacitorConfig = {
       '@capacitor/browser',
       '@capacitor/filesystem',
       '@capacitor/preferences',
+      '@capacitor/push-notifications',
       '@capacitor/share',
     ],
   },
