@@ -76,11 +76,9 @@ for (const scheme of ['light', 'dark'] as const) {
       const iosDir = `ios/fastlane/screenshots/${locale}`;
       const androidDir = `android/fastlane/metadata/android/${locale}/images/phoneScreenshots`;
 
-      // iOS screenshots (440 × 956 CSS px @ 3x → 1320 × 2868)
       await shootStore(iosPage, iosDir, scheme, locale);
       await iosCtx.close();
 
-      // Android screenshots (360 × 640 CSS px @ 3x → 1080 × 1920)
       await shootStore(androidPage, androidDir, scheme, locale);
       await androidCtx.close();
     });
@@ -91,6 +89,10 @@ async function shootStore(page: Page, out: string, scheme: string, locale: strin
   await page.goto('/');
   await completeOnboarding(page);
   await seedDemoVacation(page);
+  // Reload so the home_location written by seedDemo is read into the app context on boot.
+  // Without this, `home` stays null in React because it's only read once at app start.
+  await page.reload();
+  await page.waitForTimeout(800);
   await page.goto('/vacations');
   await page.waitForTimeout(800);
 
@@ -101,6 +103,7 @@ async function shootStore(page: Page, out: string, scheme: string, locale: strin
   await shoot(page, out, scheme, locale, '2-houses');
   // Map
   await goToMap(page);
+  await page.waitForTimeout(1500);
   await shoot(page, out, scheme, locale, '3-map');
   // People
   await goToPeople(page);

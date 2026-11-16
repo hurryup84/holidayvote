@@ -69,9 +69,14 @@ export function MapView({ houses, home, onOpen }: { houses: PropertyWithStats[];
         title: t('map.home'),
       }).addTo(g);
     }
-    if (points.length === 1) m.setView(points[0], 11);
-    else if (points.length > 1) m.fitBounds(L.latLngBounds(points), { padding: [40, 40] });
-    else if (home) m.setView([home.lat, home.lng], 6);
+    if (points.length > 0) {
+      const bounds = L.latLngBounds(points);
+      if (home) bounds.extend([home.lat, home.lng]);
+      if (points.length === 1 && !home) m.setView(points[0], 11);
+      else m.fitBounds(bounds, { padding: [40, 40] });
+    } else if (home) {
+      m.setView([home.lat, home.lng], 6);
+    }
   }, [houses, home, t]);
 
   return <div ref={el} className="map-view" />;
