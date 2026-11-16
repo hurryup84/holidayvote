@@ -131,6 +131,31 @@ platform :android do
     )
   end
 
+  desc "Upload only the Play Store screenshots (metadata/android/<locale>/images/phoneScreenshots/, made with npm run screenshots:store) – replaces the ones in Play Console"
+  lane :upload_screenshots do
+    # Screenshots belong to a release: reuse the newest track/version code
+    track, code = TRACKS.reverse.filter_map do |t|
+      codes = begin
+        google_play_track_version_codes(track: t)
+      rescue StandardError
+        []
+      end
+      [t, codes.map(&:to_i).max] unless codes.empty?
+    end.max_by { |(_, c)| c }
+    UI.user_error!("No release on Google Play yet – upload a build first (fastlane android internal)") unless track
+
+    upload_to_play_store(
+      track: track,
+      version_code: code,
+      metadata_path: METADATA,
+      skip_upload_metadata: true,
+      skip_upload_aab: true,
+      skip_upload_apk: true,
+      skip_upload_changelogs: true # only images/phoneScreenshots/ are uploaded
+    )
+    UI.success("Uploaded screenshots to track '#{track}' version code #{code}")
+  end
+
   desc "Check that the Google Play API key works (lists the version codes per track)"
   lane :check do
     validate_play_store_json_key
