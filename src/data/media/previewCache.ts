@@ -90,8 +90,19 @@ export function previewCache(db: Db, clock: Clock) {
     async ensure(url: string): Promise<Preview | null> {
       const r = await row(url);
       if (r) {
-        const failedLongAgo = r.status === 'failed' && Date.now() - new Date(r.fetched_at).getTime() > RETRY_FAILED_MS;
-        if (!failedLongAgo) return toPreview(r);
+        const failedLongAgo =
+          r.status === 'failed' && clock.now().getTime() - new Date(r.fetched_at).getTime() > RETRY_FAILED_MS;
+        if (!failedLongAgo) {
+          return {
+            url: r.id,
+            title: r.title,
+            description: r.description,
+            siteName: r.site_name,
+            imageSrc: r.image_url ?? null,
+            status: r.status === 'failed' ? 'failed' : 'ok',
+            fetchedAt: r.fetched_at,
+          };
+        }
       }
       return this.refresh(url);
     },
