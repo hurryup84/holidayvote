@@ -7,12 +7,12 @@ import {
   IonItem,
   IonLabel,
   IonList,
-  IonListHeader,
   IonModal,
   IonTitle,
   IonToolbar,
   useIonToast,
 } from '@ionic/react';
+import { App as CapApp } from '@capacitor/app';
 import { homeOutline } from 'ionicons/icons';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -86,9 +86,16 @@ export function SharedProperty() {
     };
     void check();
     const received = onIncomingShare(() => void check());
+    // Re-check for pending shares when the app comes to the foreground. This covers
+    // the case where the Share Extension opened the app while it was already running
+    // (mount check already ran and found nothing), so the newly saved share is picked up.
+    const state = CapApp.addListener('appStateChange', ({ isActive }: { isActive: boolean }) => {
+      if (isActive) void check();
+    });
     return () => {
       active = false;
-      void received.then((sub) => sub.remove());
+      void state.then((s: { remove: () => void }) => s.remove());
+      void received.then((s: { remove: () => void }) => s.remove());
     };
   }, [revision, t, toast]);
 
@@ -138,11 +145,9 @@ export function SharedProperty() {
               </IonButtons>
             </IonToolbar>
           </IonHeader>
-          <IonContent>
+          <IonContent className="ion-padding">
+            <p className="muted small">{t('property.sharedPickVacationHint')}</p>
             <IonList>
-              <IonListHeader>
-                <IonLabel>{t('property.sharedPickVacationHint')}</IonLabel>
-              </IonListHeader>
               {vacations.length === 0 && (
                 <IonItem>
                   <IonLabel>{t('property.sharedNoVacations')}</IonLabel>
