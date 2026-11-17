@@ -49,21 +49,37 @@ export function SharedProperty() {
       checking = true;
       try {
         const shares = await pendingShares();
+        if (!active) return;
+        // Filter out invalid shares silently; only show error if there are actual shares to process
+        const validShares: IncomingShare[] = [];
         for (const item of shares) {
           if (!active) return;
           const url = sharedHolidayHomeUrl(item.text);
           if (url) {
-            current.current = item.id;
-            setShare({ ...item, url });
-            setVacationId('');
-            break;
+            validShares.push(item);
+          } else {
+            await removeShare(item.id);
           }
-          await removeShare(item.id);
-          void toast({ message: t('property.sharedLinkInvalid'), duration: 4000, color: 'danger' });
+        }
+        if (!active) return;
+        if (validShares.length > 0) {
+          current.current = validShares[0].id;
+          setShare({ ...validShares[0], url: sharedHolidayHomeUrl(validShares[0].text)! });
+          setVacationId('');
         }
       } catch (error) {
         console.error('[incoming-share] inbox', error);
-        if (active) void toast({ message: t('property.sharedLinkError'), duration: 4000, color: 'danger' });
+        // Only show error toast if there was actually something to process
+        if (active) {
+          try {
+            const shares = await pendingShares();
+            if (shares.length > 0) {
+              void toast({ message: t('property.sharedLinkError'), duration: 4000, color: 'danger' });
+            }
+          } catch {
+            // Ignore - no shares to process
+          }
+        }
       } finally {
         checking = false;
       }
