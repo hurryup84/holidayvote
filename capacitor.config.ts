@@ -10,6 +10,7 @@ const config: CapacitorConfig = {
       '@capacitor-community/sqlite',
       '@capacitor/app',
       '@capacitor/browser',
+      '@capacitor/clipboard',
       '@capacitor/filesystem',
       '@capacitor/preferences',
       '@capacitor/push-notifications',

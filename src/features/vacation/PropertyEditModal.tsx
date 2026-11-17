@@ -28,6 +28,7 @@ import type { Property, PropertyInput, VacationSettings } from '../../domain/mod
 import { detectProvider, extractUrl, isHttpUrl } from '../../domain/services/provider';
 import { geocode } from '../../native/geocode';
 import { fetchLinkPreview } from '../../native/linkPreview';
+import { readClipboard } from '../../native/clipboard';
 import { fieldOn } from './fields';
 
 interface Form {
@@ -221,8 +222,8 @@ export function PropertyEditModal({
 
   const paste = async () => {
     try {
-      const text = await navigator.clipboard.readText();
-      const found = extractUrl(text);
+      const text = await readClipboard();
+      const found = text ? extractUrl(text) : null;
       if (found) setForm((f) => ({ ...f, url: found }));
       else void toast({ message: t('property.noLinkInClipboard'), duration: 2000, position: 'top' });
     } catch {

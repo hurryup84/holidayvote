@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useApp } from '../../app/AppContext';
 import { fmtShort } from '../../core/format';
+import { writeClipboard } from '../../native/clipboard';
 import { shareText } from '../../native/share';
 
 /**
@@ -54,8 +55,7 @@ export function RecoveryCard() {
     code && void shareText({ title: t('recovery.shareTitle'), text: t('recovery.shareText', { code }) });
   const copy = () =>
     code &&
-    void navigator.clipboard
-      .writeText(code)
+    void writeClipboard(code)
       .then(() => toast({ message: t('recovery.copied'), duration: 1500, position: 'top' }))
       .catch(() => undefined);
 

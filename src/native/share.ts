@@ -1,5 +1,6 @@
 import { Share } from '@capacitor/share';
 import { isCancel } from './platform';
+import { writeClipboard } from './clipboard';
 
 export type ShareResult = 'shared' | 'copied' | 'cancelled' | 'failed';
 
@@ -14,7 +15,7 @@ export async function shareText(p: { title: string; text: string; url?: string }
     if (isCancel(e)) return 'cancelled';
   }
   try {
-    await navigator.clipboard.writeText(p.url ? `${p.text} ${p.url}` : p.text);
+    await writeClipboard(p.url ? `${p.text} ${p.url}` : p.text);
     return 'copied';
   } catch {
     return 'failed';

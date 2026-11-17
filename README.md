@@ -147,6 +147,10 @@ share. Multiple shares wait in a local inbox and are reviewed one at a time.
 Website photos are never imported. The form explains that they cannot be copied and encourages taking your own photo.
 Only the page HTML is requested for the title; image files are never requested.
 
+The link field's Paste button reads through Capacitor's native Clipboard plugin on both Android and iOS;
+only the browser build uses `navigator.clipboard`. Read failures show a paste error, not an empty-clipboard message.
+Keep the Clipboard plugin in `android.includePlugins` in `capacitor.config.ts`; Android sync uses this explicit allowlist.
+
 iOS signing needs the App Group **group.com.moidev.holidayvote** enabled for both
 **com.moidev.holidayvote** and the new extension **com.moidev.holidayvote.share**. Enable/register these
 in the Apple Developer account and refresh provisioning profiles before a device/store build.
