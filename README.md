@@ -153,4 +153,15 @@ in the Apple Developer account and refresh provisioning profiles before a device
 The extension is embedded automatically by the App target. Native changes require rebuilding
 and reinstalling the app (`npm run ios` / `npm run android`), not just refreshing the web app.
 
+## iOS push notifications
+
+The App target enables Push Notifications and uses `App/App.entitlements` for both Debug and Release.
+Enable Push Notifications for **com.moidev.holidayvote** in the Apple Developer account and refresh
+provisioning profiles before a device/store build. `AppDelegate.swift` forwards APNs registration
+success and failure callbacks to Capacitor; keep both callbacks when changing the app lifecycle.
+
+After rebuilding and reinstalling on a device with an account, successful token registration logs
+`[push] token registered on server` and creates or updates the iOS row in `public.push_devices`.
+Registration failures are reported through the `registrationError` listener.
+
 The previous Next.js web version of this app (magic-link login, Vercel) is in the git history before this rewrite.
