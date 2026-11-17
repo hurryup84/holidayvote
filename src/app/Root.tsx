@@ -75,16 +75,13 @@ export function Root() {
     return () => void sub.then((s) => s.remove());
   }, []);
 
-  // Register the push-tap listener as early as possible (on first mount, before boot),
-  // so a notification tap that launched the app (cold start) is not missed. Without this,
-  // PushNotifications.addListener() only gets registered after openAppDb() + account.start()
-  // finish, and Capacitor may already have delivered pushNotificationActionPerformed.
+  // Keep cold-start taps pending while the database and router start.
   useEffect(() => {
-    if (isNative) {
-      onPushTap((route) => {
-        void setPushRouteState(route.startsWith('/') ? route : `/${route}`);
-      });
-    }
+    const listener = onPushTap(setPushRouteState);
+    return () => {
+      void listener.then((handle) => handle?.remove())
+        .catch((error: unknown) => console.error('[push] tap listener cleanup failed', error));
+    };
   }, []);
 
   const start = useCallback(async (attempt = 1): Promise<void> => {

@@ -154,6 +154,9 @@
   },
   "property": {
     "house": "Holiday home",
+    "loadingHouse": "Loading holiday home…",
+    "houseUnavailable": "This holiday home is not available on this device. Try syncing again, or return to your vacations.",
+    "houseLoadFailed": "The holiday home couldn't be loaded. Check your connection and try again.",
     "add": "Add house",
     "edit": "Edit house",
     "link": "Link to the holiday home",

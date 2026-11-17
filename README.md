@@ -171,4 +171,9 @@ The app requests notification permission and registers its FCM token after an ac
 Server-side delivery uses a private Firebase service-account key and short-lived OAuth tokens, not
 a legacy server key. Migration, secrets, deployment and verification: [backend push setup](supabase/README.md#5-push-notifications).
 
+Tapping a new-house notification opens the house detail page, including when the app was closed.
+The tap waits for the app router to start and requests a sync so new houses can arrive on the device.
+While the house loads, a loading screen is shown; unavailable houses offer retry and a way back to vacations.
+Older notifications linking only to a vacation still open that vacation.
+
 The previous Next.js web version of this app (magic-link login, Vercel) is in the git history before this rewrite.

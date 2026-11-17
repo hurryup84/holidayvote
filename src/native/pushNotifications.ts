@@ -8,7 +8,7 @@
  * - iOS: Apple's push service (Edge Function push-houses, triggered by pg_cron every 5 min)
  * - Android: Firebase Cloud Messaging (Edge Function push-houses, triggered by pg_cron every 5 min)
  *
- * Tapping a push opens the vacation.
+ * Tapping a push opens the linked house (or the vacation for older notifications).
  */
 import { PushNotifications } from '@capacitor/push-notifications';
 import type { PluginListenerHandle } from '@capacitor/core';
@@ -64,11 +64,22 @@ async function addListeners(): Promise<void> {
   );
 }
 
-/** Tapping a push notification → navigate to the vacation route. Works on iOS and Android. */
-export function onPushTap(cb: (route: string) => void): void {
+/** Native retains cold-start tap events until this listener is attached. */
+export async function onPushTap(cb: (route: string) => void): Promise<PluginListenerHandle | undefined> {
   if (!isNative) return;
-  void PushNotifications.addListener('pushNotificationActionPerformed', (a) => {
-    const route = (a.notification.data as { route?: string } | undefined)?.route;
-    if (route) cb(route);
-  });
+  try {
+    return await PushNotifications.addListener('pushNotificationActionPerformed', (a) => {
+      const route: unknown = a.notification.data?.route;
+      if (typeof route === 'string') {
+        const path = `/${route.trim().replace(/^\/+/, '')}`;
+        if (/^\/vacations\/[^/?#]+(?:\/houses\/[^/?#]+)?$/.test(path)) {
+          cb(path);
+          return;
+        }
+      }
+      console.warn('[push] notification has no supported destination');
+    });
+  } catch (error) {
+    console.error('[push] tap listener setup failed', error);
+  }
 }

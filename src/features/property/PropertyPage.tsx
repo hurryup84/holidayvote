@@ -11,6 +11,7 @@ import {
   IonListHeader,
   IonNote,
   IonPage,
+  IonSpinner,
   IonTextarea,
   IonTitle,
   IonToolbar,
@@ -57,7 +58,7 @@ import './property.css';
 export function PropertyPage() {
   const { id = '', pid = '' } = useParams();
   const { t, i18n } = useTranslation();
-  const { repos, session, account, home } = useApp();
+  const { repos, session, account, accountState, home } = useApp();
   const router = useIonRouter();
   const [alert] = useIonAlert();
   const [toast] = useIonToast();
@@ -65,9 +66,11 @@ export function PropertyPage() {
   const [editing, setEditing] = useState(false);
   const [comment, setComment] = useState('');
   const [commentStars, setCommentStars] = useState<number | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [revision, setRevision] = useState(0);
 
-  const { data: p } = useLiveQuery(() => repos.properties.getWithStats(pid), PROPERTY_TABLES, [repos, pid]);
-  const { data: vacation } = useLiveQuery(() => repos.vacations.get(id), ['vacations'], [repos, id]);
+  const { data: p, error: propertyError } = useLiveQuery(() => repos.properties.getWithStats(pid), PROPERTY_TABLES, [repos, pid, revision]);
+  const { data: vacation, error: vacationError } = useLiveQuery(() => repos.vacations.get(id), ['vacations'], [repos, id, revision]);
   const { data: members } = useLiveQuery(() => repos.vacations.members(id), ['vacation_members'], [repos, id]);
   const { data: votes } = useLiveQuery(() => repos.votes.forProperty(pid), ['votes', 'vacation_members'], [repos, pid]);
   const { data: vetoedBy } = useLiveQuery(() => repos.votes.pickedBy('vetoes', pid), ['vetoes', 'vacation_members'], [repos, pid]);
@@ -78,7 +81,52 @@ export function PropertyPage() {
 
   const say = (message: string, color?: string) => void toast({ message, duration: 2500, position: 'top', color });
 
-  if (!p || !vacation) return <IonPage />;
+  const refresh = async () => {
+    setRefreshing(true);
+    try {
+      await account.syncNow();
+    } catch (error) {
+      console.error('[property] refresh', error);
+      say(t('property.houseLoadFailed'), 'danger');
+    } finally {
+      setRefreshing(false);
+      setRevision((n) => n + 1);
+    }
+  };
+
+  if (!p || !vacation) {
+    const failed = propertyError || vacationError || accountState.sync.error;
+    const loading = !failed && (p === undefined || vacation === undefined || refreshing ||
+      accountState.sync.connecting || accountState.sync.downloading || accountState.sync.uploading);
+    return (
+      <IonPage>
+        <IonHeader>
+          <IonToolbar>
+            <IonButtons slot="start">
+              <IonBackButton defaultHref={vacation ? `/vacations/${id}` : '/vacations'} text="" />
+            </IonButtons>
+            <IonTitle>{t('property.house')}</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent>
+          <div className="empty-state" role="status">
+            {loading ? (
+              <>
+                <IonSpinner />
+                <p>{t('property.loadingHouse')}</p>
+              </>
+            ) : (
+              <>
+                <p>{t(failed ? 'property.houseLoadFailed' : 'property.houseUnavailable')}</p>
+                <IonButton disabled={refreshing} onClick={() => void refresh()}>{t('boot.retry')}</IonButton>
+                <IonButton fill="clear" routerLink="/vacations" routerDirection="root">{t('tabs.vacations')}</IonButton>
+              </>
+            )}
+          </div>
+        </IonContent>
+      </IonPage>
+    );
+  }
   const settings = vacation.settings;
   const on = (f: Parameters<typeof fieldOn>[1]) => fieldOn(settings, f);
   const people = Math.max(1, members?.length ?? 1);

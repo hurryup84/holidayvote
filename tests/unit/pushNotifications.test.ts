@@ -40,6 +40,7 @@ describe('native push registration', () => {
       await pending;
       return { remove: vi.fn() };
     });
+
     const push = await import('../../src/native/pushNotifications');
     const first = push.start();
     const second = push.start();
@@ -89,5 +90,35 @@ describe('native push registration', () => {
     mocks.saveToken.mockRejectedValueOnce(new Error('RPC failed'));
     await push.onToken('token');
     expect(console.error).toHaveBeenCalledWith('[push] token registration failed', expect.any(Error));
+  });
+});
+
+describe('notification taps', () => {
+  it.each(['android', 'ios'])('forwards a house route and returns a removable listener on %s', async (platform) => {
+    mocks.platform.platform = platform;
+    const handle = { remove: vi.fn() };
+    mocks.addListener.mockResolvedValue(handle);
+    const { onPushTap } = await import('../../src/native/pushNotifications');
+    const receive = vi.fn();
+    expect(await onPushTap(receive)).toBe(handle);
+    const [event, callback] = mocks.addListener.mock.calls[0] as [string, (action: { notification: { data?: { route?: unknown } } }) => void];
+    expect(event).toBe('pushNotificationActionPerformed');
+    callback({ notification: { data: { route: 'vacations/vacation-id/houses/house-id' } } });
+    expect(receive).toHaveBeenLastCalledWith('/vacations/vacation-id/houses/house-id');
+    callback({ notification: { data: { route: '/vacations/vacation-id' } } });
+    expect(receive).toHaveBeenLastCalledWith('/vacations/vacation-id');
+  });
+
+  it('rejects malformed or missing destinations rather than navigating to a blank route', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const { onPushTap } = await import('../../src/native/pushNotifications');
+    const receive = vi.fn();
+    await onPushTap(receive);
+    const callback = mocks.addListener.mock.calls[0][1] as (action: { notification: { data?: { route?: unknown } } }) => void;
+    for (const route of [undefined, 123, '', '/unknown', 'https://example.com/vacations/123']) {
+      callback({ notification: { data: { route } } });
+    }
+    expect(receive).not.toHaveBeenCalled();
+    expect(console.warn).toHaveBeenCalledTimes(5);
   });
 });

@@ -154,6 +154,9 @@
   },
   "property": {
     "house": "Ferienhaus",
+    "loadingHouse": "Ferienhaus wird geladen …",
+    "houseUnavailable": "Dieses Ferienhaus ist auf diesem Gerät nicht verfügbar. Versuche erneut zu synchronisieren oder gehe zu deinen Urlauben zurück.",
+    "houseLoadFailed": "Das Ferienhaus konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.",
     "add": "Haus hinzufügen",
     "edit": "Haus bearbeiten",
     "link": "Link zum Ferienhaus",

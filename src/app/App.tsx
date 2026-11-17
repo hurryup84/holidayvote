@@ -3,7 +3,7 @@ import { IonReactRouter } from '@ionic/react-router';
 import { airplaneOutline, settingsOutline } from 'ionicons/icons';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Navigate, Route } from 'react-router-dom';
+import { Navigate, Route, useLocation } from 'react-router-dom';
 import { DEBUG_TOOLS } from '../core/config';
 import { DebugPage } from '../features/debug/DebugPage';
 import { PropertyPage } from '../features/property/PropertyPage';
@@ -29,22 +29,30 @@ function InviteRouting({ startInvite }: { startInvite: string | null }) {
   return null;
 }
 
+function PushRouting() {
+  const { pushRoute, setPushRoute, account } = useApp();
+  const router = useIonRouter();
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    // Ionic catches up to React Router after the initial redirect; wait for both.
+    if (!pushRoute || pathname === '/' || router.routeInfo.pathname !== pathname) return;
+    void account.syncNow().catch((error: unknown) => console.error('[push] refresh after tap', error));
+    if (pathname !== pushRoute) router.push(pushRoute, 'root');
+    setPushRoute(null);
+  }, [pushRoute, pathname, router, setPushRoute, account]);
+  return null;
+}
+
 export function App() {
   const { t } = useTranslation();
-  const { invite, pushRoute, setPushRoute } = useApp();
-  const router = useIonRouter();
+  const { invite } = useApp();
   const [start] = useState(() => ({ invite }));
-
-  // Tapping a push notification opens the vacation.
-  useEffect(() => {
-    if (!pushRoute) return;
-    router.push(pushRoute, 'root');
-    setPushRoute(null);
-  }, [pushRoute, router, setPushRoute]);
 
   return (
     <IonReactRouter>
       <InviteRouting startInvite={start.invite} />
+      <PushRouting />
       <SharedProperty />
       <IonTabs>
         <IonRouterOutlet>
