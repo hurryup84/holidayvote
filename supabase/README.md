@@ -37,6 +37,7 @@ secret), copy URL and anon key into `.env.local` (see `.env.example`).
 npx supabase functions deploy link-preview                    # link preview for the browser build only
 npx supabase functions deploy moderation --no-verify-jwt      # moderation page backend (signed link)
 npx supabase functions deploy report-digest --no-verify-jwt   # daily report e-mail
+npx supabase functions deploy push-houses --no-verify-jwt     # iOS (APNs) + Android (FCM)
 ```
 
 `link-preview` is used only by the browser build (CORS); phones fetch the holiday-home page themselves. It returns
@@ -60,7 +61,54 @@ Daily at 07:00 UTC an e-mail comes **if new reports came in** (no content, only 
 `https://holidayvote.support-moidev.workers.dev/moderation#t=…` (dismiss / remove / remove + ban).
 By hand: `select * from moderation_queue;` and `select moderate_report('<report id>', 'remove');`.
 
-## 5. Checks (SQL editor)
+## 5. Push notifications
+
+The `holidayvote-push-houses` cron runs every five minutes and uses the same Vault
+`project_url` / `report_digest_secret` and Edge Function `REPORT_DIGEST_SECRET` as the report digest.
+iOS sending needs the `APNS_KEY_P8` (file content), `APNS_KEY_ID` and `APNS_TEAM_ID` secrets.
+
+Android setup:
+
+1. Register the Firebase Android app as `com.moidev.holidayvote`. Download `google-services.json`
+   to `android/app/` (gitignored); Capacitor provides the Messaging SDK and notification permission
+   declaration. The app requests notification permission on Android 13+ after an account is available.
+2. Enable **Firebase Cloud Messaging API (HTTP v1)** in the Firebase/Google Cloud project.
+3. Generate a service-account JSON key with permission to send FCM messages in that project
+   (the **Firebase Cloud Messaging API Admin** role). Keep it outside the repository and app.
+4. Configure the linked Supabase project from a private file:
+   ```sh
+   npx supabase secrets set FIREBASE_SERVICE_ACCOUNT="$(cat /absolute/private/path/firebase-service-account.json)"
+   ```
+   Do not paste the key into chat, commit it, or put it in a `VITE_*` variable. The function reads
+   `project_id`, `client_email` and `private_key` from this JSON and obtains renewable OAuth access
+   tokens. Neither a legacy `FCM_SERVER_KEY` nor a separate `FIREBASE_PROJECT_ID` is used.
+5. Apply the new migration and deploy the function:
+   ```sh
+   npx supabase db push
+   npx supabase functions deploy push-houses --no-verify-jwt
+   npm run android
+   ```
+   For an existing backend, apply only pending migrations, not the whole `setup_all.sql` again.
+
+`push_devices`, `push_events` and `push_sent` are server-only (not in SQLite or `sync_pull`).
+Android registration keeps the actual FCM token, protected by RLS, as well as the existing hash.
+Old hash-only Android rows are skipped until that phone reopens the updated app and registers again.
+Missing or invalid credentials for one provider do not prevent delivery through the other.
+
+Verify `[push] token registered on server` on the phone and inspect registrations without exposing tokens:
+
+```sql
+select id, platform, updated_at, (fcm_token is not null) as has_fcm_token
+from public.push_devices;
+```
+
+Test a Firebase Console notification to the device with the app backgrounded, then test the full flow:
+another member adds a house in a shared vacation during **08:00–21:00 device-local time**; wait up to
+five minutes and check the `push-houses` function logs. Tapping the notification opens that vacation.
+Only confirmed FCM `UNREGISTERED` errors remove a device; payload, permission and transient failures
+keep it for retry. A batch with delivery or receipt-write failures returns HTTP 500 and logs the error.
+
+## 6. Checks (SQL editor)
 
 ```sql
 select * from app_config;                                   -- limits, sync_deletes_purged_xid

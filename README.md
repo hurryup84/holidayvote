@@ -164,4 +164,11 @@ After rebuilding and reinstalling on a device with an account, successful token 
 `[push] token registered on server` and creates or updates the iOS row in `public.push_devices`.
 Registration failures are reported through the `registrationError` listener.
 
+## Android push notifications
+
+Add Firebase's `google-services.json` for `com.moidev.holidayvote` to `android/app/` (gitignored).
+The app requests notification permission and registers its FCM token after an account is available.
+Server-side delivery uses a private Firebase service-account key and short-lived OAuth tokens, not
+a legacy server key. Migration, secrets, deployment and verification: [backend push setup](supabase/README.md#5-push-notifications).
+
 The previous Next.js web version of this app (magic-link login, Vercel) is in the git history before this rewrite.

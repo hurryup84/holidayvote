@@ -2,6 +2,7 @@
  * Single source of truth for the local schema (plain SQLite; sql.js in the browser and tests).
  * Every table has an implicit `id TEXT PRIMARY KEY`. Mirrors concept/03_data_model.md and the
  * server tables in supabase/migrations.
+ * Push devices, delivery events and receipts are server-only and are never mirrored here.
  *
  * Holiday-home pictures are never in the database (local or server). Each phone keeps its own cache of
  * the link previews (`preview_cache`, local only; the picture as a file in the app's data directory –

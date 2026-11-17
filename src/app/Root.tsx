@@ -14,7 +14,7 @@ import { AccountService, type AccountState } from '../data/sync/account';
 import type { Session } from '../domain/models';
 import { Onboarding } from '../features/onboarding/Onboarding';
 import { isNative } from '../native/platform';
-import { addListeners, onPushTap, start as pushStart } from '../native/pushNotifications';
+import { onPushTap, start as pushStart } from '../native/pushNotifications';
 import { App } from './App';
 import { AppContext, type AppContextValue, type HomeLocation } from './AppContext';
 
@@ -48,6 +48,10 @@ export function Root() {
   const accountRef = useRef<AccountService | null>(null);
   const [accountState, setAccountState] = useState<AccountState | null>(null);
 
+  useEffect(() => {
+    if (accountState?.user?.id) void pushStart();
+  }, [accountState?.user?.id]);
+
   // Invite links (com.moidev.holidayvote://join/CODE, or /join/CODE in the browser): remembered here,
   // used by the onboarding (new users) or the vacation list (existing users).
   useEffect(() => {
@@ -69,6 +73,18 @@ export function Root() {
       if (code) setInvite(code);
     });
     return () => void sub.then((s) => s.remove());
+  }, []);
+
+  // Register the push-tap listener as early as possible (on first mount, before boot),
+  // so a notification tap that launched the app (cold start) is not missed. Without this,
+  // PushNotifications.addListener() only gets registered after openAppDb() + account.start()
+  // finish, and Capacitor may already have delivered pushNotificationActionPerformed.
+  useEffect(() => {
+    if (isNative) {
+      onPushTap((route) => {
+        void setPushRouteState(route.startsWith('/') ? route : `/${route}`);
+      });
+    }
   }, []);
 
   const start = useCallback(async (attempt = 1): Promise<void> => {
@@ -96,14 +112,6 @@ export function Root() {
         setAccountState(account.state());
         account.onChange(setAccountState);
         void account.start().catch((e) => console.error('[account]', e));
-        if (isNative) {
-          void pushStart().catch((e) => console.error('[push] start', e));
-          addListeners();
-          onPushTap((route) => {
-            // Navigate to the vacation from a push tap.
-            void setPushRouteState(route.startsWith('/') ? route : `/${route}`);
-          });
-        }
       }
       setBoot({ state: 'ready', db, sync, onboarded: (await store.get('onboarding_completed')) === '1' });
     } catch (e) {
