@@ -180,4 +180,83 @@ The tap waits for the app router to start and requests a sync so new houses can 
 While the house loads, a loading screen is shown; unavailable houses offer retry and a way back to vacations.
 Older notifications linking only to a vacation still open that vacation.
 
+## Server-side checks (SQL Editor)
+
+### Pending push notifications (not yet delivered)
+
+Push events wait in `public.push_events` until `push_due_house()` picks them up (runs every 5 minutes via the `push-houses` Edge Function, daytime 08:00–21:00 device-local). Already-delivered ones are logged in `public.push_sent` (7-day retention). `push_devices`, `push_events` and `push_sent` are server-only — not in SQLite or `sync_pull`.
+
+```sql
+-- Events waiting to be sent to at least one device
+select pe.id, pe.created_at, v.name as vacation, pe.house_title, pe.added_by_name,
+       count(distinct d.id) as devices_waiting
+from public.push_events pe
+join public.properties p on p.id = pe.property_id
+join public.vacations v on v.id = pe.vacation_id
+join public.vacation_members m on m.vacation_id = pe.vacation_id
+join public.push_devices d on d.user_id = m.user_id
+where pe.added_by is distinct from d.user_id
+  and not exists (
+    select 1 from public.push_sent s
+    where s.device_id = d.id and s.kind = 'house:' || pe.id
+  )
+group by pe.id, pe.created_at, v.name, pe.house_title, pe.added_by_name
+order by pe.created_at desc;
+
+-- What push_due_house() would deliver right now (daytime 08:00–21:00 device-local)
+select d.id as device_id, d.platform,
+       case when d.platform = 'ios' then d.apns_token else d.fcm_token end as token,
+       pe.id as event_id, pe.house_title, pe.added_by_name, v.name as vacation,
+       (now() at time zone d.tz)::date as local_date,
+       'house:' || pe.id as kind
+from public.push_devices d
+join public.vacation_members m on m.user_id = d.user_id
+join public.push_events pe on pe.vacation_id = m.vacation_id
+  and pe.added_by is distinct from d.user_id
+join public.vacations v on v.id = pe.vacation_id
+where (d.platform = 'ios' or (d.platform = 'android' and d.fcm_token is not null))
+  and (now() at time zone d.tz)::time between '08:00' and '21:00'
+  and not exists (
+    select 1 from public.push_sent s
+    where s.device_id = d.id and s.kind = 'house' and s.local_date = (now() at time zone d.tz)::date
+  )
+  and not exists (
+    select 1 from public.push_sent s
+    where s.device_id = d.id and s.kind = 'house:' || pe.id
+  )
+order by pe.created_at;
+
+-- Already delivered (audit log)
+select s.sent_at, d.platform, s.kind, s.local_date
+from public.push_sent s
+join public.push_devices d on d.id = s.device_id
+order by s.sent_at desc
+limit 50;
+
+-- Registered devices (inspect without exposing tokens)
+select id, platform, updated_at, (fcm_token is not null) as has_fcm_token
+from public.push_devices;
+```
+
+### Pending reports to be sent (moderation)
+
+Content reports wait in `public.content_reports` with status `open`. The `report-digest` Edge Function emails them daily at 07:00 UTC (only if new reports came in since the last send). The last send time is stored in `public.app_config` (`report_digest_last_at`). Open reports with everything needed to decide are exposed through the `public.moderation_queue` view.
+
+```sql
+-- Open reports waiting to be handled (moderation queue)
+select * from public.moderation_queue;
+
+-- Reports created since the last digest email (would be in today's / tomorrow's email)
+select * from public.content_reports
+where status = 'open'
+  and created_at > coalesce(
+    (select value from public.app_config where key = 'report_digest_last_at'),
+    '1970-01-01T00:00:00Z'
+  )
+order by created_at desc;
+
+-- Handle a report (SQL editor / service_role only)
+select public.moderate_report('<report-uuid>', 'dismiss');   -- or 'remove' / 'ban'
+```
+
 The previous Next.js web version of this app (magic-link login, Vercel) is in the git history before this rewrite.
