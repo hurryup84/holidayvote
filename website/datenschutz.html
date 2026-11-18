@@ -78,6 +78,19 @@
       <a href="https://osmfoundation.org/wiki/Privacy_Policy">Datenschutzerklärung der OpenStreetMap Foundation</a>.
       Auf deinen Standort greift die App nicht zu.</p>
 
+    <h2>Push-Benachrichtigungen (neue Häuser)</h2>
+    <p>Wenn ein anderes Mitglied ein Haus zu einem gemeinsamen Urlaub hinzufügt, kannst du eine
+      Push-Benachrichtigung auf deinem Gerät bekommen. Dafür fragt die App nach deiner Erlaubnis
+      (auf dem iPhone über Apple, auf Android über Google) und registriert eine Push-Kennung bei
+      Apple (Apple Push Notification service) bzw. Google (Firebase Cloud Messaging). Nur dann
+      kann der Server dir Mitteilungen schicken.</p>
+    <p>Für die Zustellung speichert der Server zu deinem Gerät: die Push-Kennung, die Zeitzone
+      und die Sprache. Der Inhalt der Mitteilung (wer welches Haus zu welchem Urlaub hinzugefügt
+      hat) wird höchstens bis zur Zustellung vorgehalten und dann gelöscht. Mitteilungen werden
+      nur tagsüber (08:00–21:00 Uhr, deine Ortszeit) verschickt. Du kannst Push-Benachrichtigungen
+      in den Einstellungen deines Geräts abschalten; ungültige oder abgemeldete Gerätekennungen
+      werden automatisch entfernt.</p>
+
     <h2>Gemeinsam planen (Einladen und Beitreten)</h2>
     <p><strong>Anonymes Konto.</strong> Lädst du jemanden ein oder nimmst eine Einladung an, legt die App ein
       anonymes Konto an – eine zufällige Kennung, ohne E-Mail-Adresse, Telefonnummer oder Passwort. Das Konto
@@ -214,6 +227,14 @@
         “distance from home”) and is never uploaded. Legal basis: Art. 6(1)(b) GDPR; the UK is covered by an EU adequacy decision
         (<a href="https://osmfoundation.org/wiki/Privacy_Policy">OSMF privacy policy</a>). The app does not access your
         location.</p>
+      <p><strong>Push notifications (new houses):</strong> if another member adds a house to a shared holiday, you can
+        receive a push notification on your device. The app asks for your permission (via Apple on iPhone, via Google
+        on Android) and registers a push token with Apple (Apple Push Notification service) or Google (Firebase Cloud
+        Messaging). Only then can the server send you messages. For delivery, the server stores your device's push
+        token, time zone and language with your device. The message content (who added which house to which holiday)
+        is kept only until delivery and then deleted. Notifications are sent only during daytime (08:00–21:00, your
+        local time). You can switch off push notifications in your device's settings; invalid or unregistered device
+        tokens are removed automatically.</p>
       <p><strong>Planning together:</strong> inviting or joining creates an anonymous account (a random ID, no email,
         phone number or password) that belongs to this device; from then on your holidays are stored on the server and
         synced with the other members’ devices. Before that, Cloudflare Turnstile (Cloudflare, Inc.) briefly checks
