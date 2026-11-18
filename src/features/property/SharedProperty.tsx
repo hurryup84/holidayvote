@@ -92,10 +92,15 @@ export function SharedProperty() {
     const state = CapApp.addListener('appStateChange', ({ isActive }: { isActive: boolean }) => {
       if (isActive) void check();
     });
+    // iOS: the share extension opens the app with this link right after saving the share.
+    const opened = CapApp.addListener('appUrlOpen', ({ url }: { url: string }) => {
+      if (url.startsWith('com.moidev.holidayvote://shared-link')) void check();
+    });
     return () => {
       active = false;
       void state.then((s: { remove: () => void }) => s.remove());
       void received.then((s: { remove: () => void }) => s.remove());
+      void opened.then((s: { remove: () => void }) => s.remove());
     };
   }, [revision, t, toast]);
 

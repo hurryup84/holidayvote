@@ -66,11 +66,43 @@ final class ShareViewController: UIViewController {
         }
         do {
             try IncomingShareStore.save(text: text, title: title == text ? nil : title)
-            message.text = NSLocalizedString("saved", comment: "")
-            done.isEnabled = true
+            saved()
         } catch {
             fail(error)
         }
+    }
+
+    /// Opens HolidayVote, which reads the share from the inbox and shows the add-house flow.
+    /// If the app can't be opened, the share stays in the inbox and the user opens the app manually.
+    private func saved() {
+        message.text = NSLocalizedString("saved", comment: "")
+        done.isEnabled = true
+        openHostApp { [weak self] opened in
+            if opened { self?.finish() }
+        }
+    }
+
+    /// Extensions can't use UIApplication.shared; reach the UIApplication through the responder chain and call
+    /// open(_:options:completionHandler:) dynamically (the plain openURL: selector no longer works since iOS 18).
+    private func openHostApp(completion: @escaping (Bool) -> Void) {
+        guard let url = URL(string: "com.moidev.holidayvote://shared-link") else { return completion(false) }
+        let selector = NSSelectorFromString("openURL:options:completionHandler:")
+        var responder: UIResponder? = self
+        while let current = responder {
+            if let application = current as? UIApplication, application.responds(to: selector) {
+                typealias OpenURL = @convention(c) (
+                    NSObject, Selector, NSURL, NSDictionary, @convention(block) (Bool) -> Void
+                ) -> Void
+                let open = unsafeBitCast(application.method(for: selector), to: OpenURL.self)
+                let handler: @convention(block) (Bool) -> Void = { opened in
+                    DispatchQueue.main.async { completion(opened) }
+                }
+                open(application, selector, url as NSURL, NSDictionary(), handler)
+                return
+            }
+            responder = current.next
+        }
+        completion(false)
     }
 
     private func fail(_ error: Error?) {
