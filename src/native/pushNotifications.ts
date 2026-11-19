@@ -13,24 +13,39 @@
 import { PushNotifications } from '@capacitor/push-notifications';
 import type { PluginListenerHandle } from '@capacitor/core';
 import { isNative, platform } from './platform';
-import { hasPushAccount, registerPushToken } from '../data/sync/push';
+import { hasPushAccount, registerPushToken, pushDeviceId, unregisterPushDevice, getPushNotificationSettings, setPushNotificationSetting } from '../data/sync/push';
+
+export { pushDeviceId, getPushNotificationSettings, setPushNotificationSetting };
 
 let starting: Promise<void> | undefined;
 let tokenListener: PluginListenerHandle | undefined;
 let errorListener: PluginListenerHandle | undefined;
 
-/** App start: register for push notifications if the user has an account. */
-export async function start(): Promise<void> {
+/** App start: register for push notifications if the user has an account and notifications are on. */
+export async function start(enabled = true): Promise<void> {
   if (!isNative) return;
   if (platform !== 'ios' && platform !== 'android') return;
-  starting ??= register()
+  starting ??= register(enabled)
     .catch((error: unknown) => console.error('[push] registration setup failed', error))
     .finally(() => { starting = undefined; });
   return starting;
 }
 
-async function register(): Promise<void> {
+async function register(enabled: boolean): Promise<void> {
   if (!(await hasPushAccount())) return;
+  if (!enabled) {
+    // Notifications disabled in general: drop this phone's registration so nothing gets sent.
+    const deviceId = await pushDeviceId();
+    if (deviceId) {
+      try {
+        await unregisterPushDevice(deviceId);
+        console.info('[push] push device unregistered (notifications off)');
+      } catch (error) {
+        console.error('[push] unregister push device failed', error);
+      }
+    }
+    return;
+  }
   await addListeners();
   if (platform === 'android') {
     let permission = await PushNotifications.checkPermissions();
@@ -49,10 +64,34 @@ async function register(): Promise<void> {
 export async function onToken(token: string): Promise<void> {
   if (platform !== 'ios' && platform !== 'android') return;
   try {
-    await registerPushToken(platform, token);
-    console.info('[push] token registered on server');
+    const deviceId = await registerPushToken(platform, token);
+    console.info('[push] token registered on server', deviceId);
   } catch (error) {
     console.error('[push] token registration failed', error);
+  }
+}
+
+/** Re-register this phone for pushes (turned notifications back on). */
+export async function reRegister(): Promise<void> {
+  if (!isNative) return;
+  if (platform !== 'ios' && platform !== 'android') return;
+  if (!(await hasPushAccount())) return;
+  await addListeners();
+  await PushNotifications.register();
+}
+
+/** Delete this phone's push device from the server (notifications off). */
+export async function unregister(): Promise<void> {
+  if (!isNative) return;
+  if (platform !== 'ios' && platform !== 'android') return;
+  const deviceId = await pushDeviceId();
+  if (deviceId) {
+    try {
+      await unregisterPushDevice(deviceId);
+      console.info('[push] push device unregistered');
+    } catch (error) {
+      console.error('[push] unregister push device failed', error);
+    }
   }
 }
 

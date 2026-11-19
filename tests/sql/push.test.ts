@@ -80,3 +80,68 @@ describe('Android and iOS push delivery', () => {
     expect((await server.asAdmin('select environment from push_devices where platform = $1', ['ios']))[0]).toEqual({ environment: 'sandbox' });
   });
 });
+
+describe('Per-vacation notification settings', () => {
+  let bDevice: string;
+  beforeEach(async () => {
+    await register(B, 'ios', APNS);
+    const [{ id }] = await server.asAdmin<{ id: string }>('select id from push_devices where user_id = $1', [B]);
+    bDevice = id;
+  });
+
+  it('register_push_device returns the device id', async () => {
+    const r = await server.as(B, "select register_push_device('ios', $1, 'UTC', 'en')", [APNS]);
+    expect(r[0].register_push_device).toMatchObject({ ok: true, device_id: bDevice });
+  });
+
+  it('push_device_id returns this phone\'s device id', async () => {
+    const [{ id }] = await server.as(B, 'select push_device_id() as id');
+    expect(id).toBe(bDevice);
+    const [{ id: aId }] = await server.as(A, 'select push_device_id() as id');
+    expect(aId).toBeNull();
+  });
+
+  it('set/get push notification settings per vacation', async () => {
+    await server.as(B, 'select set_push_notification_setting($1, $2, false)', [bDevice, VAC]);
+    const [{ r }] = await server.as(B, 'select get_push_notification_settings($1) as r', [bDevice]);
+    expect(r).toEqual([{ vacation_id: VAC, enabled: false }]);
+
+    // Disabling the vacation removes it from due delivery.
+    expect(await due()).toEqual([]);
+
+    // Re-enable: delivery comes back.
+    await server.as(B, 'select set_push_notification_setting($1, $2, true)', [bDevice, VAC]);
+    const rows = await due();
+    expect(rows).toHaveLength(1);
+    expect(rows[0].device_id).toBe(bDevice);
+  });
+
+  it('settings are per device: disabling B\'s vacation on one device does not affect B\'s other device', async () => {
+    await register(B, 'android', FCM);
+    const iosRows = await server.asAdmin<{ id: string }>(
+      'select id from push_devices where user_id = $1 and platform = $2 order by id', [B, 'ios']);
+    const androidRows = await server.asAdmin<{ id: string }>(
+      'select id from push_devices where user_id = $1 and platform = $2 order by id', [B, 'android']);
+    const iosDevice = iosRows[0]?.id;
+    const androidDevice = androidRows[0]?.id;
+
+    // Disable the vacation on the iOS device only.
+    await server.as(B, 'select set_push_notification_setting($1, $2, false)', [iosDevice, VAC]);
+
+    const rows = await due();
+    // Android device still gets it, iOS device does not.
+    expect(rows.some((d) => d.device_id === androidDevice)).toBe(true);
+    expect(rows.some((d) => d.device_id === iosDevice)).toBe(false);
+  });
+
+  it('unregister_push_device removes the device and its settings', async () => {
+    await server.as(B, 'select set_push_notification_setting($1, $2, false)', [bDevice, VAC]);
+    await server.as(B, 'select unregister_push_device($1)', [bDevice]);
+    expect(await server.asAdmin('select count(*) from push_devices where id = $1', [bDevice]))
+      .toEqual([{ count: 0 }]);
+    expect(await server.asAdmin('select count(*) from push_notification_settings where device_id = $1', [bDevice]))
+      .toEqual([{ count: 0 }]);
+    await expect(server.as(B, 'select unregister_push_device($1)', [bDevice])).rejects.toThrow('no_device');
+    await expect(server.as(A, 'select unregister_push_device($1)', [bDevice])).rejects.toThrow(/permission denied|no_device/);
+  });
+});

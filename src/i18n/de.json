@@ -356,6 +356,11 @@
     "deleteTitle": "Alle deine Daten löschen?",
     "deleteText": "Dein Konto, deine Bewertungen und alle Daten auf diesem Handy werden gelöscht. Urlaube, die nur dir gehören, werden ganz gelöscht. Das lässt sich nicht rückgängig machen.",
     "deleteConfirm": "Endgültig löschen",
-    "deleting": "Wird gelöscht …"
+    "deleting": "Wird gelöscht …",
+    "notifications": "Benachrichtigungen",
+    "notificationsOn": "Benachrichtigungen eingeschaltet",
+    "notificationsHint": "Ob du neue Ferienhäuser in deinen Urlauben per Push bekommst. Aus = überall aus, auch für alle Urlaube.",
+    "notificationsPerVacation": "Pro Urlaub",
+    "notificationsPerVacationHint": "Hier einzelne Urlaube ab- oder anschalten."
   }
 }

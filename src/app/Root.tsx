@@ -47,10 +47,11 @@ export function Root() {
   sessionRef.current = session;
   const accountRef = useRef<AccountService | null>(null);
   const [accountState, setAccountState] = useState<AccountState | null>(null);
+  const [pushNotificationsOn, setPushNotificationsOn] = useState(true);
 
   useEffect(() => {
-    if (accountState?.user?.id) void pushStart();
-  }, [accountState?.user?.id]);
+    if (accountState?.user?.id) void pushStart(pushNotificationsOn);
+  }, [accountState?.user?.id, pushNotificationsOn]);
 
   // Invite links (com.moidev.holidayvote://join/CODE, or /join/CODE in the browser): remembered here,
   // used by the onboarding (new users) or the vacation list (existing users).
@@ -91,6 +92,7 @@ export function Root() {
       const s = await ensureLocalSession(db, clock, { userName: null });
       const store = kv(db);
       setHomeState(parseHome(await store.get('home_location')));
+      setPushNotificationsOn(await store.get('notifications_enabled') !== 'false');
       setToday(clock.today());
       setSession(s);
       sessionRef.current = s;
@@ -157,10 +159,19 @@ export function Root() {
         setHomeState(h);
         await kv(ready.db).set('home_location', h ? JSON.stringify(h) : null);
       },
+      pushNotificationsOn,
+      setPushNotificationsOn: async (on) => {
+        setPushNotificationsOn(on);
+        await kv(ready.db).set('notifications_enabled', on ? 'true' : 'false');
+        if (accountState?.user?.id) {
+          if (on) await pushStart(true);
+          else await pushStart(false);
+        }
+      },
       account: accountRef.current,
       accountState,
     };
-  }, [ready, session, repos, today, accountState, invite, home, pushRoute]);
+  }, [ready, session, repos, today, accountState, invite, home, pushRoute, pushNotificationsOn]);
 
   return (
     <IonApp>

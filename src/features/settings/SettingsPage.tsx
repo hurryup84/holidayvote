@@ -13,12 +13,13 @@ import {
   IonSpinner,
   IonTitle,
   IonToolbar,
+  IonToggle,
   useIonAlert,
   useIonLoading,
   useIonToast,
 } from '@ionic/react';
 import { bugOutline, cloudDoneOutline, cloudOfflineOutline, homeOutline, phonePortraitOutline, syncOutline, trashOutline } from 'ionicons/icons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useApp } from '../../app/AppContext';
 import { APP_CONFIG, DEBUG_TOOLS } from '../../core/config';
@@ -26,19 +27,91 @@ import { fmtShort } from '../../core/format';
 import { useLiveQuery } from '../../data/db/DbContext';
 import { openUrl } from '../../native/browser';
 import { geocode } from '../../native/geocode';
+import { pushDeviceId, getPushNotificationSettings, setPushNotificationSetting } from '../../native/pushNotifications';
 import { sharingErrorText } from '../sharing/errors';
 import { RecoveryCard } from './RecoveryCard';
 
+/** One vacation's notification toggle in Settings. */
+function VacationNotificationToggle({
+  vacation,
+  deviceId,
+  on,
+  setOn,
+}: {
+  vacation: { id: string; name: string };
+  deviceId: string | null;
+  on: boolean;
+  setOn(on: boolean): void;
+}) {
+  const toggle = async (enabled: boolean) => {
+    if (!deviceId) return;
+    try {
+      await setPushNotificationSetting(deviceId, vacation.id, enabled);
+      setOn(enabled);
+    } catch (e) {
+      setOn(enabled);
+    }
+  };
+
+  return (
+    <IonItem>
+      <IonLabel>{vacation.name}</IonLabel>
+      <IonToggle
+        checked={on}
+        onIonChange={(e) => void toggle(!!e.detail.checked)}
+        slot="end"
+      />
+    </IonItem>
+  );
+}
+
 export function SettingsPage() {
   const { t } = useTranslation();
-  const { account, accountState, home, setHome, clock } = useApp();
+  const { account, accountState, home, setHome, clock, pushNotificationsOn, setPushNotificationsOn, repos } = useApp();
   const [alert] = useIonAlert();
   const [toast] = useIonToast();
   const [loading, dismissLoading] = useIonLoading();
   const { data: myName } = useLiveQuery(() => account.displayName(), ['profiles'], [accountState.user?.id]);
   const [address, setAddress] = useState('');
   const [locating, setLocating] = useState(false);
+  const [vacations, setVacations] = useState<{ id: string; name: string }[]>([]);
+  const [vacNotifications, setVacNotifications] = useState<Record<string, boolean>>({});
+  const [deviceId, setDeviceId] = useState<string | null>(null);
   const online = !!accountState.user && accountState.synced;
+
+  // Load this device's per-vacation notification settings.
+  useEffect(() => {
+    const load = async () => {
+      if (!online || !pushNotificationsOn) return;
+      const id = await pushDeviceId();
+      setDeviceId(id);
+      if (id) {
+        const rows = await getPushNotificationSettings(id);
+        const map: Record<string, boolean> = {};
+        for (const r of rows) map[r.vacationId] = r.enabled;
+        setVacNotifications(map);
+      }
+    };
+    void load();
+  }, [online, pushNotificationsOn]);
+
+  // Load this phone's vacations (for the per-vacation toggles).
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const list = await repos.vacations.list();
+        setVacations(list);
+      } catch {
+        /* list may be empty before sync */
+      }
+    };
+    void load();
+  }, [repos, online]);
+
+  // ---------- general notifications on/off ----------
+  const toggleNotifications = async (on: boolean) => {
+    await setPushNotificationsOn(on);
+  };
 
   const editName = () =>
     void alert({
@@ -158,6 +231,42 @@ export function SettingsPage() {
         <p className="list-footer">{t('settings.homeHint')}</p>
 
         {online ? <RecoveryCard /> : <p className="list-footer recovery-later">{t('recovery.later')}</p>}
+
+        <IonList inset>
+          <IonListHeader>{t('settings.notifications')}</IonListHeader>
+          <IonItem>
+            <IonLabel>{t('settings.notificationsOn')}</IonLabel>
+            <IonToggle
+              slot="end"
+              checked={pushNotificationsOn}
+              onIonChange={(e) => void toggleNotifications(!!e.detail.checked)}
+            />
+          </IonItem>
+        </IonList>
+        <p className="list-footer">{t('settings.notificationsHint')}</p>
+
+        {online && pushNotificationsOn && vacations.length > 0 ? (
+          <>
+            <IonList inset>
+              <IonListHeader>{t('settings.notificationsPerVacation')}</IonListHeader>
+              {vacations.map((v) => (
+                <VacationNotificationToggle
+                  key={v.id}
+                  vacation={v}
+                  deviceId={deviceId}
+                  on={vacNotifications[v.id] ?? true}
+                  setOn={(enabled) => {
+                    setVacNotifications((m) => ({ ...m, [v.id]: enabled }));
+                    if (deviceId) {
+                      void setPushNotificationSetting(deviceId, v.id, enabled);
+                    }
+                  }}
+                />
+              ))}
+            </IonList>
+            <p className="list-footer">{t('settings.notificationsPerVacationHint')}</p>
+          </>
+        ) : null}
 
         <IonList inset>
           <IonListHeader>{t('settings.about')}</IonListHeader>

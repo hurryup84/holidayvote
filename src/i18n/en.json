@@ -356,6 +356,11 @@
     "deleteTitle": "Delete all your data?",
     "deleteText": "Your account, your ratings and all data on this phone are deleted. Vacations that only belong to you are deleted completely. This can't be undone.",
     "deleteConfirm": "Delete for good",
-    "deleting": "Deleting …"
+    "deleting": "Deleting …",
+    "notifications": "Notifications",
+    "notificationsOn": "Notifications on",
+    "notificationsHint": "Whether you get new holiday homes in your vacations by push. Off = off everywhere, for all vacations.",
+    "notificationsPerVacation": "Per vacation",
+    "notificationsPerVacationHint": "Switch individual vacations on or off here."
   }
 }

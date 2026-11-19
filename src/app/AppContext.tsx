@@ -21,6 +21,9 @@ export interface AppContextValue {
   /** House or vacation route from a push notification tap, pending until the router is ready. */
   pushRoute: string | null;
   setPushRoute(route: string | null): void;
+  /** Push notifications on/off in general (this phone only). */
+  pushNotificationsOn: boolean;
+  setPushNotificationsOn(on: boolean): Promise<void>;
   /** Own home address for "distance from home" – only on this phone, never synced. */
   home: HomeLocation | null;
   setHome(h: HomeLocation | null): Promise<void>;
