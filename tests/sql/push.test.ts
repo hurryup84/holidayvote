@@ -145,3 +145,53 @@ describe('Per-vacation notification settings', () => {
     await expect(server.as(A, 'select unregister_push_device($1)', [bDevice])).rejects.toThrow(/permission denied|no_device/);
   });
 });
+
+describe('Comment push notifications', () => {
+  const COMMENT = '30000000-0000-7000-8000-00000000000a';
+  beforeEach(async () => {
+    await server.asAdmin('delete from push_notification_settings');
+    await server.asAdmin('delete from push_events');
+    await server.asAdmin('delete from push_sent');
+    await server.asAdmin('delete from comments');
+    await server.asAdmin('delete from push_devices');
+    await server.as(B, `select register_push_device('ios', $1, 'UTC', 'en')`, ['a'.repeat(64)]);
+    await server.as(A, `select register_push_device('android', $1, 'UTC', 'en')`, ['b'.repeat(64)]);
+    await server.as(B, `insert into comments (id, vacation_id, property_id, text, created_by, updated_by, created_at, updated_at)
+      values ($1, $2, $3, 'Lovely place!', $4, $4, '2026-11-17T10:00:00Z', '2026-11-17T10:00:00Z')`,
+      [COMMENT, VAC, HOUSE, B]);
+  });
+
+  it('creates a comment push event for other vacation members', async () => {
+    const rows = await due();
+    const commentRow = rows.find((d) => d.kind.startsWith('comment:'));
+    expect(commentRow).toBeDefined();
+    expect(commentRow!.body).toBe('Ben commented on "Beach house": "Lovely place!".');
+    expect(commentRow!.title).toBe('New comment');
+    expect(commentRow!.route).toBe(`/vacations/${VAC}/houses/${HOUSE}`);
+    // The person who added the comment (B) does not get notified; only A's android device does.
+    const bDeviceIds = (await server.asAdmin<{ id: string }>('select id from push_devices where user_id = $1', [B])).map(d => d.id);
+    expect(rows.some((d) => d.kind.startsWith('comment:') && bDeviceIds.includes(d.device_id))).toBe(false);
+    const aDeviceIds = (await server.asAdmin<{ id: string }>('select id from push_devices where user_id = $1', [A])).map(d => d.id);
+    expect(rows.some((d) => d.kind.startsWith('comment:') && aDeviceIds.includes(d.device_id))).toBe(true);
+  });
+
+  it('per-vacation setting disables comment notifications', async () => {
+    const aDevice = (await server.asAdmin<{ id: string }>('select id from push_devices where user_id = $1 and platform = $2 order by id', [A, 'android']))[0].id;
+    await server.as(A, 'select set_push_notification_setting($1, $2, false)', [aDevice, VAC]);
+    const rows = await due();
+    expect(rows.some((d) => d.kind.startsWith('comment:'))).toBe(false);
+  });
+
+  it('comment events are tracked separately in sent receipts', async () => {
+    const rows = await due();
+    const commentRow = rows.find((d) => d.kind.startsWith('comment:'));
+    expect(commentRow).toBeDefined();
+    // Mark this specific comment event as sent - it should not come again.
+    await server.asAdmin('select push_mark_sent($1, $2, $3, $4)', [
+      commentRow!.device_id, commentRow!.kind, '2026-11-17',
+      commentRow!.platform === 'ios' ? 'sandbox' : null,
+    ]);
+    const rows2 = await due();
+    expect(rows2.some((d) => d.kind.startsWith('comment:'))).toBe(false);
+  });
+});
