@@ -17,7 +17,7 @@ import {
   useIonLoading,
   useIonToast,
 } from '@ionic/react';
-import { bugOutline, cloudDoneOutline, cloudOfflineOutline, homeOutline, imagesOutline, phonePortraitOutline, syncOutline, trashOutline } from 'ionicons/icons';
+import { bugOutline, cloudDoneOutline, cloudOfflineOutline, homeOutline, phonePortraitOutline, syncOutline, trashOutline } from 'ionicons/icons';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useApp } from '../../app/AppContext';
@@ -36,8 +36,6 @@ export function SettingsPage() {
   const [toast] = useIonToast();
   const [loading, dismissLoading] = useIonLoading();
   const { data: myName } = useLiveQuery(() => account.displayName(), ['profiles'], [accountState.user?.id]);
-  const { repos } = useApp();
-  const { data: cache } = useLiveQuery(() => repos.previews.stats(), ['preview_cache'], [repos]);
   const [address, setAddress] = useState('');
   const [locating, setLocating] = useState(false);
   const online = !!accountState.user && accountState.synced;
@@ -158,36 +156,6 @@ export function SettingsPage() {
           )}
         </IonList>
         <p className="list-footer">{t('settings.homeHint')}</p>
-
-        <IonList inset>
-          <IonListHeader>{t('settings.previews')}</IonListHeader>
-          <IonItem>
-            <IonIcon slot="start" icon={imagesOutline} color="medium" />
-            <IonLabel className="ion-text-wrap">
-              {t('settings.previewCount', { count: cache?.count ?? 0 })}
-              {!!cache?.bytes && <p>{(cache.bytes / 1_048_576).toLocaleString(undefined, { maximumFractionDigits: 1 })} MB</p>}
-            </IonLabel>
-          </IonItem>
-          <IonItem
-            button
-            detail={false}
-            disabled={!cache?.count}
-            onClick={() =>
-              void alert({
-                header: t('settings.previewClearTitle'),
-                message: t('settings.previewClearText'),
-                buttons: [
-                  { text: t('common.cancel'), role: 'cancel' },
-                  { text: t('settings.previewClear'), handler: () => void repos.previews.clear() },
-                ],
-              })
-            }
-          >
-            <IonLabel color="primary">{t('settings.previewClear')}</IonLabel>
-          </IonItem>
-        </IonList>
-        <p className="list-footer">{t('settings.previewHint')}</p>
-        <p className="list-footer settings-note">{t('settings.previewHotlinkingInfo')}</p>
 
         {online ? <RecoveryCard /> : <p className="list-footer recovery-later">{t('recovery.later')}</p>}
 

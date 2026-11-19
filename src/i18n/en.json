@@ -354,14 +354,6 @@
     "deleteTitle": "Delete all your data?",
     "deleteText": "Your account, your ratings and all data on this phone are deleted. Vacations that only belong to you are deleted completely. This can't be undone.",
     "deleteConfirm": "Delete for good",
-    "deleting": "Deleting …",
-    "previews": "Preview pictures",
-    "previewCount_one": "{{count}} preview stored on this phone",
-    "previewCount_other": "{{count}} previews stored on this phone",
-    "previewClear": "Clear cache",
-    "previewClearTitle": "Reload previews?",
-    "previewClearText": "Stored pictures and previews are deleted and loaded again from the pages the next time they are shown.",
-    "previewHint": "Pictures are not downloaded or stored. The image is shown live from the provider's page and never uploaded. Single houses: in the house via “…” → “Reload preview”.",
-    "previewHotlinkingInfo": "The image is hotlinked directly from the provider's page. It is neither downloaded nor stored – never on this phone, never on a server."
+    "deleting": "Deleting …"
   }
 }

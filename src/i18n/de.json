@@ -354,14 +354,6 @@
     "deleteTitle": "Alle deine Daten löschen?",
     "deleteText": "Dein Konto, deine Bewertungen und alle Daten auf diesem Handy werden gelöscht. Urlaube, die nur dir gehören, werden ganz gelöscht. Das lässt sich nicht rückgängig machen.",
     "deleteConfirm": "Endgültig löschen",
-    "deleting": "Wird gelöscht …",
-    "previews": "Vorschaubilder",
-    "previewCount_one": "{{count}} Vorschau auf diesem Handy gespeichert",
-    "previewCount_other": "{{count}} Vorschauen auf diesem Handy gespeichert",
-    "previewClear": "Zwischenspeicher leeren",
-    "previewClearTitle": "Vorschauen neu laden?",
-    "previewClearText": "Gespeicherte Bilder und Vorschauen werden gelöscht und beim nächsten Anzeigen neu von den Seiten geladen.",
-    "previewHint": "Bilder werden nicht heruntergeladen oder gespeichert. Das Bild wird direkt von der Anbieter-Seite angezeigt und nie hochgeladen. Einzelne Häuser: im Haus über „…“ → „Vorschau neu laden“.",
-    "previewHotlinkingInfo": "Bild wird direkt von der Anbieter-Seite verlinkt (Hotlinking). Es wird weder heruntergeladen noch gespeichert – nie auf diesem Handy, nie auf einem Server."
+    "deleting": "Wird gelöscht …"
   }
 }
