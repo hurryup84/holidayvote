@@ -1,30 +1,27 @@
-import { IonBadge, IonIcon, IonItem, IonLabel, IonList, IonListHeader, IonToggle, useIonAlert, useIonRouter, useIonToast } from '@ionic/react';
-import { cloudOfflineOutline, createOutline, personAddOutline } from 'ionicons/icons';
+import { IonBadge, IonIcon, IonItem, IonLabel, IonList, IonListHeader, useIonAlert, useIonRouter, useIonToast } from '@ionic/react';
+import { cloudOfflineOutline, personAddOutline } from 'ionicons/icons';
 import { useTranslation } from 'react-i18next';
 import { useApp } from '../../app/AppContext';
 import { useChainedSheet } from '../../components/useChainedSheet';
 import { useLiveQuery } from '../../data/db/DbContext';
 import type { ReportReason } from '../../data/sync/account';
-import { OPTIONAL_FIELDS, type Member, type Vacation } from '../../domain/models';
+import type { Member, Vacation } from '../../domain/models';
 import { sharingErrorText } from '../sharing/errors';
-import { fieldOn } from './fields';
 
-/** "People" tab: members, invite, report / block, the owner's settings, leave / delete. */
+/** "People" section: members list + invite + member actions (report / block / remove). */
 export function PeopleSection({
   vacation,
   members,
   iAmOwner,
   onInvite,
-  onEdit,
 }: {
   vacation: Vacation;
   members: Member[];
   iAmOwner: boolean;
   onInvite(): void;
-  onEdit(): void;
 }) {
   const { t } = useTranslation();
-  const { session, account, accountState, repos } = useApp();
+  const { session, account, accountState } = useApp();
   const router = useIonRouter();
   const [alert] = useIonAlert();
   const [toast] = useIonToast();
@@ -106,42 +103,6 @@ export function PeopleSection({
     });
   };
 
-  const leave = () =>
-    void alert({
-      header: t('vacation.leaveTitle', { name: vacation.name }),
-      message: iAmOwner ? t('vacation.leaveTextOwner') : t('vacation.leaveText'),
-      buttons: [
-        { text: t('common.cancel'), role: 'cancel' },
-        {
-          text: t('vacation.leave'),
-          role: 'destructive',
-          handler: () =>
-            void account.leaveVacation(vacation.id).then(
-              () => router.push('/vacations', 'root'),
-              (e) => say(sharingErrorText(e), 'danger'),
-            ),
-        },
-      ],
-    });
-
-  const remove = () =>
-    void alert({
-      header: t('vacation.deleteTitle', { name: vacation.name }),
-      message: members.length > 1 ? t('vacation.deleteTextShared') : t('vacation.deleteText'),
-      buttons: [
-        { text: t('common.cancel'), role: 'cancel' },
-        {
-          text: t('common.delete'),
-          role: 'destructive',
-          handler: () =>
-            void account.deleteVacation(vacation.id).then(
-              () => router.push('/vacations', 'root'),
-              (e) => say(sharingErrorText(e), 'danger'),
-            ),
-        },
-      ],
-    });
-
   return (
     <>
       {onServer === false && (
@@ -170,46 +131,6 @@ export function PeopleSection({
         </IonItem>
       </IonList>
       <p className="list-footer">{t('sharing.inviteHint')}</p>
-
-      {iAmOwner && (
-        <>
-          <IonList inset>
-            <IonItem button detail onClick={onEdit}>
-              <IonIcon slot="start" icon={createOutline} />
-              <IonLabel>{t('vacation.edit')}</IonLabel>
-            </IonItem>
-          </IonList>
-          <IonList inset>
-            <IonListHeader>{t('vacation.fields')}</IonListHeader>
-            {OPTIONAL_FIELDS.map((f) => (
-              <IonItem key={f}>
-                <IonToggle
-                  checked={fieldOn(vacation.settings, f)}
-                  onIonChange={(e) =>
-                    void repos.vacations.updateSettings(vacation.id, { fields: { ...vacation.settings.fields, [f]: e.detail.checked } })
-                  }
-                >
-                  {t(`fields.${f}`)}
-                </IonToggle>
-              </IonItem>
-            ))}
-          </IonList>
-          <p className="list-footer">{t('vacation.fieldsHint')}</p>
-        </>
-      )}
-
-      <IonList inset>
-        {onServer && members.length > 1 && (
-          <IonItem button detail={false} onClick={leave}>
-            <IonLabel color="danger">{t('vacation.leave')}</IonLabel>
-          </IonItem>
-        )}
-        {(iAmOwner || !onServer) && (
-          <IonItem button detail={false} onClick={remove}>
-            <IonLabel color="danger">{t('vacation.delete')}</IonLabel>
-          </IonItem>
-        )}
-      </IonList>
     </>
   );
 }

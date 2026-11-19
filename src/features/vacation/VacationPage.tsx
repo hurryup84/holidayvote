@@ -19,7 +19,7 @@ import {
   IonToolbar,
   useIonRouter,
 } from '@ionic/react';
-import { add, calendarOutline, homeOutline, locationOutline, mapOutline, peopleOutline, personAddOutline } from 'ionicons/icons';
+import { add, calendarOutline, peopleOutline, homeOutline, locationOutline, mapOutline, personAddOutline } from 'ionicons/icons';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -38,11 +38,12 @@ import { MapView } from './MapView';
 import { PeopleSection } from './PeopleSection';
 import { PropertyCard } from './PropertyCard';
 import { PropertyEditModal } from './PropertyEditModal';
+import { VacationSettings } from './VacationSettings';
 import './vacation.css';
 
-type Tab = 'houses' | 'map' | 'people';
+type Tab = 'houses' | 'map' | 'more';
 
-/** One vacation: the ranked houses, the map, the people. */
+/** One vacation: the ranked houses, the map, and more (people, settings, house details). */
 export function VacationPage() {
   const { id = '' } = useParams();
   const { t } = useTranslation();
@@ -81,7 +82,6 @@ export function VacationPage() {
     const active = list.filter((h) => h.status === 'active');
     const out = list.filter((h) => h.status === 'eliminated');
     return { main: [...booked, ...active], eliminated: out };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [houses, sort, home, query]);
   const unrated = houses?.filter((h) => h.status === 'active' && h.myVote === null).length ?? 0;
   const located = houses?.filter((h) => h.lat !== null && h.lng !== null) ?? [];
@@ -115,9 +115,9 @@ export function VacationPage() {
               <IonIcon icon={mapOutline} />
               <IonLabel>{t('vacation.tabs.map')}</IonLabel>
             </IonSegmentButton>
-            <IonSegmentButton value="people">
+            <IonSegmentButton value="more">
               <IonIcon icon={peopleOutline} />
-              <IonLabel>{t('vacation.tabs.people')}</IonLabel>
+              <IonLabel>{t('vacation.tabs.more')}</IonLabel>
             </IonSegmentButton>
           </IonSegment>
         </IonToolbar>
@@ -218,24 +218,39 @@ export function VacationPage() {
           </div>
         )}
 
-        {tab === 'people' && members && (
-          <PeopleSection
-            vacation={vacation}
-            members={members}
-            iAmOwner={iAmOwner}
-            onInvite={() => sharing.createInvite(id, vacation.name)}
-            onEdit={() => setEditingVacation(true)}
-          />
-        )}
-
-        {tab === 'houses' && !!houses?.length && (
-          <IonFab slot="fixed" vertical="bottom" horizontal="end">
-            <IonFabButton onClick={() => setAdding(true)} aria-label={t('property.add')}>
-              <IonIcon icon={add} />
-            </IonFabButton>
-          </IonFab>
+        {tab === 'more' && members && (
+          <IonContent className="ion-padding">
+            <PeopleSection
+              vacation={vacation}
+              members={members}
+              iAmOwner={iAmOwner}
+              onInvite={() => sharing.createInvite(id, vacation.name)}
+            />
+            <VacationSettings
+              vacation={vacation}
+              members={members}
+              iAmOwner={iAmOwner}
+              onEdit={() => setEditingVacation(true)}
+              onLeave={() => {
+                void account.leaveVacation(id).then(() => {
+                  router.push('/vacations', 'root');
+                });
+              }}
+              onDelete={() => {
+                void account.deleteVacation(id).then(() => {
+                  router.push('/vacations', 'root');
+                });
+              }}
+            />
+          </IonContent>
         )}
       </IonContent>
+
+      <IonFab slot="fixed" vertical="bottom" horizontal="end">
+        <IonFabButton onClick={() => setAdding(true)} aria-label={t('property.add')}>
+          <IonIcon icon={add} />
+        </IonFabButton>
+      </IonFab>
 
       <PropertyEditModal isOpen={adding || editingProperty !== null} vacationId={id} settings={vacation.settings} property={propertyToEdit} onClose={() => { setAdding(false); setEditingProperty(null); }} />
       <VacationEditModal

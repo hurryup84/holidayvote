@@ -102,8 +102,10 @@
     "tabs": {
       "houses": "Häuser",
       "map": "Karte",
-      "people": "Personen"
+      "people": "Personen",
+      "more": "und mehr"
     },
+    "settings": "Einstellungen",
     "emptyTitle": "Noch keine Häuser",
     "emptyText": "Füg den Link zu einem Ferienhaus ein – und lade die anderen ein, damit alle mitbewerten.",
     "unrated_one": "{{count}} Haus hast du noch nicht bewertet.",

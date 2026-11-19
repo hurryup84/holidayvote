@@ -102,8 +102,10 @@
     "tabs": {
       "houses": "Houses",
       "map": "Map",
-      "people": "People"
+      "people": "People",
+      "more": "and more"
     },
+    "settings": "Settings",
     "emptyTitle": "No houses yet",
     "emptyText": "Paste the link to a holiday home – and invite the others so everyone can rate.",
     "unrated_one": "You haven't rated {{count}} house yet.",
