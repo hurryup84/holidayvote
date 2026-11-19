@@ -183,10 +183,13 @@
     "pool": "Pool",
     "address": "Adresse",
     "addressPlaceholder": "Ort oder Adresse",
-    "locate": "Auf der Karte finden",
-    "locateHint": "Tipp auf das Ziel-Symbol, damit das Haus auf der Karte erscheint (OpenStreetMap; gesendet wird nur die Adresse).",
+    "checkAddress": "Adresse prüfen",
+    "checkingAddress": "Adresse wird gesucht …",
+    "locateHint": "„Adresse prüfen“ trägt die gefundene Adresse ins Feld ein. Beim Speichern wird sie auch automatisch geprüft (nur die Adresse wird an OpenStreetMap gesendet).",
     "located": "Auf der Karte gefunden ✓",
     "addressNotFound": "Adresse nicht gefunden.",
+    "addressSavedWithoutPin": "Adresse gespeichert, aber ohne Kartenmarkierung. Du kannst die Adresse später erneut prüfen.",
+    "saveFailed": "Das Haus konnte nicht gespeichert werden. Bitte versuche es erneut.",
     "description": "Notizen",
     "avatar": "Symbol",
     "avatarHint": "Wird gezeigt, wenn die Seite kein Vorschaubild liefert.",
@@ -247,7 +250,7 @@
   },
   "map": {
     "home": "Zu Hause",
-    "empty": "Noch kein Haus mit Adresse. Trag beim Haus eine Adresse ein und tipp auf das Ziel-Symbol."
+    "empty": "Noch kein Haus auf der Karte. Trag beim Haus eine Adresse ein und speichere es, um den Ort zu suchen."
   },
   "sharing": {
     "yourName": "Dein Name",

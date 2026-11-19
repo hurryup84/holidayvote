@@ -131,6 +131,26 @@ describe('sync (two phones, real migrations)', () => {
     expect((await repos(ben).properties.listWithStats(vacation))[0]).toMatchObject({ title: 'Reetdachhaus', suggestedByName: 'Anna' });
   });
 
+  it('syncs house details edited by a member who did not create the house', async () => {
+    const details = {
+      url: 'https://www.novasol.de/ferienhaus/1',
+      title: 'Reetdachhaus',
+      address: 'Rømø, Denmark',
+      lat: 55.13,
+      lng: 8.53,
+      price: 1800,
+      hasPool: true,
+    };
+    await repos(ben).properties.update(house, details);
+    await ben.sync.syncNow();
+    expect(await server.as(A, 'select address, lat, lng, created_by, updated_by from properties where id = $1', [house])).toEqual([
+      { address: details.address, lat: details.lat, lng: details.lng, created_by: A, updated_by: B },
+    ]);
+    await anna.sync.syncNow();
+    expect(await repos(anna).properties.get(house)).toMatchObject(details);
+    expect(await repos(ben).properties.get(house)).toMatchObject(details);
+  });
+
   it('votes, veto, favourite and comments go both ways', async () => {
     await repos(ben).votes.set(vacation, house, 5);
     await repos(ben).votes.setFavorite(vacation, house);

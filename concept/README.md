@@ -11,13 +11,13 @@ layers, the local-first sync and the account mechanism; this file lists what is 
 | Feature | Notes |
 |---|---|
 | Vacations | Name, destination, dates (nights), description. Several per person. Created on the phone; on the server once someone is invited |
-| Houses | Link + title, provider, total price (→ price per person), bedrooms, beds, bathrooms, pool, address (→ map, distance from home), notes, icon. The owner switches optional fields on / off per vacation |
+| Houses | Any vacation member can edit a house's link, title, provider, total price (→ price per person), bedrooms, beds, bathrooms, pool, address (→ map, distance from home), notes and icon. The owner switches optional fields on / off per vacation |
 | Preview | Title / text / picture from the page's OpenGraph data (phones: native HTTP; browser: Edge Function `link-preview`). The **text is stored with the link** (synced, searchable); the **picture only in each phone's own cache** (downscaled file). Refresh per house or clear the whole cache in Settings. Fallback: the chosen icon |
 | Search | Houses of a vacation by title, provider, notes, address, link and the stored preview text (accents / ß / ø ignored) |
 | Rating | 1–5 stars per person and house; one favourite and one veto per person and vacation (they move); comments, optionally with stars |
 | Ranking | booked → active → eliminated; then average stars, number of votes, fewer vetoes, more favourites, lower price |
 | Status | Only the owner ("organiser") marks a house as booked (one at a time) or eliminated |
-| Map | OpenStreetMap tiles (Leaflet), emoji markers; addresses → coordinates with Nominatim on tap |
+| Map | OpenStreetMap tiles (Leaflet), emoji markers; **Check address** replaces the typed text with the matched address. Save stores the match and its coordinates, looking them up if needed. If no match is found or the lookup times out after five seconds, Save keeps the typed address without a map pin. |
 | Sharing | Invite code / link (`/join?c=CODE`), join, leave, remove, delete the vacation (owner) |
 | UGC rules | Terms accepted before the first invite / join; report house / comment / person; block; moderation page + daily report e-mail |
 | Account | Anonymous (no e-mail, no password), bot check (Turnstile) before it is created, recovery code for a new phone, "Delete my data" |

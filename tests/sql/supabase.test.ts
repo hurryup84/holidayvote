@@ -102,6 +102,26 @@ describe('schema + RLS', () => {
     expect((await as(A, `select id from properties where vacation_id = $1 and status = 'booked'`, [VAC_A])).length).toBe(1);
   });
 
+  it('allows shared house upserts at the house limit without allowing forged creates or outsider edits', async () => {
+    const upsert = `insert into properties (id, vacation_id, url, created_by, title, status)
+       values ($1, $2, 'https://x.de/shared', $3, 'Edited by a member', 'eliminated')
+       on conflict (id) do update set title = excluded.title, status = excluded.status`;
+    const newId = '20000000-0000-7000-8000-0000000000a3';
+    await expect(as(B, upsert, [newId, VAC_A, A])).rejects.toMatchObject({ code: '42501' });
+    await expect(as(C, upsert, [HOUSE_A, VAC_A, A])).rejects.toMatchObject({ code: '42501' });
+
+    await asAdmin("update app_config set value = '1' where key = 'max_properties_per_vacation'");
+    try {
+      await as(B, upsert, [HOUSE_A, VAC_A, A]);
+      expect(await as(A, 'select title, status, created_by from properties where id = $1', [HOUSE_A])).toEqual([
+        { title: 'Edited by a member', status: 'booked', created_by: A },
+      ]);
+      await expect(as(B, upsert, [newId, VAC_A, B])).rejects.toThrow('limit_properties');
+    } finally {
+      await asAdmin("update app_config set value = '300' where key = 'max_properties_per_vacation'");
+    }
+  });
+
   it('votes, vetoes, favourites: own rows only, same vacation, one veto per person', async () => {
     await as(B, `insert into votes (id, vacation_id, property_id, user_id, value) values (gen_random_uuid(), $1, $2, $3, 4)`, [VAC_A, HOUSE_A, B]);
     expect(await errorOf(as(B, `insert into votes (id, vacation_id, property_id, user_id, value) values (gen_random_uuid(), $1, $2, $3, 4)`, [VAC_A, HOUSE_A2, A]))).toMatch(

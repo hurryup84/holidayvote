@@ -18,8 +18,8 @@ import {
   IonToolbar,
   useIonToast,
 } from '@ionic/react';
-import { clipboardOutline, locateOutline, warningOutline } from 'ionicons/icons';
-import { useEffect, useRef, useState } from 'react';
+import { checkmarkOutline, clipboardOutline, warningOutline } from 'ionicons/icons';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useApp } from '../../app/AppContext';
 import { HOUSE_AVATARS } from '../../components/houseAvatars';
@@ -46,6 +46,8 @@ interface Form {
   lng: number | null;
   avatar: string;
 }
+
+const ADDRESS_MAX_LENGTH = 300;
 
 /** Preview info from the listing page – shown to the user, never stored.
  * The user manually takes over what's relevant into title/description above. */
@@ -92,7 +94,6 @@ export function PropertyEditModal({
   onDismissed,
   onSaved,
   initialPropertyUrl,
-  initialTitle,
 }: {
   isOpen: boolean;
   vacationId: string;
@@ -122,10 +123,15 @@ export function PropertyEditModal({
   const titleChanged = useRef(false);
   const urlChanged = useRef(false);
   const providerChanged = useRef(false);
+  const formRevision = useRef(0);
+  const pendingAddressCheck = useRef<ReturnType<typeof geocode> | null>(null);
+  const saveInProgress = useRef(false);
   const on = (f: Parameters<typeof fieldOn>[1]) => fieldOn(settings, f);
 
-  useEffect(() => {
-    if (!isOpen) return;
+  const resetForm = useEffectEvent(() => {
+    saveInProgress.current = false;
+    setGeocoding(false);
+    setSaving(false);
     lastFetched.current = property?.url ?? '';
     setPreviewFailed(false);
     setDuplicate(null);
@@ -163,9 +169,10 @@ export function PropertyEditModal({
     }
 
     if (!property && initialPropertyUrl) {
+      const revision = formRevision.current;
       setTitleLoading(true);
       void fetchLinkPreview(initialPropertyUrl).then((p) => {
-        if (!isOpen) return;
+        if (revision !== formRevision.current) return;
         setPreview({
           title: p?.title ?? null,
           description: p?.description ?? null,
@@ -180,9 +187,20 @@ export function PropertyEditModal({
         setTitleLoading(false);
       });
     }
-  }, [isOpen, property, initialPropertyUrl, initialTitle]);
+  });
+
+  // Live queries can replace the property object while this house is still being edited.
+  useEffect(() => {
+    if (!isOpen) return;
+    resetForm();
+    return () => {
+      formRevision.current += 1;
+      pendingAddressCheck.current = null;
+    };
+  }, [isOpen, vacationId, property?.id, initialPropertyUrl]);
 
   const url = isHttpUrl(form.url.trim()) ? form.url.trim() : null;
+  const hasCoordinates = form.lat !== null && form.lng !== null;
 
   // New link → duplicate check + preview (from this phone's cache, or fetched once).
   // The preview is shown to the user but NOT stored – the user takes over what's relevant.
@@ -231,45 +249,75 @@ export function PropertyEditModal({
     }
   };
 
-  const locate = async () => {
+  const checkAddress = (address: string) => {
+    if (pendingAddressCheck.current) return pendingAddressCheck.current;
+    const revision = formRevision.current;
     setGeocoding(true);
-    const r = await geocode(form.address);
-    setGeocoding(false);
-    if (r) setForm((f) => ({ ...f, lat: r.lat, lng: r.lng }));
-    else void toast({ message: t('property.addressNotFound'), duration: 2500, position: 'top', color: 'warning' });
+    pendingAddressCheck.current = geocode(address).then((result) => {
+      if (revision !== formRevision.current) return null;
+      if (!result) return null;
+      const label = Array.from(result.label?.trim() || address.trim()).slice(0, ADDRESS_MAX_LENGTH).join('').trimEnd();
+      setForm((f) => ({ ...f, address: label, lat: result.lat, lng: result.lng }));
+      return { ...result, label };
+    }).finally(() => {
+      if (revision !== formRevision.current) return;
+      pendingAddressCheck.current = null;
+      setGeocoding(false);
+    });
+    return pendingAddressCheck.current;
+  };
+
+  const resolveAddress = async () => {
+    const revision = formRevision.current;
+    if (!(await checkAddress(form.address)) && revision === formRevision.current && !saveInProgress.current) {
+      void toast({ message: t('property.addressNotFound'), duration: 2500, position: 'top', color: 'warning' });
+    }
   };
 
   const save = async () => {
-    if (!url || saving) return;
+    if (!url || saveInProgress.current) return;
+    const revision = formRevision.current;
+    const address = form.address.trim();
+    saveInProgress.current = true;
     setSaving(true);
-    const input: PropertyInput = {
-      url,
-      title: form.title,
-      description: form.description,
-      provider: form.provider || detectProvider(url),
-      price: toNum(form.price),
-      beds: toNum(form.beds, true),
-      bedrooms: toNum(form.bedrooms, true),
-      bathrooms: toNum(form.bathrooms, true),
-      hasPool: form.hasPool,
-      address: form.address,
-      // Coordinates only while the address they belong to is still there.
-      lat: form.address.trim() ? form.lat : null,
-      lng: form.address.trim() ? form.lng : null,
-      avatar: form.avatar,
-    };
     try {
-      if (property) {
-        await repos.properties.update(property.id, input);
-        onSaved?.(property.id);
-      } else {
-        // Not `onSaved?.(await create())`: an optional call skips evaluating its arguments.
-        const id = await repos.properties.create(vacationId, input);
-        onSaved?.(id);
+      const shouldResolve = on('address') && !!address && !hasCoordinates;
+      const resolved = shouldResolve ? await checkAddress(address) : null;
+      if (revision !== formRevision.current) return;
+      const input: PropertyInput = {
+        url,
+        title: form.title,
+        description: form.description,
+        provider: form.provider || detectProvider(url),
+        price: toNum(form.price),
+        beds: toNum(form.beds, true),
+        bedrooms: toNum(form.bedrooms, true),
+        bathrooms: toNum(form.bathrooms, true),
+        hasPool: form.hasPool,
+        address: resolved?.label ?? address,
+        lat: resolved?.lat ?? (address && hasCoordinates ? form.lat : null),
+        lng: resolved?.lng ?? (address && hasCoordinates ? form.lng : null),
+        avatar: form.avatar,
+      };
+      let id = property?.id;
+      if (id) await repos.properties.update(id, input);
+      else id = await repos.properties.create(vacationId, input);
+      if (revision !== formRevision.current) return;
+      if (shouldResolve && !resolved) {
+        void toast({ message: t('property.addressSavedWithoutPin'), duration: 4000, position: 'top', color: 'warning' });
       }
+      onSaved?.(id);
       onClose();
+    } catch (error) {
+      console.error('[property] save failed', error);
+      if (revision === formRevision.current) {
+        void toast({ message: t('property.saveFailed'), duration: 4000, position: 'top', color: 'danger' });
+      }
     } finally {
-      setSaving(false);
+      if (revision === formRevision.current) {
+        saveInProgress.current = false;
+        setSaving(false);
+      }
     }
   };
 
@@ -278,7 +326,7 @@ export function PropertyEditModal({
       <IonHeader>
         <IonToolbar>
           <IonButtons slot="start">
-            <IonButton onClick={onClose}>{t('common.cancel')}</IonButton>
+            <IonButton disabled={saving} onClick={onClose}>{t('common.cancel')}</IonButton>
           </IonButtons>
           <IonTitle>{property ? t('property.edit') : t('property.add')}</IonTitle>
           <IonButtons slot="end">
@@ -384,12 +432,17 @@ export function PropertyEditModal({
                 label={t('property.address')}
                 labelPlacement="stacked"
                 value={form.address}
-                maxlength={300}
+                readonly={saving || geocoding}
+                maxlength={ADDRESS_MAX_LENGTH}
                 placeholder={t('property.addressPlaceholder')}
-                onIonInput={(e) => setForm((f) => ({ ...f, address: String(e.detail.value ?? ''), lat: null, lng: null }))}
+                onIonInput={(e) => {
+                  const address = e.detail.value ?? '';
+                  setForm((f) => address === f.address ? f : { ...f, address, lat: null, lng: null });
+                }}
               />
-              <IonButton slot="end" fill="clear" disabled={!form.address.trim() || geocoding} onClick={() => void locate()} aria-label={t('property.locate')}>
-                {geocoding ? <IonSpinner name="dots" /> : <IonIcon slot="icon-only" icon={locateOutline} color={form.lat !== null ? 'success' : undefined} />}
+              <IonButton slot="end" fill="clear" disabled={!form.address.trim() || hasCoordinates || geocoding || saving} onClick={() => void resolveAddress()}>
+                {geocoding ? <IonSpinner slot="start" name="dots" /> : <IonIcon slot="start" icon={checkmarkOutline} />}
+                {t('property.checkAddress')}
               </IonButton>
             </IonItem>
           )}
@@ -399,7 +452,7 @@ export function PropertyEditModal({
             </IonItem>
           )}
         </IonList>
-        {on('address') && <p className="list-footer">{form.lat !== null ? t('property.located') : t('property.locateHint')}</p>}
+        {on('address') && <p className="list-footer" role="status">{t(geocoding ? 'property.checkingAddress' : hasCoordinates ? 'property.located' : 'property.locateHint')}</p>}
 
         <IonList inset>
           <IonListHeader>

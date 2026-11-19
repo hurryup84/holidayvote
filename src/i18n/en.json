@@ -183,10 +183,13 @@
     "pool": "Pool",
     "address": "Address",
     "addressPlaceholder": "Town or address",
-    "locate": "Find on the map",
-    "locateHint": "Tap the target icon so the house appears on the map (OpenStreetMap; only the address is sent).",
+    "checkAddress": "Check address",
+    "checkingAddress": "Looking up the address…",
+    "locateHint": "Check address fills in the matching address. Save also checks automatically (only the address is sent to OpenStreetMap).",
     "located": "Found on the map ✓",
     "addressNotFound": "Address not found.",
+    "addressSavedWithoutPin": "Address saved, but no map pin could be added. You can check the address again later.",
+    "saveFailed": "The house couldn't be saved. Please try again.",
     "description": "Notes",
     "avatar": "Icon",
     "avatarHint": "Shown when the page provides no preview picture.",
@@ -247,7 +250,7 @@
   },
   "map": {
     "home": "Home",
-    "empty": "No house with an address yet. Enter an address for a house and tap the target icon."
+    "empty": "No houses on the map yet. Enter an address for a house and save it to look up its location."
   },
   "sharing": {
     "yourName": "Your name",
