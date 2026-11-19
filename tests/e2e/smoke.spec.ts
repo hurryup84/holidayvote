@@ -111,3 +111,41 @@ test('onboarding → vacation → houses → votes → ranking → persists', as
 
   expect(errors).toEqual([]);
 });
+
+test('house cards and details show only the total price for a shared vacation', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: /Plan a vacation/ }).click();
+  for (let i = 0; i < 3; i++) await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await page.getByLabel('Your name', { exact: true }).fill('Anna');
+  await page.locator('ion-input', { hasText: 'Name' }).nth(1).locator('input').fill('Summer 2027');
+  await page.getByRole('button', { name: 'Create vacation', exact: true }).click();
+  const card = page.locator('.vacation-card', { hasText: 'Summer 2027' });
+  await card.click();
+  await expect(page.getByText('No houses yet')).toBeVisible();
+  await addHouse(page, 'https://example.com/villa', 'Beach villa', '2400');
+  await page.goto('/vacations');
+  await expect(card).toBeVisible();
+
+  // Seed a second member without contacting Supabase, then reload the app's SQLite connection.
+  await page.evaluate(async (modulePath) => {
+    const { openWebDb }: typeof import('../../src/data/db/webDb') = await import(modulePath);
+    const db = await openWebDb();
+    try {
+      await db.execute(
+        `INSERT INTO vacation_members (id, vacation_id, user_id, role, display_name)
+         SELECT 'test-member', id, 'test-user', 'member', 'Ben' FROM vacations WHERE name = ?`,
+        ['Summer 2027'],
+      );
+    } finally {
+      await db.close();
+    }
+  }, '/src/data/db/webDb.ts');
+  await page.reload();
+  await expect(card).toContainText('2 people');
+  await card.click();
+  const villa = page.locator('.property-card', { hasText: 'Beach villa' });
+  await expect(villa.locator('.price')).toHaveText('€2,400');
+  await villa.click();
+  await expect(page.locator('ion-item').filter({ hasText: 'Total price' })).toHaveText(/Total price\s*€2,400/);
+  await expect(page.getByText('Per person', { exact: false })).toHaveCount(0);
+});

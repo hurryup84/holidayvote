@@ -11,7 +11,7 @@ layers, the local-first sync and the account mechanism; this file lists what is 
 | Feature | Notes |
 |---|---|
 | Vacations | Name, destination, dates (nights), description. Several per person. Created on the phone; on the server once someone is invited |
-| Houses | Any vacation member can edit a house's link, title, provider, total price (→ price per person), bedrooms, beds, bathrooms, pool, address (→ map, distance from home), notes and icon. The owner switches optional fields on / off per vacation |
+| Houses | Any vacation member can edit a house's link, title, provider, total price, bedrooms, beds, bathrooms, pool, address (→ map, distance from home), notes and icon. The owner switches optional fields on / off per vacation |
 | Preview | Title / text / picture from the page's OpenGraph data (phones: native HTTP; browser: Edge Function `link-preview`). The **text is stored with the link** (synced, searchable); the **picture only in each phone's own cache** (downscaled file). Refresh per house or clear the whole cache in Settings. Fallback: the chosen icon |
 | Search | Houses of a vacation by title, provider, notes, address, link and the stored preview text (accents / ß / ø ignored) |
 | Rating | 1–5 stars per person and house; one favourite and one veto per person and vacation (they move); comments, optionally with stars |

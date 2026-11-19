@@ -129,7 +129,6 @@ export function PropertyPage() {
   }
   const settings = vacation.settings;
   const on = (f: Parameters<typeof fieldOn>[1]) => fieldOn(settings, f);
-  const people = Math.max(1, members?.length ?? 1);
   const iAmOwner = members?.some((m) => m.userId === session.userId && m.role === 'owner') ?? false;
   const canDelete = iAmOwner || p.createdBy === session.userId;
   const distance = home && p.lat !== null && p.lng !== null ? haversineKm(home, { lat: p.lat, lng: p.lng }) : null;
@@ -215,7 +214,6 @@ export function PropertyPage() {
   const facts: [string, string][] = [];
   if (on('price') && p.price !== null) {
     facts.push([t('property.price'), fmtPrice(p.price, i18n.language)]);
-    if (people > 1) facts.push([t('property.pricePerPerson', { count: people }), fmtPrice(p.price / people, i18n.language)]);
   }
   if (on('bedrooms') && p.bedrooms !== null) facts.push([t('property.bedrooms'), String(p.bedrooms)]);
   if (on('beds') && p.beds !== null) facts.push([t('property.beds'), String(p.beds)]);

@@ -10,7 +10,7 @@ URLAUB ANLEGEN
 HÄUSER SAMMELN
 • Link einfügen – von Airbnb, Booking.com, FeWo-direkt, Novasol und vielen anderen Seiten
 • Vorschau des Angebots mit Bild – Bilder bleiben auf deinem Handy, auf den Server kommt nur der Link mit Titel und Beschreibung
-• Preis eintragen, HolidayVote rechnet den Preis pro Person aus
+• Ferienhäuser anhand des Gesamtpreises vergleichen
 • Alle Häuser auf einer Karte
 
 GEMEINSAM ENTSCHEIDEN

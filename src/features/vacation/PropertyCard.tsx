@@ -11,7 +11,6 @@ import { fieldOn } from './fields';
 export function PropertyCard({
   p,
   rank,
-  people,
   settings,
   distanceKm,
   onOpen,
@@ -19,7 +18,6 @@ export function PropertyCard({
 }: {
   p: PropertyWithStats;
   rank: number | null;
-  people: number;
   settings: VacationSettings;
   distanceKm: number | null;
   onOpen(): void;
@@ -61,10 +59,7 @@ export function PropertyCard({
         </div>
         <div className="property-facts">
           {on('price') && p.price !== null && (
-            <span className="price">
-              {fmtPrice(p.price, i18n.language)}
-              {people > 1 && <span className="muted"> · {t('property.perPerson', { price: fmtPrice(p.price / people, i18n.language) })}</span>}
-            </span>
+            <span className="price">{fmtPrice(p.price, i18n.language)}</span>
           )}
           {on('bedrooms') && p.bedrooms !== null && (
             <span>

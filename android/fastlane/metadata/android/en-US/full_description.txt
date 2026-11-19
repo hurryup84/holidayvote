@@ -10,7 +10,7 @@ CREATE YOUR TRIP
 COLLECT HOUSES
 • Paste a link – from Airbnb, Booking.com, Vrbo, Novasol and many other sites
 • Preview of each listing with picture – pictures stay on your phone; only the link with title and description goes to the server
-• Enter the price and HolidayVote works out the price per person
+• Add the total price to compare holiday homes
 • All houses on a map
 
 DECIDE TOGETHER

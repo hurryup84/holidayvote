@@ -191,7 +191,6 @@ export function VacationPage() {
                   key={p.id}
                   p={p}
                   rank={sort === 'rank' ? (ranks.get(p.id) ?? null) : null}
-                  people={people}
                   settings={vacation.settings}
                   distanceKm={distance(p)}
                   onOpen={() => openHouse(p.id)}
@@ -205,7 +204,7 @@ export function VacationPage() {
               )}
               {showEliminated &&
                 visible.eliminated.map((p) => (
-                  <PropertyCard key={p.id} p={p} rank={null} people={people} settings={vacation.settings} distanceKm={distance(p)} onOpen={() => openHouse(p.id)} onEdit={() => setEditingProperty(p.id)} />
+                  <PropertyCard key={p.id} p={p} rank={null} settings={vacation.settings} distanceKm={distance(p)} onOpen={() => openHouse(p.id)} onEdit={() => setEditingProperty(p.id)} />
                 ))}
             </div>
           </>
